@@ -1,11 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { MenuItemOptionsService } from './menu-item-options.service';
 import { CreateMenuItemOptionDto } from './dto/create-menu-item-option.dto';
 import { UpdateMenuItemOptionDto } from './dto/update-menu-item-option.dto';
 
 @Controller('menu-item-options')
 export class MenuItemOptionsController {
-  constructor(private readonly menuItemOptionsService: MenuItemOptionsService) {}
+  constructor(
+    private readonly menuItemOptionsService: MenuItemOptionsService,
+  ) {}
 
   @Post()
   create(@Body() createMenuItemOptionDto: CreateMenuItemOptionDto) {
@@ -23,7 +33,10 @@ export class MenuItemOptionsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMenuItemOptionDto: UpdateMenuItemOptionDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateMenuItemOptionDto: UpdateMenuItemOptionDto,
+  ) {
     return this.menuItemOptionsService.update(+id, updateMenuItemOptionDto);
   }
 

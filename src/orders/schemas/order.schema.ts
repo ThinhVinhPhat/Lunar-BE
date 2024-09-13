@@ -1,15 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
 export type OrderDocument = HydratedDocument<Order>;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Order {
-  
-  @Prop({type: mongoose.Schema.Types.ObjectId,ref: 'User'})
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   user_id: string;
 
-  @Prop({type: mongoose.Schema.Types.ObjectId,ref: 'Restaurant'})
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' })
   restaurant_id: string;
 
   @Prop()
@@ -23,7 +22,6 @@ export class Order {
 
   @Prop()
   delivery_time: Date;
-
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

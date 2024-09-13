@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { MenuItemsService } from './menu-items.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
@@ -23,7 +31,10 @@ export class MenuItemsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMenuItemDto: UpdateMenuItemDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateMenuItemDto: UpdateMenuItemDto,
+  ) {
     return this.menuItemsService.update(+id, updateMenuItemDto);
   }
 

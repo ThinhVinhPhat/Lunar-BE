@@ -1,12 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
-export type UserDocument = HydratedDocument<User>;
+export type MenuItemDocument = HydratedDocument<MenuItem>;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class MenuItem {
-  
-  @Prop({type: mongoose.Schema.Types.ObjectId,ref: 'Menu'})
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Menu' })
   menu_id: string;
 
   @Prop()
@@ -22,4 +21,4 @@ export class MenuItem {
   image: string;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const MenuItemSchema = SchemaFactory.createForClass(MenuItem);

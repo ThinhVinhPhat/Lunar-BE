@@ -3,10 +3,9 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 export type MenuItemOptionDocument = HydratedDocument<MenuItemOption>;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class MenuItemOption {
-  
-  @Prop({type: mongoose.Schema.Types.ObjectId,ref: 'MenuItem'})
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem' })
   menu_item_id: string;
 
   @Prop()
@@ -19,4 +18,5 @@ export class MenuItemOption {
   optional_description: string;
 }
 
-export const MenuItemOptionSchema = SchemaFactory.createForClass(MenuItemOption);
+export const MenuItemOptionSchema =
+  SchemaFactory.createForClass(MenuItemOption);

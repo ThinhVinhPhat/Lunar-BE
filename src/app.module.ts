@@ -12,15 +12,16 @@ import { MenuItemOptionsModule } from './menu-item-options/menu-item-options.mod
 import { ReviewsModule } from './reviews/reviews.module';
 import { OrdersModule } from './orders/orders.module';
 import { OrderDetailModule } from './order-detail/order-detail.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
+        uri: configService.get<string>('MONGODB_URL'),
       }),
       inject: [ConfigService],
     }),
@@ -32,6 +33,7 @@ import { OrderDetailModule } from './order-detail/order-detail.module';
     ReviewsModule,
     OrdersModule,
     OrderDetailModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

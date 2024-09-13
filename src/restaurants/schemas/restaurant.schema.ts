@@ -3,9 +3,8 @@ import { HydratedDocument } from 'mongoose';
 
 export type RestaurantDocument = HydratedDocument<Restaurant>;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Restaurant {
-  
   @Prop()
   name: string;
 
