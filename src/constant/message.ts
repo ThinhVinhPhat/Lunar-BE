@@ -1,5 +1,6 @@
 export const message = {
   SIGN_IN_SUCCESS: 'Login Successfully',
+  SIGN_IN_FAIL: 'Login Fail',
   SIGN_UP_SUCCESS: 'Register Successfully',
   USER_NOT_EXISTS: 'User does not exist',
   USER_ALREADY_EXISTS: 'User already exists',
