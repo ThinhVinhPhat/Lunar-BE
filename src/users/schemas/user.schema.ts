@@ -36,7 +36,7 @@ export class User {
   code_id: string;
 
   @Prop()
-  code_expried: boolean;
+  code_expried: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

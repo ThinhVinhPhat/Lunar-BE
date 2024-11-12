@@ -9,11 +9,15 @@ import { hashPasswordHelper } from '@/helper/hasPassword';
 import { message } from '@/constant/message';
 import { findRespond } from '@/types/user/find-respond';
 import aqp from 'api-query-params';
-
+import { RegisterAuthDto } from '@/auth/dto/register-atuth.dto';
+import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
+import { MailerService } from '@nestjs-modules/mailer';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly mailerService: MailerService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<createRespond> {
@@ -157,6 +161,48 @@ export class UsersService {
       );
     } else {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+    }
+  }
+  async handleRegister(registerDTO: RegisterAuthDto) {
+    const { name, email, password } = registerDTO;
+
+    const hashedPassword = await hashPasswordHelper(password);
+
+    const emailExist = await this.userModel.findOne({ email });
+
+    if (emailExist == null) {
+      const user = await this.userModel.create({
+        name,
+        email,
+        password: hashedPassword,
+        code_id: uuidv4(),
+        code_expried: dayjs().add(1, 'seconds'),
+      });
+
+      this.mailerService
+        .sendMail({
+          to: user.email,
+          subject: 'Testing Nest MailerModule ✔',
+          text: 'welcome',
+          template: './register',
+          context: {
+            name: user.name ?? user.email,
+            activationCode: user.code_id
+          }
+        })
+        .then(() => {})
+        .catch(() => {});
+
+      await user.save();
+      return {
+        status: HttpStatus.ACCEPTED,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        message: message.RESIGTER_SUCCESS,
+      };
+    } else {
+      throw new HttpException(message.RESIGTER_FAIL, HttpStatus.BAD_REQUEST);
     }
   }
 }

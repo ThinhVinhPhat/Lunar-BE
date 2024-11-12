@@ -1,4 +1,6 @@
 export const message = {
+  RESIGTER_SUCCESS: "Resigter Successfully",
+  RESIGTER_FAIL: "Resigter Fail",
   SIGN_IN_SUCCESS: 'Login Successfully',
   SIGN_IN_FAIL: 'Login Fail',
   SIGN_UP_SUCCESS: 'Register Successfully',
@@ -11,4 +13,5 @@ export const message = {
   PASSWORD_NOT_MATCH: 'Password does not match',
   FIND_USER_SUCCESS: 'Find users successfully',
   FIND_USER_FAIL: 'Find users fail',
+  USER_NOT_ACTIVE: 'This user account is not active'
 };

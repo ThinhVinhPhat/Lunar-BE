@@ -1,5 +1,5 @@
 export interface findRespond {
-  status: number;
+  status?: number;
   Users: {
     id: string;
     name: string;
@@ -8,5 +8,5 @@ export interface findRespond {
     phone: string;
     images: string;
   }[];
-  message: string;
+  message?: string;
 }
