@@ -1,12 +1,6 @@
+import { userRespond } from './create-respond';
 export interface findRespond {
   status?: number;
-  Users: {
-    id: string;
-    name: string;
-    email: string;
-    address: string;
-    phone: string;
-    images: string;
-  }[];
+  data: userRespond[];
   message?: string;
 }

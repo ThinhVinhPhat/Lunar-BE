@@ -1,14 +1,25 @@
 import { IS_PUBLIC_KEY } from '@/common/decorator/public.decorator';
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { UsersService } from '@/users/users.service';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
-    super();
-  }
-  canActivate(context: ExecutionContext) {
+export class JwtAuthGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private readonly jwtService: JwtService,
+    private readonly userService: UsersService,
+    private readonly configService: ConfigService,
+  ) {}
+  async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -16,13 +27,37 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true;
     }
-    return super.canActivate(context);
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+    if (!token) {
+      throw new UnauthorizedException('Token is required');
+    }
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.getOrThrow('JWT_SECRET_KEY'),
+      });
+
+
+      request['jwtPayLoad'] = payload;
+
+      const user = await this.userService.findOne(payload.sub);
+      request['user'] = user;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    return true;
   }
 
-  handleRequest(err, user, info) {
+  handleRequest(err, user) {
     if (err || !user) {
-      throw err || new UnauthorizedException("Invaild or missing AccessToken");
+      throw err || new UnauthorizedException('Invaild or missing AccessToken');
     }
     return user;
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }

@@ -1,9 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from './schemas/user.schema';
-import mongoose, { Model } from 'mongoose';
+import { User } from './entity/user.entity';
 import { createRespond } from '@/types/user/create-respond';
 import { hashPasswordHelper } from '@/helper/hasPassword';
 import { message } from '@/constant/message';
@@ -13,40 +11,66 @@ import { RegisterAuthDto } from '@/auth/dto/register-atuth.dto';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Role } from '@/constant/role';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectRepository(User)
+    private readonly userEntity: Repository<User>,
     private readonly mailerService: MailerService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<createRespond> {
-    const { name, email, password, address, phone, images } = createUserDto;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      address,
+      phone,
+      city,
+      company,
+      role,
+    } = createUserDto;
 
     const hashedPassword = await hashPasswordHelper(password);
 
-    const emailExist = await this.userModel.findOne({ email });
-    console.log(emailExist);
+    const emailExist = await this.userEntity.findOne({
+      where: {
+        email: email,
+      },
+    });
 
     if (emailExist == null) {
-      const user = await this.userModel.create({
-        name,
+      const user = this.userEntity.create({
+        firstName,
+        lastName,
         email,
         password: hashedPassword,
         phone,
         address,
-        images,
+        city,
+        company,
+        role: role !== null ? role : Role.CUSTOMER,
       });
 
-      await user.save();
+      await this.userEntity.save(user);
+
       return {
         status: HttpStatus.ACCEPTED,
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        address: user.address,
-        phone: user.phone,
-        images: user.images,
+        data: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          company: user.company,
+          address: user.address,
+          phone: user.phone,
+          city: user.city,
+          role: user.role,
+        },
         message: message.USER_CREATE_SUCCESS,
       };
     } else {
@@ -70,15 +94,16 @@ export class UsersService {
     if (!current) current = 1;
     if (!pageSize) pageSize = 10;
 
-    const totalItems = (await this.userModel.find(filter)).length;
+    const totalItems = (await this.userEntity.find(filter)).length;
     const totalPage = Math.ceil(totalItems / pageSize);
     const skip = (current - 1) * pageSize;
 
-    const result = await this.userModel
-      .find(filter)
-      .limit(+pageSize)
-      .skip(skip)
-      .sort(sort as any);
+    const result = await this.userEntity.find({
+      where: filter, // Điều kiện lọc
+      skip: skip, // Bỏ qua `skip` bản ghi đầu tiên
+      take: pageSize, // Lấy `pageSize` bản ghi
+      order: sort, // Sắp xếp theo trường
+    });
 
     if (!result) {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
@@ -86,37 +111,61 @@ export class UsersService {
 
     return {
       status: HttpStatus.ACCEPTED,
-      Users: result.map((user) => ({
+      data: result.map((user) => ({
         id: user.id,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+        company: user.company,
         address: user.address,
         phone: user.phone,
-        images: user.images,
+        city: user.city,
+        role: user.role,
       })),
       message: message.FIND_USER_SUCCESS,
     };
   }
 
   async findUser(email: string): Promise<any> {
-    const user = await this.userModel.findOne({ email: email });
-    return user;
+    const user = await this.userEntity.findOne({
+      where: {
+        email: email,
+      },
+    });
+    return {
+      status: HttpStatus.ACCEPTED,
+      data: {
+        id: user.id,
+        email: user.email,
+        password: user.password
+      },
+      message: message.USER_CREATE_SUCCESS,
+    };
   }
 
   async findOne(id: string): Promise<createRespond> {
-    const user = await this.userModel.findOne({ _id: id });
+    const user = await this.userEntity.findOne({
+      where: {
+        id: id,
+      },
+    });
 
     if (!user) {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
     }
     return {
       status: HttpStatus.ACCEPTED,
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      address: user.address,
-      phone: user.phone,
-      images: user.images,
+      data: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        company: user.company,
+        address: user.address,
+        phone: user.phone,
+        city: user.city,
+        role: user.role,
+      },
       message: message.USER_CREATE_SUCCESS,
     };
   }
@@ -125,25 +174,36 @@ export class UsersService {
     userId: string,
     updateUserDto: UpdateUserDto,
   ): Promise<createRespond> {
-    const { name, address, phone, images } = updateUserDto;
-    const ValidId = mongoose.isValidObjectId(userId);
-    if (ValidId) {
-      await this.userModel.updateOne(
-        { _id: userId },
-        { name, address, phone, images },
-      );
+    const { firstName, lastName, address, phone, city, company, email, role } =
+      updateUserDto;
 
-      const user = await this.userModel.findOne({ _id: userId });
+    const user = await this.userEntity.findOne({ where: { id: userId } });
+
+    if (user) {
+      user.firstName = firstName;
+      user.lastName = lastName;
+      user.address = address;
+      user.phone = phone;
+      user.city = city;
+      user.company = company;
+      user.email = email;
+      user.role = role;
+      await this.userEntity.save(user);
 
       return {
         status: HttpStatus.ACCEPTED,
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        address: user.address,
-        phone: user.phone,
-        images: user.images,
-        message: message.USER_UPDATE_SUCCESS,
+        data: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          company: user.company,
+          address: user.address,
+          phone: user.phone,
+          city: user.city,
+          role: user.role,
+        },
+        message: message.USER_CREATE_SUCCESS,
       };
     } else {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
@@ -151,9 +211,9 @@ export class UsersService {
   }
 
   async remove(userId: string): Promise<HttpException> {
-    const ValidId = mongoose.isValidObjectId(userId);
-    if (ValidId) {
-      await this.userModel.deleteOne({ _id: userId });
+    const user = await this.userEntity.findOne({ where: { id: userId } });
+    if (user) {
+      await this.userEntity.remove(user);
 
       return new HttpException(
         message.USER_DELETE_SUCCESS,
@@ -164,16 +224,17 @@ export class UsersService {
     }
   }
   async handleRegister(registerDTO: RegisterAuthDto) {
-    const { name, email, password } = registerDTO;
+    const { firstName, lastName, email, password } = registerDTO;
 
     const hashedPassword = await hashPasswordHelper(password);
 
-    const emailExist = await this.userModel.findOne({ email });
+    const emailExist = await this.userEntity.findOne({ where: { email } });
 
     if (emailExist == null) {
-      const user = await this.userModel.create({
-        name,
+      const user = this.userEntity.create({
         email,
+        firstName,
+        lastName,
         password: hashedPassword,
         code_id: uuidv4(),
         code_expried: dayjs().add(1, 'seconds'),
@@ -186,18 +247,19 @@ export class UsersService {
           text: 'welcome',
           template: './register',
           context: {
-            name: user.name ?? user.email,
-            activationCode: user.code_id
-          }
+            name: user.lastName ?? user.email,
+            activationCode: user.code_id,
+          },
         })
         .then(() => {})
         .catch(() => {});
 
-      await user.save();
+      await this.userEntity.save(user);
       return {
         status: HttpStatus.ACCEPTED,
         id: user.id,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         message: message.RESIGTER_SUCCESS,
       };

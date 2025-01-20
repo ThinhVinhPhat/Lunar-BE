@@ -21,12 +21,21 @@ export class RegisterAuthDto {
   password: string;
 
   @ApiProperty({
-    description: 'user name',
+    description: 'first name',
+    example: 'Nguyen Van',
+    nullable: false,
+  })
+  @IsString()
+  @IsNotEmpty()
+  firstName: string;
+
+  @ApiProperty({
+    description: 'last name',
     example: 'Teo',
     nullable: false,
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  lastName: string;
 
 }

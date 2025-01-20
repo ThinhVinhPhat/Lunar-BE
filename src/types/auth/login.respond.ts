@@ -1,7 +1,7 @@
 export interface loginRespond {
   user: {
     email: string;
-    _id: string;
+    id: string;
     name: string;
   }
   accessToken: string

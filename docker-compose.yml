@@ -1,13 +1,19 @@
-services:
 
-  mongodb:
-    image: mongo:5.0.15
+services:
+  db:
+    image: postgres:13-alpine
     environment:
-      MONGO_INITDB_ROOT_USERNAME: thinhvinhp
-      MONGO_INITDB_ROOT_PASSWORD: Thinhvinhphat21122004
-    ports:
-      - 27017:27017
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+      POSTGRES_DB: glasses-store
+      PG_DATA: /var/lib/postgresql/data
     volumes:
-      - mongodb_data_container:/data/db
+      - dbdata:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+
 volumes:
-  mongodb_data_container:
+  dbdata:
+    driver: local
+  cache:
+    driver: local
