@@ -45,6 +45,14 @@ export class CreateProductDto {
   stock: number;
 
   @ApiProperty({
+    description: 'The discount of the product (%)',
+    example: 10,
+    nullable: false,
+  })
+  @IsNotEmpty()
+  discount: number;
+
+  @ApiProperty({
     description: 'The video URL for the product',
     example: 'http://example.com/video.mp4',
     required: false,

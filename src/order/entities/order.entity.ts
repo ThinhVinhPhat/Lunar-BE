@@ -1,41 +1,36 @@
+import { OrderStatus } from '@/constant/role';
 import { OrderDetail } from '@/order-detail/entities/order-detail.entity';
 import { BaseEntity } from '@/shared/base.entity';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
+import { User } from '@/users/entity/user.entity';
+import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('order')
 export class Order extends BaseEntity {
-
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   shippingAddress: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   shipPhone: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   shippingFee: number;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', nullable: true })
   orderDate: Date;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   note: string;
 
-  @Column('uuid')
-  paymentMethodId: string;
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
+  status: OrderStatus;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  @Column({ type: 'varchar', nullable: true })
+  paymentId: string;
 
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order)
   orderDetails: OrderDetail[];
+
+  @ManyToOne(() => User, (user) => user.orders)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

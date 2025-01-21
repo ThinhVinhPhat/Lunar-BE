@@ -1,6 +1,7 @@
 import { Role } from '@/constant/role';
+import { Order } from '@/order/entities/order.entity';
 import { BaseEntity } from '@/shared/base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class User extends BaseEntity {
@@ -42,6 +43,9 @@ export class User extends BaseEntity {
   
   @Column({ type: 'date', nullable: true })
   code_expried: Date;
+
+  @OneToMany(()=> Order, (order) => order.user)
+  orders: Order[];
 
 
 }

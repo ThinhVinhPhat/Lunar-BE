@@ -33,6 +33,7 @@ export class ProductService {
           isFeatured,
           isFreeShip,
           isNew,
+          discount,
         } = createProductDto;
 
         try {
@@ -46,39 +47,53 @@ export class ProductService {
             );
           }
 
-          const imageUrls = [];
-          for (const image of images) {
-            const imageUrl = await this.uploadService.uploadS3(image);
-            imageUrls.push(imageUrl);
-          }
-          const product = transactionManager.create(Product, {
-            name: name,
-            category: category,
-            description: description,
-            images: imageUrls,
-            price: price,
-            stock: stock,
-            isFeatured: isFeatured,
-            isFreeShip: isFreeShip,
-            isNew: isNew,
-          });
-          await transactionManager.save(Product, product);
-
-          const productCategory = await transactionManager.create(
-            ProductCategory,
-            {
-              product: product,
-              categoryDetails: category,
-              quantity: product.stock,
+          const existingProduct = await transactionManager.findOne(Product, {
+            where: {
+              name: name,
             },
-          );
-          await transactionManager.save(ProductCategory, productCategory);
+          });
 
-          return {
-            status: HttpStatus.OK,
-            data: product,
-            message: message.CREATE_PRODUCT_SUCCESS,
-          };
+          if (existingProduct) {
+            throw new HttpException(
+              'Product already exist',
+              HttpStatus.BAD_REQUEST,
+            );
+          } else {
+            const imageUrls = [];
+            for (const image of images) {
+              const imageUrl = await this.uploadService.uploadS3(image);
+              imageUrls.push(imageUrl);
+            }
+            const product = transactionManager.create(Product, {
+              name: name,
+              category: category,
+              description: description,
+              images: imageUrls,
+              price: price,
+              stock: stock,
+              isFeatured: isFeatured,
+              isFreeShip: isFreeShip,
+              isNew: isNew,
+              discount_percentage: discount,
+            });
+            await transactionManager.save(Product, product);
+
+            const productCategory = await transactionManager.create(
+              ProductCategory,
+              {
+                product: product,
+                categoryDetails: category,
+                quantity: product.stock,
+              },
+            );
+            await transactionManager.save(ProductCategory, productCategory);
+
+            return {
+              status: HttpStatus.OK,
+              data: product,
+              message: message.CREATE_PRODUCT_SUCCESS,
+            };
+          }
         } catch (e) {
           throw new Error(e);
         }
@@ -157,6 +172,7 @@ export class ProductService {
             isFeatured,
             isFreeShip,
             isNew,
+            discount,
           } = updateProductDto;
 
           const product = await transactionManager.findOne(Product, {
@@ -189,6 +205,7 @@ export class ProductService {
           product.isFeatured = isFeatured;
           product.isFreeShip = isFreeShip;
           product.isNew = isNew;
+          product.discount_percentage = discount;
           await transactionManager.save(Product, product);
 
           result.quantity = product.stock;

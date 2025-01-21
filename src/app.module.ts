@@ -22,7 +22,6 @@ import { CategoryDetailModule } from './category-detail/category-detail.module';
 import { OrderModule } from './order/order.module';
 import { OrderDetailModule } from './order-detail/order-detail.module';
 import { PaymentModule } from './payment/payment.module';
-import { OrderStatusModule } from './order-status/order-status.module';
 
 @Module({
   imports: [
@@ -71,7 +70,6 @@ import { OrderStatusModule } from './order-status/order-status.module';
     OrderModule,
     OrderDetailModule,
     PaymentModule,
-    OrderStatusModule,
   ],
   controllers: [AppController],
   providers: [

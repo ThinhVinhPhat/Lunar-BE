@@ -5,11 +5,14 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class Product extends BaseEntity {
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   name: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   price: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  discount_percentage: number;
 
   @Column({ type: 'varchar', nullable: true })
   description: string;
@@ -17,7 +20,7 @@ export class Product extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   status: boolean;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   stock: number;
 
   @Column({ type: 'varchar', nullable: true })
@@ -42,7 +45,6 @@ export class Product extends BaseEntity {
   )
   productCategories: ProductCategory[];
 
-  
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.product)
   orderDetails: OrderDetail[];
 }
