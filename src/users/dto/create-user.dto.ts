@@ -1,15 +1,31 @@
+import { Role } from '@/constant/role';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({
-    description: 'user name',
+    description: 'first name',
+    example: 'Nguyễn Văn',
+    nullable: false,
+  })
+  @IsString()
+  @IsNotEmpty()
+  firstName: string;
+
+  @ApiProperty({
+    description: 'last name',
     example: 'Tèo',
     nullable: false,
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  lastName: string;
 
   @ApiProperty({
     description: 'user email',
@@ -30,15 +46,6 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({
-    description: 'user address',
-    example: '123 Hai Bà Trưng',
-    nullable: false,
-  })
-  @IsString()
-  @IsNotEmpty()
-  address: string;
-
-  @ApiProperty({
     description: 'user phone',
     example: '0902423699',
     nullable: false,
@@ -48,10 +55,38 @@ export class CreateUserDto {
   phone: string;
 
   @ApiProperty({
-    description: 'user images',
-    example: 'link',
+    description: 'user current city',
+    example: 'Hanoi',
     nullable: false,
   })
   @IsString()
-  images: string;
+  @IsNotEmpty()
+  city: string;
+
+  @ApiProperty({
+    description: 'user role',
+    example: Role.ADMIN,
+    enum: Role,
+  })
+  @IsEnum(Role)
+  @IsOptional()
+  role: Role;
+
+  @ApiProperty({
+    description: 'user address',
+    example: '123 Hai Bà Trưng',
+    nullable: false,
+  })
+  @IsString()
+  @IsOptional()
+  address: string;
+
+  @ApiProperty({
+    description: 'user address',
+    example: 'Công ty ACB',
+    nullable: false,
+  })
+  @IsString()
+  @IsOptional()
+  company: string;
 }

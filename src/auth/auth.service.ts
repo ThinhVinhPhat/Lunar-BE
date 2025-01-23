@@ -12,6 +12,7 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 import { RegisterAuthDto } from './dto/register-atuth.dto';
 import { loginRespond } from '@/types/auth/login.respond';
 
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -24,7 +25,7 @@ export class AuthService {
     const user = await this.UserService.findUser(email);
     const validPassword = await hashPasswordCompareHelper(
       password,
-      user.password,
+      user.data.password,
     );
 
     if (!validPassword) {
@@ -35,15 +36,15 @@ export class AuthService {
       throw new HttpException(message.USER_NOT_ACTIVE, HttpStatus.BAD_REQUEST);
     }
 
-    const payload = { sub: user.code_id, email: user.email };
+    const payload = { sub: user.data.id, email: user.data.email };
 
     return {
       user: {
         email: user.email,
-        _id: user._id,
+        id: user.id,
         name: user.name,
       },
-      accessToken: this.jwtService.sign(payload),
+      accessToken: await this.jwtService.signAsync(payload),
     };
   }
 

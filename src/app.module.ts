@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
@@ -11,12 +10,18 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { VechiceModule } from './vechice/vechice.module';
-import { ViolationModule } from './violation/violation.module';
-import { CameraModule } from './camera/camera.module';
-import { VideoModule } from './video/video.module';
-import { ViolationTypeModule } from './violation_type/violation_type.module';
-import { VechiceTrackingModule } from './vechice_tracking/vechice_tracking.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import typeorm from './config/typeorm';
+import { User } from './users/entity/user.entity';
+import { ProductModule } from './product/product.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { UploadModule } from './upload/upload.module';
+import { UploadService } from './upload/upload.service';
+import { CategoryModule } from './category/category.module';
+import { CategoryDetailModule } from './category-detail/category-detail.module';
+import { OrderModule } from './order/order.module';
+import { OrderDetailModule } from './order-detail/order-detail.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -46,28 +51,32 @@ import { VechiceTrackingModule } from './vechice_tracking/vechice_tracking.modul
       }),
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URL'),
-      }),
+    ConfigModule.forRoot({ isGlobal: true, load: [typeorm] }),
+    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forRootAsync({
       inject: [ConfigService],
+      useFactory: async (configService: ConfigService) =>
+        configService.get('typeorm'),
     }),
     UsersModule,
     AuthModule,
-    VechiceModule,
-    ViolationModule,
-    CameraModule,
-    VideoModule,
-    ViolationTypeModule,
-    VechiceTrackingModule,
+    ProductModule,
+    UploadModule,
+    MulterModule.register({
+      dest: './uploads',
+    }),
+    CategoryModule,
+    CategoryDetailModule,
+    OrderModule,
+    OrderDetailModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     AuthService,
     JwtService,
+    UploadService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
