@@ -95,7 +95,10 @@ export class ProductService {
             };
           }
         } catch (e) {
-          throw new Error(e);
+          throw new HttpException(
+            message.CREATE_PRODUCT_FAIL,
+            HttpStatus.BAD_REQUEST,
+          );
         }
       },
     );
@@ -155,7 +158,10 @@ export class ProductService {
         message: message.FIND_PRODUCT_SUCCESS,
       };
     } catch (e) {
-      throw new Error(e);
+      throw new HttpException(
+        message.FIND_PRODUCT_FAIL,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -217,7 +223,10 @@ export class ProductService {
             message: message.UPDATE_PRODUCT_SUCCESS,
           };
         } catch (e) {
-          throw new Error(e);
+          throw new HttpException(
+            message.UPDATE_PRODUCT_FAIL,
+            HttpStatus.BAD_REQUEST,
+          );
         }
       },
     );
@@ -239,7 +248,10 @@ export class ProductService {
             message: message.DELETE_PRODUCT_SUCCESS,
           };
         } catch (e) {
-          throw new Error(e);
+          throw new HttpException(
+            message.DELETE_PRODUCT_FAIL,
+            HttpStatus.BAD_REQUEST,
+          );
         }
       },
     );

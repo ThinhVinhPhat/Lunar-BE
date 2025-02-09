@@ -1,16 +1,29 @@
-
 services:
-  db:
-    image: postgres:13-alpine
-    environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: user
-      POSTGRES_DB: glasses-store
-      PG_DATA: /var/lib/postgresql/data
-    volumes:
-      - dbdata:/var/lib/postgresql/data
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
     ports:
-      - 5433:5432
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: glasses-store
+
+  app:
+    build: .
+    container_name: nest_app
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: glasses-store
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: password
 
 volumes:
   dbdata:

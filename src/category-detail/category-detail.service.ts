@@ -63,7 +63,10 @@ export class CategoryDetailService {
             message: message.CREATE_CATEGORY_DETAIL_SUCCESS,
           };
         } catch (e) {
-          throw new Error(e);
+          throw new HttpException(
+            message.CREATE_CATEGORY_DETAIL_SUCCESS,
+            HttpStatus.BAD_REQUEST,
+          );
         }
       },
     );
@@ -141,10 +144,13 @@ export class CategoryDetailService {
           return {
             status: HttpStatus.OK,
             data: categoryDetail,
-            message: message.CREATE_CATEGORY_DETAIL_SUCCESS,
+            message: message.UPDATE_CATEGORY_DETAIL_SUCCESS,
           };
         } catch (e) {
-          throw new Error(e);
+          throw new HttpException(
+            message.UPDATE_CATEGORY_DETAIL_FAIL,
+            HttpStatus.BAD_REQUEST,
+          );
         }
       },
     );
@@ -165,7 +171,10 @@ export class CategoryDetailService {
             message: message.DELETE_CATEGORY_DETAIL_SUCCESS,
           };
         } catch(e) {
-          throw new Error(e)
+          throw new HttpException(
+            message.DELETE_CATEGORY_DETAIL_FAIL,
+            HttpStatus.BAD_REQUEST,
+          );
         }
       },
     );
