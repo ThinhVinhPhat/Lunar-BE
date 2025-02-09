@@ -4,27 +4,14 @@ services:
     container_name: postgres_db
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: glasses-store
-
-  app:
-    build: .
-    container_name: nest_app
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - postgres
-    environment:
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: glasses-store
-      DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: password
-
+      PG_DATA: /var/lib/postgresql/data
+    volumes:
+      - dbdata:/var/lib/postgresql/data
 volumes:
   dbdata:
     driver: local
