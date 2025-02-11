@@ -1,10 +1,72 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/main/src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "assets": ["mail/template/**/*"],
-    "watchAssets": true
+    "assets": [
+      "mail/template/**/*"
+    ],
+    "watchAssets": true,
+    "webpack": true,
+    "tsConfigPath": "apps/main/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/main",
+  "projects": {
+    "@apps/main-service": {
+      "type": "application",
+      "root": "apps/main",
+      "entryFile": "main",
+      "sourceRoot": "apps/main/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/main/tsconfig.app.json"
+      }
+    },
+    "@app/decorator": {
+      "type": "library",
+      "root": "libs/decorator",
+      "entryFile": "index",
+      "sourceRoot": "libs/decorator/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/decorator/tsconfig.lib.json"
+      }
+    },
+    "@app/database": {
+      "type": "library",
+      "root": "libs/database",
+      "entryFile": "index",
+      "sourceRoot": "libs/database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/database/tsconfig.lib.json"
+      }
+    },
+    "@app/helper": {
+      "type": "library",
+      "root": "libs/helper",
+      "entryFile": "index",
+      "sourceRoot": "libs/helper/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/helper/tsconfig.lib.json"
+      }
+    },
+    "@app/shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
+      }
+    },
+    "@app/types": {
+      "type": "library",
+      "root": "libs/types",
+      "entryFile": "index",
+      "sourceRoot": "libs/types/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/types/tsconfig.lib.json"
+      }
+    }
   }
 }
