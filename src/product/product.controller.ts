@@ -15,6 +15,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorator';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { Public } from '@/common/decorator/public.decorator';
 
 @ApiTags('Product')
 @Controller('product')
@@ -41,7 +42,7 @@ export class ProductController {
     );
   }
   
-  @ApiBearerAuth()
+  @Public()
   @Get('/')
   findAll() {
     return this.productService.findAll();
