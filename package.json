@@ -8,25 +8,31 @@
   "engines": {
     "node": "20.x"
   },
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "libs/*"
+    ]
+  },
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "node dist/main.js",
     "vercel-build": "npm run build",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/apps/main/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./apps/main/test/jest-e2e.json",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "migration:up": "npm run build && npm run typeorm migration:run -- -d ./src/config/typeorm.ts",
-    "migration:generate": "npm run typeorm -- -d ./src/config/typeorm.ts migration:generate ./migrations/$npm_config_name",
+    "migration:generate": "npm run typeorm -- -d ./apps/main/config/typeorm.ts migration:generate ./migrations/$npm_config_name",
     "migration:create": "npm run typeorm -- migration:create ./migrations/$npm_config_name",
-    "migration:down": "npm run typeorm -- -d ./src/config/typeorm.ts migration:revert"
+    "migration:down": "npm run typeorm -- -d ./apps/main/config/typeorm.ts migration:revert"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.726.1",
@@ -100,7 +106,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -108,7 +114,18 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@app/decorator(|/.*)$": "<rootDir>/libs/decorator/src/$1",
+      "^@app/database(|/.*)$": "<rootDir>/libs/database/src/$1",
+      "^@app/helper(|/.*)$": "<rootDir>/libs/helper/src/$1",
+      "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1",
+      "^@app/type(|/.*)$": "<rootDir>/libs/type/src/$1"
+    }
   }
 }
