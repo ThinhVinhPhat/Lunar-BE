@@ -48,7 +48,6 @@ export class ProductController {
     return this.productService.findAll();
   }
   
-  @ApiBearerAuth()
   @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.productService.findOne(id);
