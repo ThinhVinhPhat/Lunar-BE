@@ -139,7 +139,10 @@ export class ProductService {
 
   async findOne(id: string) {
     try {
-      const product = await this.productEntity.findOne({ where: { id: id } });
+      const product = await this.productEntity.findOne({
+        where: { id: id },
+        relations: ['productCategories', 'productCategories.categoryDetails'],
+      });
       return {
         status: HttpStatus.OK,
         data: {
@@ -148,7 +151,9 @@ export class ProductService {
         },
         message: message.FIND_PRODUCT_SUCCESS,
       };
-    } catch {
+    } catch (e) {
+      console.log(e);
+
       throw new HttpException(
         message.FIND_PRODUCT_FAIL,
         HttpStatus.BAD_REQUEST,
@@ -160,7 +165,7 @@ export class ProductService {
     try {
       const category = await this.categoryDetailEntity.findOne({
         where: { id: categoryId },
-        relations: ['productCategories'],
+        relations: ['productCategories', 'productCategories.categoryDetails'],
       });
 
       if (!category) {

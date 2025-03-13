@@ -18,7 +18,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '../common/decorator/public.decorator';
 
 @ApiTags('CategoryDetail')
-@Controller('category-detail')
+@Controller('category-details')
 export class CategoryDetailController {
   constructor(private readonly categoryDetailService: CategoryDetailService) {}
 
