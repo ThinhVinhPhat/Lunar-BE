@@ -41,25 +41,37 @@ export class ProductController {
       categoryId,
     );
   }
-  
+
   @Public()
+  @ApiOperationDecorator({
+    summary: 'Find all product',
+    description: 'Find all product',
+  })
   @Get('/')
   findAll() {
     return this.productService.findAll();
   }
-  
+
   @Public()
+  @ApiOperationDecorator({
+    summary: 'Find product by id',
+    description: 'Find product by id',
+  })
   @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.productService.findOne(id);
   }
-  
-  @ApiBearerAuth()
+
+  @Public()
+  @ApiOperationDecorator({
+    summary: 'Find product by categories',
+    description: 'Find product by categories',
+  })
   @Get('/get-by-category/:id')
   findByCategory(@Param('id') categoryId: string) {
     return this.productService.findByCategory(categoryId);
   }
-  
+
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperationDecorator({
@@ -79,7 +91,7 @@ export class ProductController {
       images: images,
     });
   }
-  
+
   @ApiBearerAuth()
   @Delete('/:id')
   remove(@Param('id') id: string) {
