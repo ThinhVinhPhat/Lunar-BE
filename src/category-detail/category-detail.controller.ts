@@ -14,7 +14,8 @@ import { CreateCategoryDetailDto } from './dto/create-category-detail.dto';
 import { UpdateCategoryDetailDto } from './dto/update-category-detail.dto';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorator';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { Public } from '../common/decorator/public.decorator';
 
 @ApiTags('CategoryDetail')
 @Controller('category-detail')
@@ -44,7 +45,11 @@ export class CategoryDetailController {
     );
   }
 
-  @ApiBearerAuth()
+  @Public()
+  @ApiOperationDecorator({
+    summary: 'Find all Category Detail',
+    description: 'Find all Category Detail',
+  })
   @Get()
   findAll() {
     return this.categoryDetailService.findAll();
@@ -56,7 +61,11 @@ export class CategoryDetailController {
     return this.categoryDetailService.findOne(id);
   }
 
-  @ApiBearerAuth()
+  @Public()
+  @ApiOperationDecorator({
+    summary: 'Find Category Detail by Category',
+    description: 'Find Category Detail by Category',
+  })
   @Get('/get-by-category/:id')
   findByCategory(@Param('id') id: string) {
     return this.categoryDetailService.findByCategory(id);

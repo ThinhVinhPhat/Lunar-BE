@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { message } from '@/constant/message';
 import { CategoryDetail } from '@/category-detail/entities/category-detail.entity';
 import { Product } from './entities/product.entity';
@@ -21,6 +21,20 @@ export class ProductService {
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
   ) {}
+
+  private async findProductCategoryDetail(product: Product) {
+    const categories = await this.categoryDetailEntity.find({
+      where: {
+        id: In(
+          product.productCategories.map(
+            (category) => category.categoryDetails.id,
+          ),
+        ),
+      },
+    });
+    const result = categories.map((item) => item.name).join(', ');
+    return result;
+  }
   async create(createProductDto: CreateProductDto, categoryId: string) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
@@ -105,10 +119,20 @@ export class ProductService {
   }
 
   async findAll() {
-    const products = await this.productEntity.find();
+    const products = await this.productEntity.find({
+      relations: ['productCategories', 'productCategories.categoryDetails'],
+    });
+    const result = await Promise.all(
+      products.map(async (product) => {
+        return {
+          ...product,
+          categories: await this.findProductCategoryDetail(product),
+        };
+      }),
+    );
     return {
       status: HttpStatus.OK,
-      data: products,
+      data: result,
       message: message.FIND_PRODUCT_SUCCESS,
     };
   }
@@ -118,7 +142,10 @@ export class ProductService {
       const product = await this.productEntity.findOne({ where: { id: id } });
       return {
         status: HttpStatus.OK,
-        data: product,
+        data: {
+          ...product,
+          categories: await this.findProductCategoryDetail(product),
+        },
         message: message.FIND_PRODUCT_SUCCESS,
       };
     } catch {

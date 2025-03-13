@@ -14,6 +14,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from '@/constant/role';
+import { UpdatePasswordDTO } from './dto/update-password.dto';
 @Injectable()
 export class UsersService {
   constructor(
@@ -137,7 +138,7 @@ export class UsersService {
       data: {
         id: user.id,
         email: user.email,
-        password: user.password
+        password: user.password,
       },
       message: message.USER_CREATE_SUCCESS,
     };
@@ -204,6 +205,25 @@ export class UsersService {
           role: user.role,
         },
         message: message.USER_CREATE_SUCCESS,
+      };
+    } else {
+      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updatePassword(UpdatePasswordDTO: UpdatePasswordDTO) {
+    const { password, code, email } = UpdatePasswordDTO;
+    const user = await this.userEntity.findOne({ where: { email: email } });
+    if (user) {
+      if (user.code_id === code) {
+        const hashPassword = await hashPasswordHelper(password);
+        user.password = hashPassword;
+        await this.userEntity.save(user);
+      }
+      return {
+        status: HttpStatus.ACCEPTED,
+        data: user,
+        message: message.USER_PASSWORD_UPDATE_SUCCESS,
       };
     } else {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);

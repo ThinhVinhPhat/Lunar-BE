@@ -10,6 +10,7 @@ export const message = {
   USER_CREATE_SUCCESS: 'User created successfully',
   USER_UPDATE_SUCCESS: 'User updated successfully',
   USER_UPDATE_Fail: 'User updated fail',
+  USER_PASSWORD_UPDATE_SUCCESS: 'User password updated successfully',
   PASSWORD_NOT_MATCH: 'Password does not match',
   FIND_USER_SUCCESS: 'Find users successfully',
   FIND_USER_FAIL: 'Find users fail',

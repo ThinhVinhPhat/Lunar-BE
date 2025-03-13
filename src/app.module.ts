@@ -43,7 +43,7 @@ import { PaymentModule } from './payment/payment.module';
 
         template: {
           dir: process.cwd() + '/src/mail/template/',
-          adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },

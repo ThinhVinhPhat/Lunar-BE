@@ -10,7 +10,7 @@ import {
 } from '@nestjs/swagger';
 
 interface ApiOperatorOptions {
-  type: any;
+  type?: any;
   summary: string;
   description: string;
 }
