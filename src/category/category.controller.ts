@@ -12,6 +12,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Public } from '@/common/decorator/public.decorator';
 
 @ApiTags('Category')
 @Controller('category')
@@ -28,19 +29,19 @@ export class CategoryController {
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto);
   }
-  
-  @ApiBearerAuth()
+
+  @Public()
   @Get('/')
   findAll() {
     return this.categoryService.findAll();
   }
-  
-  @ApiBearerAuth()
+
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoryService.findOne(id);
   }
-  
+
   @ApiBearerAuth()
   @ApiOperationDecorator({
     summary: 'Update a category',
@@ -54,7 +55,7 @@ export class CategoryController {
   ) {
     return this.categoryService.update(id, updateCategoryDto);
   }
-  
+
   @ApiBearerAuth()
   @Delete(':id')
   remove(@Param('id') id: string) {
