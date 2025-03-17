@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,9 +8,12 @@ import { CategoryDetail } from '@/category-detail/entities/category-detail.entit
 import { Product } from './entities/product.entity';
 import { ProductCategory } from '@/product/entities/product-category.entity';
 import { UploadService } from '@/upload/upload.service';
+import { FindProductDTO } from './dto/find-product.dto';
+import slugify from 'slugify';
 
 @Injectable()
 export class ProductService {
+  private readonly logger: Logger;
   constructor(
     @InjectRepository(CategoryDetail)
     private readonly categoryDetailEntity: Repository<CategoryDetail>,
@@ -20,7 +23,9 @@ export class ProductService {
     private readonly productCategoryEntity: Repository<ProductCategory>,
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
-  ) {}
+  ) {
+    this.logger = new Logger('ProductService');
+  }
 
   private async findProductCategoryDetail(product: Product) {
     const categories = await this.categoryDetailEntity.find({
@@ -35,7 +40,11 @@ export class ProductService {
     const result = categories.map((item) => item.name).join(', ');
     return result;
   }
-  async create(createProductDto: CreateProductDto, categoryId: string[]) {
+  private slugGenerate(name: string) {
+    const slug = slugify(name + '-' + Date.now());
+    return slug;
+  }
+  async create(createProductDto: CreateProductDto) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const {
@@ -48,13 +57,14 @@ export class ProductService {
           isFreeShip,
           isNew,
           discount,
+          categoryId,
         } = createProductDto;
 
         try {
           const category = await transactionManager.find(CategoryDetail, {
             where: { id: In(categoryId) },
           });
-          if (!category) {
+          if (!category || category.length === 0) {
             throw new HttpException(
               message.FIND_CATEGORY_FAIL,
               HttpStatus.NOT_FOUND,
@@ -78,8 +88,10 @@ export class ProductService {
               const imageUrl = await this.uploadService.uploadS3(image);
               imageUrls.push(imageUrl);
             }
+            const slug = this.slugGenerate(name);
             const product = transactionManager.create(Product, {
               name: name,
+              slug: slug,
               category: category,
               description: description,
               images: imageUrls,
@@ -92,15 +104,16 @@ export class ProductService {
             });
             await transactionManager.save(Product, product);
 
-            const productCategory = await transactionManager
+            await transactionManager
               .createQueryBuilder()
               .insert()
               .into(ProductCategory)
               .values(
                 category.map((item) => {
+                  console.log(item);
                   return {
                     product: product,
-                    category: item,
+                    categoryDetails: item,
                     quantity: stock,
                   };
                 }),
@@ -114,6 +127,7 @@ export class ProductService {
             };
           }
         } catch (e) {
+          this.logger.warn(e);
           throw new HttpException(
             message.CREATE_PRODUCT_FAIL,
             HttpStatus.BAD_REQUEST,
@@ -123,29 +137,51 @@ export class ProductService {
     );
   }
 
-  async findAll() {
-    const products = await this.productEntity.find({
-      relations: ['productCategories', 'productCategories.categoryDetails'],
-    });
-    const result = await Promise.all(
-      products.map(async (product) => {
-        return {
-          ...product,
-          categories: await this.findProductCategoryDetail(product),
-        };
-      }),
-    );
-    return {
-      status: HttpStatus.OK,
-      data: result,
-      message: message.FIND_PRODUCT_SUCCESS,
-    };
+  async findAll(findDTO: FindProductDTO) {
+    try {
+      const { category, limit, offset } = findDTO;
+
+      const products = await this.productEntity.find({
+        where: {
+          productCategories: category
+            ? {
+                categoryDetails: {
+                  name: In(category),
+                },
+              }
+            : {},
+        },
+        skip: offset,
+        take: limit,
+        relations: ['productCategories', 'productCategories.categoryDetails'],
+      });
+
+      // const result = await Promise.all(
+      //   products.map(async (product) => {
+      //     return {
+      //       ...product,
+      //       categories: await this.findProductCategoryDetail(product),
+      //     };
+      //   }),
+      // );
+      return {
+        status: HttpStatus.OK,
+        data: products,
+        message: message.FIND_PRODUCT_SUCCESS,
+      };
+    } catch (e) {
+      this.logger.warn(e);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: message.FIND_PRODUCT_FAIL,
+      };
+    }
   }
 
-  async findOne(id: string) {
+  async findOne(slug: string) {
     try {
       const product = await this.productEntity.findOne({
-        where: { id: id },
+        where: { slug: slug },
         relations: ['productCategories', 'productCategories.categoryDetails'],
       });
       return {
@@ -165,43 +201,6 @@ export class ProductService {
       );
     }
   }
-
-  async findByCategory(categoryId: string) {
-    try {
-      const category = await this.categoryDetailEntity.findOne({
-        where: { id: categoryId },
-        relations: ['productCategories', 'productCategories.categoryDetails'],
-      });
-
-      if (!category) {
-        throw new HttpException(
-          message.FIND_CATEGORY_FAIL,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const productCategory = await this.productCategoryEntity.find({
-        relations: ['product', 'categoryDetails'],
-      });
-
-      const result = productCategory.filter(
-        (item) => item.categoryDetails.id === category.id,
-      );
-      return {
-        status: HttpStatus.OK,
-        data: result.map((item) => {
-          return item.product;
-        }),
-        message: message.FIND_PRODUCT_SUCCESS,
-      };
-    } catch (e) {
-      throw new HttpException(
-        message.FIND_PRODUCT_FAIL,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
   async update(id: string, updateProductDto: UpdateProductDto) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {

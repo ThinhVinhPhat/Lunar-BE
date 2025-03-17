@@ -17,6 +17,7 @@ import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorato
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '@/common/decorator/public.decorator';
+import { FindProductDTO } from './dto/find-product.dto';
 
 @ApiTags('Product')
 @Controller('product')
@@ -31,16 +32,12 @@ export class ProductController {
     type: CreateProductDto,
   })
   @UseInterceptors(FilesInterceptor('images'))
-  @Post('/:id')
+  @Post('')
   create(
-    @Query() categoryId: string[],
     @UploadedFiles() images: Express.Multer.File[],
     @Body() createProductDto: CreateProductDto,
   ) {
-    return this.productService.create(
-      { ...createProductDto, images: images },
-      categoryId,
-    );
+    return this.productService.create({ ...createProductDto, images: images });
   }
 
   @Public()
@@ -49,28 +46,18 @@ export class ProductController {
     description: 'Find all product',
   })
   @Get('/')
-  findAll() {
-    return this.productService.findAll();
+  findAll(@Query() findDto: FindProductDTO) {
+    return this.productService.findAll(findDto);
   }
 
   @Public()
   @ApiOperationDecorator({
-    summary: 'Find product by id',
-    description: 'Find product by id',
+    summary: 'Find product by slug',
+    description: 'Find product by slug',
   })
-  @Get('/:id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(id);
-  }
-
-  @Public()
-  @ApiOperationDecorator({
-    summary: 'Find product by categories',
-    description: 'Find product by categories',
-  })
-  @Get('/get-by-category/:id')
-  findByCategory(@Param('id') categoryId: string) {
-    return this.productService.findByCategory(categoryId);
+  @Get('/:slug')
+  findOne(@Param('slug') slug: string) {
+    return this.productService.findOne(slug);
   }
 
   @ApiBearerAuth()

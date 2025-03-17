@@ -63,12 +63,12 @@ export class CategoryDetailController {
 
   @Public()
   @ApiOperationDecorator({
-    summary: 'Find Category Detail by Category',
-    description: 'Find Category Detail by Category',
+    summary: 'Find Category Detail by Category Name',
+    description: 'Find Category Detail by Category Name',
   })
-  @Get('/get-by-category/:id')
-  findByCategory(@Param('id') id: string) {
-    return this.categoryDetailService.findByCategory(id);
+  @Get('/get-by-category/:name')
+  findByCategory(@Param('name') name: string) {
+    return this.categoryDetailService.findByCategory(name);
   }
 
   @ApiBearerAuth()

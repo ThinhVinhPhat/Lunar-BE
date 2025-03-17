@@ -100,9 +100,9 @@ export class CategoryDetailService {
     };
   }
 
-  async findByCategory(id: string) {
+  async findByCategory(name: string) {
     const category = await this.categoryEntity.findOne({
-      where: { id: id },
+      where: { name: name },
       relations: ['categoryDetails'],
     });
 

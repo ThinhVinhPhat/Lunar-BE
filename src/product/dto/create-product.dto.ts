@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   IsOptional,
@@ -8,6 +9,25 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto {
+  @ApiProperty({
+    description: 'Product category id',
+    type: 'array',
+    nullable: false,
+    items: {
+      type: 'string',
+    },
+  })
+  @IsNotEmpty()
+  @IsArray()
+  @Transform(({ value }) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string')
+      return value.split(',').map((id) => id.trim());
+    return [value];
+  })
+  categoryId: string[];
+
   @ApiProperty({
     description: 'The name of the product',
     example: 'Product A',
