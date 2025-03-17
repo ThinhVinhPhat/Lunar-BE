@@ -6,12 +6,6 @@ import { Column, Entity, OneToMany } from 'typeorm';
 export class Category extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   name: string;
-  
-  @Column({ type: 'varchar', nullable: true })
-  description: string;
-
-  @Column({ type: 'simple-array', nullable: true })
-  images: string[];
 
   @Column({ type: 'boolean', nullable: true, default: true })
   status: boolean;
