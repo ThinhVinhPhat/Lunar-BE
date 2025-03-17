@@ -9,6 +9,5 @@ export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {
     nullable: false
   })
   @IsNotEmpty()
-  @IsBoolean()
   status: boolean;
 }

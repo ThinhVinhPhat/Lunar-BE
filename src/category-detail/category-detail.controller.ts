@@ -29,7 +29,7 @@ export class CategoryDetailController {
     description: 'Create Category Detail',
     type: CreateCategoryDetailDto,
   })
-  @UseInterceptors(FilesInterceptor('image'))
+  @UseInterceptors(FilesInterceptor('images'))
   @Post('/:id')
   create(
     @Param('id') categoryId: string,
@@ -39,7 +39,7 @@ export class CategoryDetailController {
     return this.categoryDetailService.create(
       {
         ...createCategoryDetailDto,
-        image: image,
+        images: image,
       },
       categoryId,
     );
@@ -78,7 +78,7 @@ export class CategoryDetailController {
     description: 'Update Category Detail',
     type: UpdateCategoryDetailDto,
   })
-  @UseInterceptors(FilesInterceptor('image'))
+  @UseInterceptors(FilesInterceptor('images'))
   @Patch('/:id')
   update(
     @UploadedFiles() image: Express.Multer.File[],
@@ -87,7 +87,7 @@ export class CategoryDetailController {
   ) {
     return this.categoryDetailService.update(id, {
       ...updateCategoryDetailDto,
-      image: image,
+      images: image,
     });
   }
 

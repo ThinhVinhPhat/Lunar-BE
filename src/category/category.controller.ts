@@ -28,17 +28,9 @@ export class CategoryController {
     type: CreateCategoryDto,
   })
   @ApiBearerAuth()
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FilesInterceptor('images'))
   @Post('/')
-  create(
-    @UploadedFiles() images: Express.Multer.File[],
-    @Body() createCategoryDto: CreateCategoryDto,
-  ) {
-    return this.categoryService.create({
-      ...createCategoryDto,
-      images: images,
-    });
+  create(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoryService.create(createCategoryDto);
   }
 
   @Public()
@@ -67,18 +59,12 @@ export class CategoryController {
     description: 'Create a category',
     type: UpdateCategoryDto,
   })
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FilesInterceptor('images'))
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @UploadedFiles() images: Express.Multer.File[],
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoryService.update(id, {
-      ...updateCategoryDto,
-      images: images,
-    });
+    return this.categoryService.update(id, updateCategoryDto);
   }
 
   @ApiBearerAuth()

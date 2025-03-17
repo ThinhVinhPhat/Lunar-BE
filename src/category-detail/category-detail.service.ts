@@ -25,7 +25,7 @@ export class CategoryDetailService {
   ) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
-        const { name, description, image } = createCategoryDetailDto;
+        const { name, description, images } = createCategoryDetailDto;
 
         try {
           const category = await transactionManager.findOne(Category, {
@@ -39,19 +39,24 @@ export class CategoryDetailService {
             );
           }
 
-          if (image.length - 1 > 0) {
+          if (images.length > 2) {
             throw new HttpException(
-              'Only one image is required',
+              'Only 2 images are allowed',
               HttpStatus.BAD_REQUEST,
             );
           }
 
-          const imageUrl = await this.uploadService.uploadS3(image[0]);
+          const imageUrls = [];
+          for (const image of images) {
+            const imageUrl = await this.uploadService.uploadS3(image);
+            imageUrls.push(imageUrl);
+          }
+
           const categoryDetail = transactionManager.create(CategoryDetail, {
             name: name,
             category: category,
             description: description,
-            image: imageUrl,
+            image: imageUrls,
           });
           category.categoryDetails.push(categoryDetail);
           await transactionManager.save(CategoryDetail, categoryDetail);
@@ -64,7 +69,7 @@ export class CategoryDetailService {
           };
         } catch (e) {
           throw new HttpException(
-            message.CREATE_CATEGORY_DETAIL_SUCCESS,
+            message.CREATE_CATEGORY_DETAIL_FAIL,
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -115,17 +120,22 @@ export class CategoryDetailService {
   async update(id: string, updateCategoryDetailDto: UpdateCategoryDetailDto) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
-        const { name, description, image, status } = updateCategoryDetailDto;
+        const { name, description, images, status } = updateCategoryDetailDto;
 
         try {
-          if (image.length - 1 > 0) {
+          if (images.length > 2) {
             throw new HttpException(
-              'Only one image is required',
+              'Only 2 images are allowed',
               HttpStatus.BAD_REQUEST,
             );
           }
 
-          const imageUrl = await this.uploadService.uploadS3(image[0]);
+          const imageUrls = [];
+          for (const image of images) {
+            const imageUrl = await this.uploadService.uploadS3(image);
+            imageUrls.push(imageUrl);
+          }
+
           const categoryDetail = await transactionManager.findOne(
             CategoryDetail,
             {
@@ -136,7 +146,7 @@ export class CategoryDetailService {
           );
           categoryDetail.name = name;
           categoryDetail.description = description;
-          categoryDetail.image = imageUrl;
+          categoryDetail.image = imageUrls;
           categoryDetail.status = status;
 
           await transactionManager.save(CategoryDetail, categoryDetail);
@@ -170,7 +180,7 @@ export class CategoryDetailService {
             status: HttpStatus.OK,
             message: message.DELETE_CATEGORY_DETAIL_SUCCESS,
           };
-        } catch(e) {
+        } catch (e) {
           throw new HttpException(
             message.DELETE_CATEGORY_DETAIL_FAIL,
             HttpStatus.BAD_REQUEST,

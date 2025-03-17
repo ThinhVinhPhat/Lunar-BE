@@ -8,13 +8,14 @@ import {
   Delete,
   UseInterceptors,
   UploadedFiles,
+  Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorator';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '@/common/decorator/public.decorator';
 
 @ApiTags('Product')
@@ -32,7 +33,7 @@ export class ProductController {
   @UseInterceptors(FilesInterceptor('images'))
   @Post('/:id')
   create(
-    @Param('id') categoryId: string,
+    @Query() categoryId: string[],
     @UploadedFiles() images: Express.Multer.File[],
     @Body() createProductDto: CreateProductDto,
   ) {

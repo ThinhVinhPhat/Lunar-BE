@@ -19,7 +19,7 @@ export class CategoryService {
   async create(createCategoryDto: CreateCategoryDto) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
-        const { name, images, description } = createCategoryDto;
+        const { name } = createCategoryDto;
 
         try {
           const existCategory = await transactionManager.findOne(Category, {
@@ -33,24 +33,8 @@ export class CategoryService {
               HttpStatus.BAD_REQUEST,
             );
           }
-
-          if (images.length > 2) {
-            throw new HttpException(
-              'Only 2 images are allowed',
-              HttpStatus.BAD_REQUEST,
-            );
-          }
-
-          const imageUrls = [];
-          for (const image of images) {
-            const imageUrl = await this.uploadService.uploadS3(image);
-            imageUrls.push(imageUrl);
-          }
-
           const category = transactionManager.create(Category, {
             name: name,
-            images: imageUrls,
-            description: description,
           });
           await transactionManager.save(category);
 
@@ -93,7 +77,7 @@ export class CategoryService {
   update(id: string, updateCategoryDto: UpdateCategoryDto) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
-        const { name, status, images, description } = updateCategoryDto;
+        const { name, status } = updateCategoryDto;
 
         try {
           const category = await transactionManager.findOne(Category, {
@@ -108,22 +92,8 @@ export class CategoryService {
             );
           }
 
-          if (images.length > 2) {
-            throw new HttpException(
-              'Only 2 images are allowed',
-              HttpStatus.BAD_REQUEST,
-            );
-          }
-
-          const imageUrls = [];
-          for (const image of images) {
-            const imageUrl = await this.uploadService.uploadS3(image);
-            imageUrls.push(imageUrl);
-          }
 
           category.name = name;
-          category.images = imageUrls;
-          category.description = description;
           category.status = status;
           await transactionManager.save(Category, category);
 

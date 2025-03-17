@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsNumber,
   IsArray,
   IsDecimal,
 } from 'class-validator';
@@ -65,7 +64,7 @@ export class CreateProductDto {
     description: 'Array of image for the product',
     required: true,
     items: { type: 'string', format: 'binary' },
-    type: 'array'
+    type: 'array',
   })
   @IsOptional()
   @IsArray()
@@ -75,7 +74,7 @@ export class CreateProductDto {
     description: 'Indicates if the product has free shipping',
     example: true,
     nullable: false,
-    type: 'boolean'
+    type: 'boolean',
   })
   @IsNotEmpty()
   isFreeShip: boolean;
@@ -84,7 +83,7 @@ export class CreateProductDto {
     description: 'Indicates if the product is new',
     example: true,
     nullable: false,
-    type: 'boolean'
+    type: 'boolean',
   })
   @IsNotEmpty()
   isNew: boolean;
@@ -93,7 +92,7 @@ export class CreateProductDto {
     description: 'Indicates if the product is featured',
     example: false,
     nullable: false,
-    type: 'boolean'
+    type: 'boolean',
   })
   @IsNotEmpty()
   isFeatured: boolean;

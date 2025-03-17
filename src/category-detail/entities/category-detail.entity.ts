@@ -12,7 +12,7 @@ export class CategoryDetail extends BaseEntity {
   description: string;
 
   @Column({ type: 'varchar', nullable: true })
-  image: string;
+  image: string[];
 
   @Column({ type: 'boolean', nullable: true, default: true })
   status: boolean;

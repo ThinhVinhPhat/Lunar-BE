@@ -35,7 +35,7 @@ export class ProductService {
     const result = categories.map((item) => item.name).join(', ');
     return result;
   }
-  async create(createProductDto: CreateProductDto, categoryId: string) {
+  async create(createProductDto: CreateProductDto, categoryId: string[]) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const {
@@ -51,8 +51,8 @@ export class ProductService {
         } = createProductDto;
 
         try {
-          const category = await transactionManager.findOne(CategoryDetail, {
-            where: { id: categoryId },
+          const category = await transactionManager.find(CategoryDetail, {
+            where: { id: In(categoryId) },
           });
           if (!category) {
             throw new HttpException(
@@ -92,15 +92,20 @@ export class ProductService {
             });
             await transactionManager.save(Product, product);
 
-            const productCategory = await transactionManager.create(
-              ProductCategory,
-              {
-                product: product,
-                categoryDetails: category,
-                quantity: product.stock,
-              },
-            );
-            await transactionManager.save(ProductCategory, productCategory);
+            const productCategory = await transactionManager
+              .createQueryBuilder()
+              .insert()
+              .into(ProductCategory)
+              .values(
+                category.map((item) => {
+                  return {
+                    product: product,
+                    category: item,
+                    quantity: stock,
+                  };
+                }),
+              )
+              .execute();
 
             return {
               status: HttpStatus.OK,

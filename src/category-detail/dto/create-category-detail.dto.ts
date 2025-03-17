@@ -24,5 +24,5 @@ export class CreateCategoryDetailDto {
     items: { type: 'string', format: 'binary' },
     required: true,
   })
-  image: Express.Multer.File[];
+  images: Express.Multer.File[];
 }
