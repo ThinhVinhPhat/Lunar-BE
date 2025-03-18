@@ -139,7 +139,7 @@ export class ProductService {
 
   async findAll(findDTO: FindProductDTO) {
     try {
-      const { category, limit, offset } = findDTO;
+      const { category, limit, offset, name } = findDTO;
 
       const products = await this.productEntity.find({
         where: {
@@ -149,7 +149,8 @@ export class ProductService {
                   name: In(category),
                 },
               }
-            : {},
+            : null,
+          name: name ? name : null,
         },
         skip: offset,
         take: limit,

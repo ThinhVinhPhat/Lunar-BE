@@ -1,8 +1,16 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsArray, IsOptional } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class FindProductDTO {
+  @ApiPropertyOptional({
+    description: 'Product name',
+    example: 'Product 1', 
+  })
+  @IsOptional()
+  @IsString()
+  name: string;
+
   @ApiPropertyOptional({
     description: 'Product category',
     example: 'Electronics',

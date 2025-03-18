@@ -249,6 +249,7 @@ export class UsersService {
     const hashedPassword = await hashPasswordHelper(password);
 
     const emailExist = await this.userEntity.findOne({ where: { email } });
+    const randomCode = Math.floor(Math.random() * 1000000) + 1;
 
     if (emailExist == null) {
       const user = this.userEntity.create({
@@ -256,23 +257,22 @@ export class UsersService {
         firstName,
         lastName,
         password: hashedPassword,
-        code_id: uuidv4(),
+        code_id: randomCode.toString(),
         code_expried: dayjs().add(1, 'seconds'),
       });
 
-      this.mailerService
-        .sendMail({
-          to: user.email,
-          subject: 'Testing Nest MailerModule ✔',
-          text: 'welcome',
-          template: './register',
-          context: {
-            name: user.lastName ?? user.email,
-            activationCode: user.code_id,
-          },
-        })
-        .then(() => {})
-        .catch(() => {});
+      const mail = await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Send Email Validation Code',
+        text: 'welcome',
+        template: './register',
+        context: {
+          name: user.lastName ?? user.email,
+          activationCode: user.code_id,
+        },
+      });
+
+      console.log(mail);
 
       await this.userEntity.save(user);
       return {
