@@ -153,7 +153,9 @@ export class OrderDetailService {
         }
         orderDetail.quantity = quantity;
         orderDetail.price = productPrice;
-        orderDetail.total = Math.floor(orderDetail.quantity * orderDetail.price);
+        orderDetail.total = Math.floor(
+          orderDetail.quantity * orderDetail.price,
+        );
         orderDetail.product_name = product.name;
         orderDetail.product = product;
         await transactionManager.save(orderDetail);
@@ -190,6 +192,5 @@ export class OrderDetailService {
         };
       },
     );
-    return `This action removes a #${id} orderDetail`;
   }
 }

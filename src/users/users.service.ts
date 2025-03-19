@@ -175,7 +175,7 @@ export class UsersService {
     userId: string,
     updateUserDto: UpdateUserDto,
   ): Promise<createRespond> {
-    const { firstName, lastName, address, phone, city, company, email, role } =
+    const { firstName, lastName, address, phone, city, company } =
       updateUserDto;
 
     const user = await this.userEntity.findOne({ where: { id: userId } });
@@ -187,12 +187,10 @@ export class UsersService {
       user.phone = phone;
       user.city = city;
       user.company = company;
-      user.email = email;
-      user.role = role;
       await this.userEntity.save(user);
 
       return {
-        status: HttpStatus.ACCEPTED,
+        status: HttpStatus.OK,
         data: {
           id: user.id,
           firstName: user.firstName,

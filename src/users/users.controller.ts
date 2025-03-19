@@ -46,11 +46,12 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  // @ApiBearerAuth()
-  // @Patch('update/:id')
-  // update(@Param('id') userid: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(userid, updateUserDto);
-  // }
+  @ApiBearerAuth()
+  @Patch('update')
+  update(@UserReq() currentUser: User, @Body() updateUserDto: UpdateUserDto) {
+    const userId = currentUser.id;
+    return this.usersService.update(userId, updateUserDto);
+  }
 
   @Public()
   @UseGuards(JwtAuthGuard)
