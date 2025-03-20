@@ -1,4 +1,5 @@
 import { IS_PUBLIC_KEY } from '@/common/decorator/public.decorator';
+import { OrderService } from '@/order/order.service';
 import { UsersService } from '@/users/users.service';
 import {
   CanActivate,
@@ -37,11 +38,10 @@ export class JwtAuthGuard implements CanActivate {
         secret: this.configService.getOrThrow('JWT_SECRET_KEY'),
       });
 
-
       request['jwtPayLoad'] = payload;
 
       const user = await this.userService.findOne(payload.sub);
-      request['user'] = user;
+      request['user'] = user.data;
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }

@@ -7,6 +7,7 @@ import { DataSource, EntityManager, Repository } from 'typeorm';
 import { User } from '@/users/entity/user.entity';
 import { message } from '@/constant/message';
 import { FindByStatusDTO } from './dto/find-by-status.dto';
+import { OrderStatus } from '@/constant/role';
 
 @Injectable()
 export class OrderService {
@@ -20,16 +21,38 @@ export class OrderService {
   async create(createOrderDto: CreateOrderDto, id: string) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
+        console.log(id);
+
         const user = await transactionManager.findOne(User, {
           where: { id: id },
-          relations: ['orders'],
         });
+
+        console.log(user);
+
         if (!user) {
           throw new HttpException(
             message.FIND_USER_FAIL,
             HttpStatus.BAD_REQUEST,
           );
         }
+        const existOrder = await transactionManager.findOne(Order, {
+          where: {
+            user: {
+              id: user.id,
+            },
+            status: OrderStatus.PENDING,
+          },
+          relations: ['user', 'orderDetails'],
+        });
+
+        if (existOrder) {
+          return {
+            status: HttpStatus.OK,
+            data: existOrder,
+            message: message.CREATE_ORDER_SUCCESS,
+          };
+        }
+
         const { shipPhone, shippingAddress, shippingFee, note } =
           createOrderDto;
 
@@ -75,7 +98,7 @@ export class OrderService {
   async findAll(id: string) {
     const user = await this.userRepository.findOne({
       where: { id: id },
-      relations: ['orders'],
+      relations: ['orders', 'orders.orderDetails'],
     });
     if (!user) {
       throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
@@ -88,15 +111,25 @@ export class OrderService {
     };
   }
 
-  async findOne(id: string) {
-    const order = await this.orderRepository.findOne({
-      where: { id: id },
+  async findOne(userId: string, id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
     });
-
+    if (!user) {
+      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
+    }
+    const order = await this.orderRepository.findOne({
+      where: {
+        id: id,
+        user: {
+          id: userId,
+        },
+      },
+      relations: ['orderDetails', 'user'],
+    });
     if (!order) {
       throw new HttpException(message.FIND_ORDER_FAIL, HttpStatus.BAD_REQUEST);
     }
-
     return {
       status: HttpStatus.OK,
       data: order,
@@ -111,6 +144,7 @@ export class OrderService {
           where: {
             id: id,
           },
+          relations: ['orderDetails'],
         });
         if (!order) {
           throw new HttpException(
@@ -119,13 +153,14 @@ export class OrderService {
           );
         }
 
-        const { shipPhone, shippingAddress, shippingFee, note } =
+        const { shipPhone, shippingAddress, shippingFee, note, status } =
           updateOrderDto;
 
         order.shipPhone = shipPhone;
         order.shippingAddress = shippingAddress;
         order.shippingFee = shippingFee;
         order.note = note;
+        order.status = status;
 
         await transactionManager.save(Order, order);
 

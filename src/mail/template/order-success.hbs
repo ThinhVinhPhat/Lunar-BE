@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #C8A846;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            padding: 20px;
+            text-align: left;
+            color: #333;
+            line-height: 1.6;
+        }
+        .order-details {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 20px 0;
+            background-color: #C8A846;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">✅ Order Successfully Placed!</div>
+        <div class="content">
+            <p>Hello <strong>{{CUSTOMER_NAME}}</strong>,</p>
+            <p>Thank you for shopping with <strong>Lunar Shop</strong>. Your order has been successfully placed and is now being processed.</p>
+            
+            <div class="order-details">
+                <p><strong>Order Details:</strong></p>
+                <p>Order ID: <strong>{{ORDER_ID}}</strong></p>
+                <p>Order Date: {{ORDER_DATE}}</p>
+                <p>Total Amount: <strong>{{TOTAL_AMOUNT}}</strong></p>
+            </div>
+
+            <p>You can track your order status by clicking the button below:</p>
+            <a href="{{ORDER_TRACKING_URL}}" class="button">Track Your Order</a>
+
+            <p>If you have any questions, feel free to contact us at <strong>thinhvinhp@gmail.com</strong>.</p>
+        </div>
+        <div class="footer">
+            &copy; 2025 Lunar. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

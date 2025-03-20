@@ -48,13 +48,17 @@ export class OrderController {
   findAll(@UserReq() currentUser: User) {
     return this.orderService.findAll(currentUser.id);
   }
-  
+
   @ApiBearerAuth()
+  @ApiOperationDecorator({
+    summary: 'Find one user order',
+    description: 'Find one user order by id',
+  })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(id);
+  findOne(@UserReq() currentUser: User, @Param('id') id: string) {
+    const userId = currentUser.id;
+    return this.orderService.findOne(userId, id);
   }
-  
 
   @ApiBearerAuth()
   @ApiOperationDecorator({

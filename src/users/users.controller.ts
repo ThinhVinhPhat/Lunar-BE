@@ -27,7 +27,7 @@ export class UsersController {
   @ApiBearerAuth()
   @Get('/me')
   getMe(@UserReq() user: User) {
-    return user;
+    return this.usersService.findMe(user);
   }
 
   @ApiBearerAuth()

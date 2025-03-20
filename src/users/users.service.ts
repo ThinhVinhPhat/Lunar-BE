@@ -23,6 +23,14 @@ export class UsersService {
     private readonly mailerService: MailerService,
   ) {}
 
+  async findMe(user: User) {
+    return {
+      status: HttpStatus.OK,
+      data: user,
+      message: message.FIND_USER_SUCCESS,
+    };
+  }
+
   async create(createUserDto: CreateUserDto): Promise<createRespond> {
     const {
       firstName,
