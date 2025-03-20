@@ -42,7 +42,7 @@ export class OrderService {
             },
             status: OrderStatus.PENDING,
           },
-          relations: ['user', 'orderDetails'],
+          relations: ['user', 'orderDetails', 'orderDetails.product'],
         });
 
         if (existOrder) {
