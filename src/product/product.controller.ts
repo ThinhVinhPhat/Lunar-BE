@@ -18,6 +18,8 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '@/common/decorator/public.decorator';
 import { FindProductDTO } from './dto/find-product.dto';
+import { Roles } from '@/common/decorator/role.decorator';
+import { Role } from '@/constant/role';
 
 @ApiTags('Product')
 @Controller('product')
@@ -25,6 +27,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @ApiConsumes('multipart/form-data')
   @ApiOperationDecorator({
     summary: 'Create a new product',
@@ -68,6 +71,7 @@ export class ProductController {
     type: CreateProductDto,
   })
   @UseInterceptors(FilesInterceptor('images'))
+  @Roles(Role.ADMIN)
   @Patch('/:id')
   update(
     @Param('id') id: string,
@@ -81,6 +85,7 @@ export class ProductController {
   }
 
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Delete('/:id')
   remove(@Param('id') id: string) {
     return this.productService.remove(id);

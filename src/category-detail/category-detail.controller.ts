@@ -16,6 +16,8 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '../common/decorator/public.decorator';
+import { Roles } from '@/common/decorator/role.decorator';
+import { Role } from '@/constant/role';
 
 @ApiTags('CategoryDetail')
 @Controller('category-details')
@@ -30,6 +32,7 @@ export class CategoryDetailController {
     type: CreateCategoryDetailDto,
   })
   @UseInterceptors(FilesInterceptor('images'))
+  @Roles(Role.ADMIN)
   @Post('/:id')
   create(
     @Param('id') categoryId: string,
@@ -79,6 +82,7 @@ export class CategoryDetailController {
     type: UpdateCategoryDetailDto,
   })
   @UseInterceptors(FilesInterceptor('images'))
+  @Roles(Role.ADMIN)
   @Patch('/:id')
   update(
     @UploadedFiles() image: Express.Multer.File[],
@@ -92,6 +96,7 @@ export class CategoryDetailController {
   }
 
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoryDetailService.remove(id);

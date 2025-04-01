@@ -86,11 +86,10 @@ export class PaymentService {
           },
           customer: customer.id,
           success_url:
-            'https://jwt-be-production.up.railway.app' +
-            `/api/v1/payment/success/checkout/session?order_id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
+            'https://glasses-store-be.onrender.com' +
+            `/api/v1/payment/success/?order_id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url:
-            'https://jwt-be-production.up.railway.app' +
-            '/api/v1/payment/failed/checkout/session',
+            'https://glasses-store-be.onrender.com' + '/api/v1/payment/failed',
         });
         console.log(session.url);
 

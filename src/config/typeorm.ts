@@ -18,9 +18,6 @@ export const config = {
   autoLoadEntities: true,
   synchronize: false,
   logging: process.env?.DATABASE_DEBUG_MODE === 'true' || false,
-  ssl: {
-    rejectUnauthorized: false,
-  },
 };
 if (config.logging) {
   console.log('Connect DB Successfully');

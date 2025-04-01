@@ -18,6 +18,8 @@ import { Public } from '@/common/decorator/public.decorator';
 import { UpdatePasswordDTO } from './dto/update-password.dto';
 import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorator';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
+import { Roles } from '@/common/decorator/role.decorator';
+import { Role } from '@/constant/role';
 
 @ApiTags('User')
 @Controller('users')
@@ -75,6 +77,7 @@ export class UsersController {
   }
 
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Delete('delete/:id')
   remove(@Param('id') userId: string) {
     return this.usersService.remove(userId);

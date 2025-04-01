@@ -16,6 +16,8 @@ import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorato
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Public } from '@/common/decorator/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { Roles } from '@/common/decorator/role.decorator';
+import { Role } from '@/constant/role';
 
 @ApiTags('Category')
 @Controller('category')
@@ -28,6 +30,7 @@ export class CategoryController {
     type: CreateCategoryDto,
   })
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Post('/')
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto);
@@ -54,6 +57,7 @@ export class CategoryController {
   }
 
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @ApiOperationDecorator({
     summary: 'Update a category',
     description: 'Create a category',
@@ -68,6 +72,7 @@ export class CategoryController {
   }
 
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoryService.remove(id);
