@@ -250,7 +250,7 @@ export class UsersService {
     }
   }
   async handleRegister(registerDTO: RegisterAuthDto) {
-    const { firstName, lastName, email, password } = registerDTO;
+    const { firstName, lastName, email, password, role } = registerDTO;
 
     const hashedPassword = await hashPasswordHelper(password);
 
@@ -263,6 +263,7 @@ export class UsersService {
         firstName,
         lastName,
         password: hashedPassword,
+        role: role,
         code_id: randomCode.toString(),
         code_expried: dayjs().add(1, 'seconds'),
       });
