@@ -86,10 +86,10 @@ export class PaymentService {
           },
           customer: customer.id,
           success_url:
-            'https://glasses-store-be.onrender.com' +
+            'http://localhost:5173/' +
             `/api/v1/payment/success/?order_id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url:
-            'https://glasses-store-be.onrender.com' + '/api/v1/payment/failed',
+            'http://localhost:5173/' + '/api/v1/payment/failed',
         });
         console.log(session.url);
 
