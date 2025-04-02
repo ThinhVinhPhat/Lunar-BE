@@ -86,10 +86,9 @@ export class PaymentService {
           },
           customer: customer.id,
           success_url:
-            'http://localhost:5173/' +
+            'http://localhost:5173' +
             `/api/v1/payment/success/?order_id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url:
-            'http://localhost:5173/' + '/api/v1/payment/failed',
+          cancel_url: 'http://localhost:5173' + '/api/v1/payment/failed',
         });
         console.log(session.url);
 
