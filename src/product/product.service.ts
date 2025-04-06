@@ -157,6 +157,19 @@ export class ProductService {
         relations: ['productCategories', 'productCategories.categoryDetails'],
       });
 
+      const total = await this.productEntity.count({
+        where: {
+          productCategories: category
+            ? {
+                categoryDetails: {
+                  name: In(category),
+                },
+              }
+            : null,
+          name: name ? name : null,
+        },
+      });
+
       // const result = await Promise.all(
       //   products.map(async (product) => {
       //     return {
@@ -167,7 +180,10 @@ export class ProductService {
       // );
       return {
         status: HttpStatus.OK,
-        data: products,
+        data: {
+          products: products,
+          productCount: total,
+        },
         message: message.FIND_PRODUCT_SUCCESS,
       };
     } catch (e) {
