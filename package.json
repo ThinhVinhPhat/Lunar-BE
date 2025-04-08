@@ -9,9 +9,9 @@
     "node": "20.x"
   },
   "scripts": {
-    "build": "nest build",
+    "build": "nest build",  
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "node dist/src/main.js",
+    "start": "node dist/main.js",
     "vercel-build": "npm run build",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
