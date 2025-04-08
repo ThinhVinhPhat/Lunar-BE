@@ -15,7 +15,7 @@ import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorato
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserReq } from '@/common/decorator/user.decorator';
 import { User } from '@/users/entity/user.entity';
-import { FindByStatusDTO } from './dto/find-by-status.dto';
+import { FindOrderDTO } from './dto/find-order.dto';
 
 @ApiTags('Order')
 @Controller('order')
@@ -35,18 +35,9 @@ export class OrderController {
   }
 
   @ApiBearerAuth()
-  @Get('find-by-status')
-  findByStatus(
-    @Query() findByStatusDTO: FindByStatusDTO,
-    @UserReq() currentUser: User,
-  ) {
-    return this.orderService.findByStatus(findByStatusDTO, currentUser.id);
-  }
-
-  @ApiBearerAuth()
   @Get('')
-  findAll(@UserReq() currentUser: User) {
-    return this.orderService.findAll(currentUser.id);
+  findAll(@Query() findOrderDTO: FindOrderDTO, @UserReq() currentUser: User) {
+    return this.orderService.findAll(findOrderDTO, currentUser.id);
   }
 
   @ApiBearerAuth()

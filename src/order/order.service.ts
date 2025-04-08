@@ -6,7 +6,7 @@ import { Order } from './entities/order.entity';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { User } from '@/users/entity/user.entity';
 import { message } from '@/constant/message';
-import { FindByStatusDTO } from './dto/find-by-status.dto';
+import { FindOrderDTO } from './dto/find-order.dto';
 import { OrderStatus } from '@/constant/role';
 
 @Injectable()
@@ -76,26 +76,7 @@ export class OrderService {
     );
   }
 
-  async findByStatus(findByOrderDTO: FindByStatusDTO, id: string) {
-    const user = await this.userRepository.findOne({
-      where: { id: id },
-      relations: ['orders'],
-    });
-    if (!user) {
-      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
-    }
-    const { status } = findByOrderDTO;
-
-    const orders = user.orders.filter((item) => item.status === status);
-
-    return {
-      status: HttpStatus.OK,
-      data: orders,
-      message: message.FIND_ORDER_SUCCESS,
-    };
-  }
-
-  async findAll(id: string) {
+  async findAll(findByOrderDTO: FindOrderDTO, id: string) {
     const user = await this.userRepository.findOne({
       where: { id: id },
       relations: ['orders', 'orders.orderDetails'],
@@ -103,10 +84,26 @@ export class OrderService {
     if (!user) {
       throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
     }
+    const { status, offset, limit } = findByOrderDTO;
+
+    const orders = user.orders
+      .filter((item) => item.status === status)
+      .slice(offset, limit);
 
     return {
       status: HttpStatus.OK,
-      data: user.orders,
+      data: {
+        orders: orders.map((order) => {
+          return {
+            ...order,
+            total: order.orderDetails.reduce(
+              (acc, item) => acc + item.price * item.quantity,
+              0,
+            ),
+          };
+        }),
+        count: orders.length,
+      },
       message: message.FIND_ORDER_SUCCESS,
     };
   }

@@ -8,19 +8,20 @@ import { message } from '@/constant/message';
 import { findRespond } from '@/types/user/find-respond';
 import aqp from 'api-query-params';
 import { RegisterAuthDto } from '@/auth/dto/register-atuth.dto';
-import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from '@/constant/role';
 import { UpdatePasswordDTO } from './dto/update-password.dto';
+import { UploadService } from '@/upload/upload.service';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userEntity: Repository<User>,
     private readonly mailerService: MailerService,
+    private readonly uploadService: UploadService,
   ) {}
 
   async findMe(user: User) {
@@ -183,10 +184,18 @@ export class UsersService {
     userId: string,
     updateUserDto: UpdateUserDto,
   ): Promise<createRespond> {
-    const { firstName, lastName, address, phone, city, company } =
+    const { firstName, lastName, address, phone, city, company, avatar } =
       updateUserDto;
 
     const user = await this.userEntity.findOne({ where: { id: userId } });
+
+    if (avatar.length > 1) {
+      throw new HttpException(
+        'Only one avatar is allowed',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const avartarUrl = await this.uploadService.uploadS3(avatar[0]);
 
     if (user) {
       user.firstName = firstName;
@@ -195,6 +204,7 @@ export class UsersService {
       user.phone = phone;
       user.city = city;
       user.company = company;
+      user.avatar = avartarUrl;
       await this.userEntity.save(user);
 
       return {

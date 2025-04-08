@@ -8,10 +8,12 @@ import {
   Query,
   UnprocessableEntityException,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { UserReq } from '@/common/decorator/user.decorator';
 import { User } from './entity/user.entity';
 import { Public } from '@/common/decorator/public.decorator';
@@ -20,6 +22,7 @@ import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorato
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { Roles } from '@/common/decorator/role.decorator';
 import { Role } from '@/constant/role';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('User')
 @Controller('users')
@@ -49,10 +52,24 @@ export class UsersController {
   }
 
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('avatar'))
+  @ApiOperationDecorator({
+    summary: 'Update user',
+    description: 'Update user information',
+    type: UpdateUserDto,
+  })
   @Patch('update')
-  update(@UserReq() currentUser: User, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @UserReq() currentUser: User,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFiles() avatar: Express.Multer.File[],
+  ) {
     const userId = currentUser.id;
-    return this.usersService.update(userId, updateUserDto);
+    return this.usersService.update(userId, {
+      ...updateUserDto,
+      avatar: avatar,
+    });
   }
 
   @Public()

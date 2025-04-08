@@ -1,5 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateUserDto } from './create-user.dto';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
@@ -56,4 +55,12 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   company: string;
+
+  @ApiPropertyOptional({
+    description: 'User image',
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
+    required: true,
+  })
+  avatar: Express.Multer.File[];
 }

@@ -17,6 +17,9 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   lastName: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  avatar: string;
+
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string;
 
@@ -40,12 +43,10 @@ export class User extends BaseEntity {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   code_id: string;
-  
+
   @Column({ type: 'date', nullable: true })
   code_expried: Date;
 
-  @OneToMany(()=> Order, (order) => order.user)
+  @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
-
-
 }
