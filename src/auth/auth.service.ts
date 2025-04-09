@@ -43,7 +43,7 @@ export class AuthService {
         email: user.email,
       },
       {
-        expiresIn: config.JWT.EXPIRES_IN,
+        expiresIn: this.configService.getOrThrow('JWT_EXPIRATION_TIME'),
       },
     );
     const refreshToken = await this.jwtService.signAsync(
