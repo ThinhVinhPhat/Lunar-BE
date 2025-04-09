@@ -1,5 +1,8 @@
 import { plainToInstance } from 'class-transformer';
 import { IsNotEmpty, IsOptional, validateSync } from 'class-validator';
+import { config as dotenvConfig } from 'dotenv';
+
+dotenvConfig({ path: '.env' });
 
 export class EnvironmentVariables {
   @IsOptional()

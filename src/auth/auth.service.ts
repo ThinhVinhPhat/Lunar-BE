@@ -22,6 +22,7 @@ import { Repository } from 'typeorm';
 import dayjs from 'dayjs';
 import { config } from '@/config';
 import { RefreshTokenDto } from './dto/refresh_token.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     private readonly UserService: UsersService,
     private jwtService: JwtService,
     private readonly mailService: MailerService,
+    private readonly configService: ConfigService,
   ) {}
 
   async generateJwt(user: User) {
@@ -51,7 +53,7 @@ export class AuthService {
         email: user.email,
       },
       {
-        expiresIn: config.JWT_REFRESH.EXPIRES_IN,
+        expiresIn: this.configService.getOrThrow('JWT_EXPIRATION_TIME'),
       },
     );
     await this.UserService.updateRefreshToken(user.email, refreshToken);
