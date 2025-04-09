@@ -5,6 +5,7 @@ export enum Role {
 }
 
 export enum OrderStatus {
+  ALL_ORDER = 'ALL_ORDER',
   PENDING = 'Pending',
   CONFIRMED = 'Confirmed',
   SHIPPED = 'Shipped',

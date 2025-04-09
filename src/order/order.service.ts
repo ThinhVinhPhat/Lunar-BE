@@ -86,9 +86,12 @@ export class OrderService {
     }
     const { status, offset, limit } = findByOrderDTO;
 
-    const orders = user.orders
-      .filter((item) => item.status === status)
-      .slice(offset, limit);
+    const orders =
+      status !== OrderStatus.ALL_ORDER
+        ? user.orders
+            .filter((item) => item.status === status)
+            .slice(offset, limit)
+        : user.orders.slice(offset, limit);
 
     return {
       status: HttpStatus.OK,
