@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entity/user.entity';
 import { createRespond } from '@/types/user/create-respond';
-import { hashPasswordHelper } from '@/helper/hasPassword';
+import { hashedRefreshToken, hashPasswordHelper } from '@/helper/hasPassword';
 import { message } from '@/constant/message';
 import { findRespond } from '@/types/user/find-respond';
 import aqp from 'api-query-params';
@@ -15,6 +15,7 @@ import { Repository } from 'typeorm';
 import { Role } from '@/constant/role';
 import { UpdatePasswordDTO } from './dto/update-password.dto';
 import { UploadService } from '@/upload/upload.service';
+import { reverse } from '@/helper/reverse';
 @Injectable()
 export class UsersService {
   constructor(
@@ -224,6 +225,15 @@ export class UsersService {
       };
     } else {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updateRefreshToken(email: string, refreshToken: string) {
+    const user = await this.userEntity.findOne({ where: { email } });
+    if (user) {
+      const hashedToken = await hashedRefreshToken(reverse(refreshToken));
+      user.refreshToken = hashedToken;
+      await this.userEntity.save(user);
     }
   }
 

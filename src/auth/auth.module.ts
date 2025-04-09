@@ -8,6 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@/users/entity/user.entity';
+import { GoogleStrategy } from '@/strategies/google.stategy';
 
 @Module({
   imports: [
@@ -27,6 +28,6 @@ import { User } from '@/users/entity/user.entity';
     forwardRef(() => UsersModule),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy],
 })
 export class AuthModule {}

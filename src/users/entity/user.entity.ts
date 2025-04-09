@@ -44,6 +44,9 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   code_id: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  refreshToken: string;
+
   @Column({ type: 'date', nullable: true })
   code_expried: Date;
 

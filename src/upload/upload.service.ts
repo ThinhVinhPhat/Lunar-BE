@@ -11,7 +11,7 @@ export class UploadService {
     credentials: {
       accessKeyId: this.configService.getOrThrow('AWS_S3_ACCESS_KEY_ID'),
       secretAccessKey: this.configService.getOrThrow(
-        'AWS_S3_SERECT_ACCESS_KEY',
+        'AWS_S3_SECRECT_ACCESS_KEY',
       ),
     },
     requestHandler: new NodeHttpHandler({

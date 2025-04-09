@@ -7,7 +7,10 @@ import {
 import { UsersService } from '@/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { message } from '@/constant/message';
-import { hashPasswordCompareHelper } from '@/helper/hasPassword';
+import {
+  hashPasswordCompareHelper,
+  hashTokenCompareHelper,
+} from '@/helper/hasPassword';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { RegisterAuthDto } from './dto/register-atuth.dto';
 import { loginRespond } from '@/types/auth/login.respond';
@@ -17,6 +20,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/users/entity/user.entity';
 import { Repository } from 'typeorm';
 import dayjs from 'dayjs';
+import { config } from '@/config';
+import { RefreshTokenDto } from './dto/refresh_token.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +32,31 @@ export class AuthService {
     private jwtService: JwtService,
     private readonly mailService: MailerService,
   ) {}
+
+  async generateJwt(user: User) {
+    const accessToken = await this.jwtService.signAsync(
+      {
+        iss: config.JWT.ISSUER,
+        sub: user.id,
+        email: user.email,
+      },
+      {
+        expiresIn: config.JWT.EXPIRES_IN,
+      },
+    );
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        iss: config.JWT.ISSUER,
+        sub: user.id,
+        email: user.email,
+      },
+      {
+        expiresIn: config.JWT_REFRESH.EXPIRES_IN,
+      },
+    );
+    await this.UserService.updateRefreshToken(user.email, refreshToken);
+    return { accessToken, refreshToken };
+  }
 
   async login(loginDTO: LoginAuthDto): Promise<loginRespond> {
     const { email, password } = loginDTO;
@@ -44,10 +74,9 @@ export class AuthService {
       throw new HttpException(message.USER_NOT_ACTIVE, HttpStatus.BAD_REQUEST);
     }
 
-    const payload = { sub: user.data.id, email: user.data.email };
-
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: (await this.generateJwt(user.data)).accessToken,
+      refreshToken: (await this.generateJwt(user.data)).refreshToken,
     };
   }
 
@@ -82,5 +111,51 @@ export class AuthService {
     await this.userRepository.save(user);
 
     return { status: 200, message: 'Đã gửi mail' };
+  }
+
+  async refreshToken(refreshTokenDTO: RefreshTokenDto) {
+    const { refreshToken } = refreshTokenDTO;
+
+    const payload = await this.jwtService.verify(refreshToken, {
+      secret: config.JWT_REFRESH.SECRET,
+    });
+
+    const user = await this.userRepository.findOne({
+      where: { email: payload.email },
+    });
+
+    const is_equal = await hashTokenCompareHelper(
+      refreshToken,
+      user.refreshToken,
+    );
+    if (!is_equal) {
+      throw new HttpException(
+        ' Refresh token is not equal',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const token = await this.generateJwt(user);
+    return {
+      email: user.email,
+      ...token,
+    };
+  }
+
+  async validateGoogleAccount(googleUser) {
+    const user = await this.userRepository.findOne({
+      where: { email: googleUser.email },
+    });
+
+    if (user) {
+      return user;
+    }
+    const newUser = await this.userRepository.create({
+      email: googleUser.email,
+      firstName: googleUser.firstName,
+      lastName: googleUser.lastName,
+      password: googleUser.password,
+      avatar: googleUser.avatar,
+    });
+    return newUser;
   }
 }

@@ -16,7 +16,7 @@ export class PaymentService {
     private readonly mailService: MailerService,
     private readonly configService: ConfigService,
   ) {}
-  stripe = new Stripe(this.configService.getOrThrow('STRIPE_SERECT_KEY'));
+  stripe = new Stripe(this.configService.getOrThrow('STRIPE_SECRECT_KEY'));
 
   async create(orderId: string, user: User) {
     try {

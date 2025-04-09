@@ -72,6 +72,7 @@ export class UsersController {
     });
   }
 
+
   @Public()
   @UseGuards(JwtAuthGuard)
   @ApiOperationDecorator({

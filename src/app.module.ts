@@ -20,6 +20,7 @@ import { CategoryDetailModule } from './category-detail/category-detail.module';
 import { OrderModule } from './order/order.module';
 import { OrderDetailModule } from './order-detail/order-detail.module';
 import { PaymentModule } from './payment/payment.module';
+import { validate } from './config';
 
 @Module({
   imports: [
@@ -49,7 +50,7 @@ import { PaymentModule } from './payment/payment.module';
       }),
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot({ isGlobal: true, load: [typeorm] }),
+    ConfigModule.forRoot({ isGlobal: true, load: [typeorm], validate }),
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
