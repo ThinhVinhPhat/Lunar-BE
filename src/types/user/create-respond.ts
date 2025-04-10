@@ -11,6 +11,7 @@ export interface userRespond {
   city?: string;
   company: string;
   role: Role;
+  avatar?: string;
 }
 
 export interface createRespond {

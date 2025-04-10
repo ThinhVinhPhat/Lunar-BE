@@ -27,7 +27,6 @@ export class OrderService {
           where: { id: id },
         });
 
-        console.log(user);
 
         if (!user) {
           throw new HttpException(

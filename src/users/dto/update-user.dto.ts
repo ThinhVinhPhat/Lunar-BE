@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -62,5 +62,6 @@ export class UpdateUserDto {
     items: { type: 'string', format: 'binary' },
     required: true,
   })
+  @IsOptional()
   avatar: Express.Multer.File[];
 }

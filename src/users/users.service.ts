@@ -110,10 +110,10 @@ export class UsersService {
     const skip = (current - 1) * pageSize;
 
     const result = await this.userEntity.find({
-      where: filter, // Điều kiện lọc
-      skip: skip, // Bỏ qua `skip` bản ghi đầu tiên
-      take: pageSize, // Lấy `pageSize` bản ghi
-      order: sort, // Sắp xếp theo trường
+      where: filter,
+      skip: skip,
+      take: pageSize,
+      order: sort,
     });
 
     if (!result) {
@@ -176,6 +176,7 @@ export class UsersService {
         phone: user.phone,
         city: user.city,
         role: user.role,
+        avatar: user.avatar,
       },
       message: message.USER_CREATE_SUCCESS,
     };
@@ -190,13 +191,16 @@ export class UsersService {
 
     const user = await this.userEntity.findOne({ where: { id: userId } });
 
-    if (avatar.length > 1) {
-      throw new HttpException(
-        'Only one avatar is allowed',
-        HttpStatus.BAD_REQUEST,
-      );
+    let avartarUrl = null;
+    if (avatar) {
+      if (avatar.length > 1) {
+        throw new HttpException(
+          'Only one avatar is allowed',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      avartarUrl = await this.uploadService.uploadS3(avatar[0]);
     }
-    const avartarUrl = await this.uploadService.uploadS3(avatar[0]);
 
     if (user) {
       user.firstName = firstName;
@@ -205,7 +209,9 @@ export class UsersService {
       user.phone = phone;
       user.city = city;
       user.company = company;
-      user.avatar = avartarUrl;
+      if (avartarUrl !== null) {
+        user.avatar = avartarUrl;
+      }
       await this.userEntity.save(user);
 
       return {
@@ -220,6 +226,7 @@ export class UsersService {
           phone: user.phone,
           city: user.city,
           role: user.role,
+          avatar: user.avatar,
         },
         message: message.USER_CREATE_SUCCESS,
       };
