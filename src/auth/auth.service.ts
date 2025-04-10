@@ -53,7 +53,7 @@ export class AuthService {
         email: user.email,
       },
       {
-        expiresIn: this.configService.getOrThrow('JWT_EXPIRATION_TIME'),
+        expiresIn: this.configService.getOrThrow('JWT_REFRESH_EXPIRATION_TIME'),
       },
     );
     await this.UserService.updateRefreshToken(user.email, refreshToken);
