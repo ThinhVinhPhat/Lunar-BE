@@ -10,6 +10,7 @@ import { ProductCategory } from '@/product/entities/product-category.entity';
 import { UploadService } from '@/upload/upload.service';
 import { FindProductDTO } from './dto/find-product.dto';
 import slugify from 'slugify';
+import { OrderDetail } from '@/order-detail/entities/order-detail.entity';
 
 @Injectable()
 export class ProductService {
@@ -288,24 +289,41 @@ export class ProductService {
   async remove(id: string) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
-        try {
-          const product = await transactionManager.findOne(Product, {
-            where: { id: id },
-            relations: {
-              productCategories: true,
+        const product = await transactionManager.findOne(Product, {
+          where: { id: id },
+          relations: {
+            productCategories: true,
+            orderDetails: true,
+          },
+        });
+        const productCategories = await transactionManager.find(
+          ProductCategory,
+          {
+            where: {
+              id: In(product.productCategories.map((pc) => pc.id)),
             },
-          });
-          await transactionManager.remove(Product, product);
-          return {
-            status: HttpStatus.OK,
-            message: message.DELETE_PRODUCT_SUCCESS,
-          };
-        } catch (e) {
-          throw new HttpException(
-            message.DELETE_PRODUCT_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
+            relations: {
+              product: true,
+            },
+          },
+        );
+
+        const orderDetail = await transactionManager.find(OrderDetail, {
+          where: {
+            id: In(product.orderDetails.map((od) => od.id)),
+          },
+          relations: {
+            product: true,
+          },
+        });
+
+        await transactionManager.remove(OrderDetail, orderDetail);
+        await transactionManager.remove(ProductCategory, productCategories);
+        await transactionManager.remove(Product, product);
+        return {
+          status: HttpStatus.OK,
+          message: message.DELETE_PRODUCT_SUCCESS,
+        };
       },
     );
   }
