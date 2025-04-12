@@ -63,7 +63,7 @@ export class PaymentService {
           }
 
           const priceObj = await this.stripe.prices.create({
-            unit_amount: item.price ,
+            unit_amount: item.price * 100,
             currency: 'usd',
             product: productId,
           });
