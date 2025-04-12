@@ -63,7 +63,7 @@ export class PaymentService {
           }
 
           const priceObj = await this.stripe.prices.create({
-            unit_amount: item.price * 1000,
+            unit_amount: item.price ,
             currency: 'usd',
             product: productId,
           });
@@ -86,9 +86,11 @@ export class PaymentService {
           },
           customer: customer.id,
           success_url:
-            'http://localhost:5173' +
+            this.configService.getOrThrow('STRIPE_URL') +
             `/api/v1/payment/success/?order_id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: 'http://localhost:5173' + '/api/v1/payment/failed',
+          cancel_url:
+            this.configService.getOrThrow('STRIPE_URL') +
+            '/api/v1/payment/failed',
         });
         console.log(session.url);
 
