@@ -53,12 +53,10 @@ export class OrderDetailService {
           ? product.price * (product.discount_percentage / 100)
           : product.price;
 
-        const existOrderDetail = await transactionManager.findOne(OrderDetail, {
-          where: {
-            product_name: product.name,
-          },
-          relations: ['order'],
-        });
+        const existOrderDetail = order.orderDetails.find(
+          (ol) => ol.product_name == product.name,
+        );
+
         if (existOrderDetail) {
           existOrderDetail.quantity = existOrderDetail.quantity + quantity;
           await transactionManager.save(existOrderDetail);
