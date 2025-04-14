@@ -27,7 +27,6 @@ export class OrderService {
           where: { id: id },
         });
 
-
         if (!user) {
           throw new HttpException(
             message.FIND_USER_FAIL,
@@ -124,7 +123,7 @@ export class OrderService {
           id: userId,
         },
       },
-      relations: ['orderDetails', 'user'],
+      relations: ['orderDetails', 'user', 'orderDetails.product'],
     });
     if (!order) {
       throw new HttpException(message.FIND_ORDER_FAIL, HttpStatus.BAD_REQUEST);
