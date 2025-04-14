@@ -4,7 +4,7 @@ import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
 import { FindOrderDetailDto } from './dto/find-order-detail.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderDetail } from './entities/order-detail.entity';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { Order } from '@/order/entities/order.entity';
 import { Product } from '@/product/entities/product.entity';
 import { message } from '@/constant/message';
@@ -27,6 +27,7 @@ export class OrderDetailService {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { orderId, productId } = findOrderDetailDto;
+        const { quantity } = createOrderDetailDto;
 
         const order = await transactionManager.findOne(Order, {
           where: { id: orderId },
@@ -51,25 +52,41 @@ export class OrderDetailService {
         const productPrice = product.discount_percentage
           ? product.price * (product.discount_percentage / 100)
           : product.price;
-        const { quantity } = createOrderDetailDto;
 
-        const orderDetail = transactionManager.create(OrderDetail, {
-          order: order,
-          product: product,
-          quantity: quantity,
-          price: productPrice,
-          total: productPrice * quantity,
-          product_name: product.name,
+        const existOrderDetail = await transactionManager.findOne(OrderDetail, {
+          where: {
+            product_name: product.name,
+          },
+          relations: ['order'],
         });
-        await transactionManager.save(OrderDetail, orderDetail);
-        order.orderDetails.push(orderDetail);
-        await transactionManager.save(order);
+        if (existOrderDetail) {
+          existOrderDetail.quantity = existOrderDetail.quantity + quantity;
+          await transactionManager.save(existOrderDetail);
 
-        return {
-          status: HttpStatus.OK,
-          data: orderDetail,
-          message: message.CREATE_ORDER_DETAIL_SUCCESS,
-        };
+          return {
+            status: HttpStatus.OK,
+            data: existOrderDetail,
+            message: message.CREATE_ORDER_DETAIL_SUCCESS,
+          };
+        } else {
+          const orderDetail = transactionManager.create(OrderDetail, {
+            order: order,
+            product: product,
+            quantity: quantity,
+            price: productPrice,
+            total: productPrice * quantity,
+            product_name: product.name,
+          });
+          await transactionManager.save(OrderDetail, orderDetail);
+          order.orderDetails.push(orderDetail);
+          await transactionManager.save(order);
+
+          return {
+            status: HttpStatus.OK,
+            data: orderDetail,
+            message: message.CREATE_ORDER_DETAIL_SUCCESS,
+          };
+        }
       },
     );
   }
