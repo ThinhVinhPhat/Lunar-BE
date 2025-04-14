@@ -202,21 +202,7 @@ export class OrderDetailService {
             HttpStatus.BAD_REQUEST,
           );
         }
-        const order = await transactionManager.findOne(Order, {
-          where: {
-            orderDetails: {
-              id: orderDetail.id,
-            },
-          },
-          relations: ['orderDetails'],
-        });
-        if (order) {
-          order.orderDetails = order.orderDetails.filter(
-            (item) => item.id !== orderDetail.id,
-          );
-          await transactionManager.save(order);
-        }
-        await transactionManager.delete(OrderDetail, orderDetail.id);
+        await transactionManager.remove(OrderDetail, orderDetail);
         return {
           status: HttpStatus.OK,
           message: message.DELETE_ORDER_DETAIL_SUCCESS,
