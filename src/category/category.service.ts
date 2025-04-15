@@ -55,7 +55,9 @@ export class CategoryService {
   }
 
   async findAll() {
-    const categories = await this.categoryEntity.find();
+    const categories = await this.categoryEntity.find({
+      relations: ['categoryDetails'],
+    });
 
     return {
       status: HttpStatus.OK,
@@ -91,7 +93,6 @@ export class CategoryService {
               HttpStatus.NOT_FOUND,
             );
           }
-
 
           category.name = name;
           category.status = status;
