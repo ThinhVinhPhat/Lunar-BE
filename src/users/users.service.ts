@@ -16,6 +16,7 @@ import { Role } from '@/constant/role';
 import { UpdatePasswordDTO } from './dto/update-password.dto';
 import { UploadService } from '@/upload/upload.service';
 import { reverse } from '@/helper/reverse';
+import { FindDTO } from './dto/find-user.dto';
 @Injectable()
 export class UsersService {
   constructor(
@@ -92,37 +93,32 @@ export class UsersService {
     }
   }
 
-  async findAll(
-    query: string,
-    current: number,
-    pageSize: number,
-  ): Promise<findRespond> {
-    const { filter, sort } = aqp(query);
+  async findAll(query: FindDTO): Promise<findRespond> {
+    console.log(query);
 
-    if (filter.current) delete filter.current;
-    if (filter.pageSize) delete filter.pageSize;
+    const queryList = {
+      limit: query.limit ? query.limit : 10,
+      offset: query.offset ? query.offset : 0,
+      email: query.email ? query.email : null,
+      role: query.role ? query.role : Role.CUSTOMER,
+    };
 
-    if (!current) current = 1;
-    if (!pageSize) pageSize = 10;
-
-    const totalItems = (await this.userEntity.find(filter)).length;
-    const totalPage = Math.ceil(totalItems / pageSize);
-    const skip = (current - 1) * pageSize;
-
-    const result = await this.userEntity.find({
-      where: filter,
-      skip: skip,
-      take: pageSize,
-      order: sort,
+    const users = await this.userEntity.find({
+      where: {
+        email: queryList.email,
+        role: queryList.role,
+      },
+      skip: queryList.offset,
+      take: queryList.limit,
     });
 
-    if (!result) {
+    if (!users) {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
     }
 
     return {
       status: HttpStatus.ACCEPTED,
-      data: result.map((user) => ({
+      data: users.map((user) => ({
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,

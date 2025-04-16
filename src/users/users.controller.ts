@@ -23,6 +23,7 @@ import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { Roles } from '@/common/decorator/role.decorator';
 import { Role } from '@/constant/role';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { FindDTO } from './dto/find-user.dto';
 
 @ApiTags('User')
 @Controller('users')
@@ -37,12 +38,8 @@ export class UsersController {
 
   @ApiBearerAuth()
   @Get('/find-all')
-  findAll(
-    @Query() query: string,
-    @Query('current') current: number,
-    @Query('pageSize') pageSize: number,
-  ) {
-    return this.usersService.findAll(query, current, pageSize);
+  findAll(@Query() query: FindDTO) {
+    return this.usersService.findAll(query);
   }
 
   @ApiBearerAuth()
@@ -71,7 +68,6 @@ export class UsersController {
       avatar: avatar,
     });
   }
-
 
   @Public()
   @UseGuards(JwtAuthGuard)
