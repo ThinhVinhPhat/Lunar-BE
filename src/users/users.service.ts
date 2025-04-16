@@ -130,6 +130,7 @@ export class UsersService {
         city: user.city,
         role: user.role,
         status: user.status,
+        createdAt: user.createdAt,
       })),
       message: message.FIND_USER_SUCCESS,
     };
