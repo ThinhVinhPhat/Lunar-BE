@@ -41,6 +41,7 @@ export class AuthService {
         iss: config.JWT.ISSUER,
         sub: user.id,
         email: user.email,
+        role: user.role,
       },
       {
         expiresIn: this.configService.getOrThrow('JWT_EXPIRATION_TIME'),
@@ -51,6 +52,7 @@ export class AuthService {
         iss: config.JWT.ISSUER,
         sub: user.id,
         email: user.email,
+        role: user.role,
       },
       {
         expiresIn: this.configService.getOrThrow('JWT_REFRESH_EXPIRATION_TIME'),
