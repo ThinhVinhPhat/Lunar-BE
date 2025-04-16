@@ -123,6 +123,7 @@ export class UsersService {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        avatar: user.avatar,
         company: user.company,
         address: user.address,
         phone: user.phone,
