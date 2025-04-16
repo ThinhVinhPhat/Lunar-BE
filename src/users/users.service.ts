@@ -129,6 +129,7 @@ export class UsersService {
         phone: user.phone,
         city: user.city,
         role: user.role,
+        status: user.status,
       })),
       message: message.FIND_USER_SUCCESS,
     };
