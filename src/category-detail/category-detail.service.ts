@@ -38,18 +38,20 @@ export class CategoryDetailService {
               HttpStatus.NOT_FOUND,
             );
           }
-
-          if (images.length > 2) {
-            throw new HttpException(
-              'Only 2 images are allowed',
-              HttpStatus.BAD_REQUEST,
-            );
-          }
-
           const imageUrls = [];
-          for (const image of images) {
-            const imageUrl = await this.uploadService.uploadS3(image);
-            imageUrls.push(imageUrl);
+
+          if (images) {
+            if (images.length > 2) {
+              throw new HttpException(
+                'Only 2 images are allowed',
+                HttpStatus.BAD_REQUEST,
+              );
+            }
+
+            for (const image of images) {
+              const imageUrl = await this.uploadService.uploadS3(image);
+              imageUrls.push(imageUrl);
+            }
           }
 
           const categoryDetail = transactionManager.create(CategoryDetail, {
@@ -123,17 +125,18 @@ export class CategoryDetailService {
         const { name, description, images, status } = updateCategoryDetailDto;
 
         try {
-          if (images.length > 2) {
-            throw new HttpException(
-              'Only 2 images are allowed',
-              HttpStatus.BAD_REQUEST,
-            );
-          }
-
           const imageUrls = [];
-          for (const image of images) {
-            const imageUrl = await this.uploadService.uploadS3(image);
-            imageUrls.push(imageUrl);
+          if (images) {
+            if (images.length > 2) {
+              throw new HttpException(
+                'Only 2 images are allowed',
+                HttpStatus.BAD_REQUEST,
+              );
+            }
+            for (const image of images) {
+              const imageUrl = await this.uploadService.uploadS3(image);
+              imageUrls.push(imageUrl);
+            }
           }
 
           const categoryDetail = await transactionManager.findOne(

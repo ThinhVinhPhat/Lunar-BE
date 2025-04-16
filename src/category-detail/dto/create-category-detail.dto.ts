@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateCategoryDetailDto {
   @ApiProperty({
@@ -18,11 +18,12 @@ export class CreateCategoryDetailDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Category image',
     type: 'array',
     items: { type: 'string', format: 'binary' },
     required: true,
   })
+  @IsOptional()
   images: Express.Multer.File[];
 }
