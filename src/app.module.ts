@@ -21,6 +21,7 @@ import { OrderModule } from './order/order.module';
 import { OrderDetailModule } from './order-detail/order-detail.module';
 import { PaymentModule } from './payment/payment.module';
 import { validate } from './config';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { validate } from './config';
     OrderModule,
     OrderDetailModule,
     PaymentModule,
+    CommentModule,
   ],
   providers: [
     AuthService,

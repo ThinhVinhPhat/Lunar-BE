@@ -12,3 +12,9 @@ export enum OrderStatus {
   DELIVERED = 'Delivered',
   REJECTED = 'Rejected',
 }
+
+export enum CommentSort {
+  NEWEST = 'NEWEST',
+  LOW_RATE = 'LOW_RATE',
+  HIGH_RATE = 'HIGH_RATE',
+}

@@ -1,3 +1,4 @@
+import { Comment } from '@/comment/entities/comment.entity';
 import { Role } from '@/constant/role';
 import { Order } from '@/order/entities/order.entity';
 import { BaseEntity } from '@/shared/base.entity';
@@ -52,4 +53,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
 }

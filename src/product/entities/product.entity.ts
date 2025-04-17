@@ -1,3 +1,4 @@
+import { Comment } from '@/comment/entities/comment.entity';
 import { OrderDetail } from '@/order-detail/entities/order-detail.entity';
 import { ProductCategory } from '@/product/entities/product-category.entity';
 import { BaseEntity } from '@/shared/base.entity';
@@ -50,4 +51,7 @@ export class Product extends BaseEntity {
 
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.product)
   orderDetails: OrderDetail[];
+
+  @OneToMany(() => Comment, (comment) => comment.product)
+  comments: Comment[];
 }
