@@ -200,7 +200,11 @@ export class ProductService {
     try {
       const product = await this.productEntity.findOne({
         where: { slug: slug },
-        relations: ['productCategories', 'productCategories.categoryDetails'],
+        relations: [
+          'productCategories',
+          'productCategories.categoryDetails',
+          'comments',
+        ],
       });
       return {
         status: HttpStatus.OK,
