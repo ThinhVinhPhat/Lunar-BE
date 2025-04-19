@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -43,25 +44,8 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
+  @MinLength(6)
   password: string;
-
-  @ApiProperty({
-    description: 'user phone',
-    example: '0902423699',
-    nullable: false,
-  })
-  @IsString()
-  @IsNotEmpty()
-  phone: string;
-
-  @ApiProperty({
-    description: 'user current city',
-    example: 'Hanoi',
-    nullable: false,
-  })
-  @IsString()
-  @IsNotEmpty()
-  city: string;
 
   @ApiProperty({
     description: 'user role',
@@ -71,22 +55,4 @@ export class CreateUserDto {
   @IsEnum(Role)
   @IsOptional()
   role: Role;
-
-  @ApiProperty({
-    description: 'user address',
-    example: '123 Hai Bà Trưng',
-    nullable: false,
-  })
-  @IsString()
-  @IsOptional()
-  address: string;
-
-  @ApiProperty({
-    description: 'user address',
-    example: 'Công ty ACB',
-    nullable: false,
-  })
-  @IsString()
-  @IsOptional()
-  company: string;
 }

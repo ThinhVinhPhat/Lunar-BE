@@ -6,7 +6,6 @@ import { createRespond } from '@/types/user/create-respond';
 import { hashedRefreshToken, hashPasswordHelper } from '@/helper/hasPassword';
 import { message } from '@/constant/message';
 import { findRespond } from '@/types/user/find-respond';
-import aqp from 'api-query-params';
 import { RegisterAuthDto } from '@/auth/dto/register-atuth.dto';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -35,17 +34,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<createRespond> {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      address,
-      phone,
-      city,
-      company,
-      role,
-    } = createUserDto;
+    const { firstName, lastName, email, password, role } = createUserDto;
 
     const hashedPassword = await hashPasswordHelper(password);
 
@@ -61,13 +50,8 @@ export class UsersService {
         lastName,
         email,
         password: hashedPassword,
-        phone,
-        address,
-        city,
-        company,
         role: role !== null ? role : Role.CUSTOMER,
       });
-
       await this.userEntity.save(user);
 
       return {
@@ -232,6 +216,39 @@ export class UsersService {
     } else {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async updateByAdmin(
+    userId: string,
+    UpdateUserDto: UpdateUserDto,
+  ): Promise<createRespond> {
+    const { firstName, lastName, role, status, } = UpdateUserDto;
+
+    const user = await this.userEntity.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+    }
+    user.firstName = firstName != null ? firstName : user.firstName;
+    user.lastName = lastName != null ? lastName : user.lastName;
+    user.role = UpdateUserDto.role != null ? role : user.role;
+    user.status = UpdateUserDto.status != null ? status : user.status;
+    await this.userEntity.save(user);
+    return {
+      status: HttpStatus.OK,
+      data: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        company: user.company,
+        address: user.address,
+        phone: user.phone,
+        city: user.city,
+        role: user.role,
+        avatar: user.avatar,
+      },
+      message: message.USER_CREATE_SUCCESS,
+    };
   }
 
   async updateRefreshToken(email: string, refreshToken: string) {

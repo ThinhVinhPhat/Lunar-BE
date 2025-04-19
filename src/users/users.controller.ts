@@ -10,6 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFiles,
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -24,11 +25,23 @@ import { Roles } from '@/common/decorator/role.decorator';
 import { Role } from '@/constant/role';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FindDTO } from './dto/find-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @ApiOperationDecorator({
+    summary: 'Create User',
+    description: 'Create a new user',
+  })
+  @Post()
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
 
   @ApiBearerAuth()
   @Get('/me')
@@ -67,6 +80,21 @@ export class UsersController {
       ...updateUserDto,
       avatar: avatar,
     });
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @ApiOperationDecorator({
+    summary: 'Update user By Admin',
+    description: 'Update user By Admin',
+    type: UpdateUserDto,
+  })
+  @Patch('update-by-admin/:id')
+  updateByAdmin(
+    @Param('id') userId: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.updateByAdmin(userId, updateUserDto);
   }
 
   @Public()
