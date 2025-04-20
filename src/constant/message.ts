@@ -63,4 +63,7 @@ export const message = {
   DELETE_ORDER_DETAIL_FAIL: 'Delete Order detail  fail',
   FIND_ORDER_DETAIL_SUCCESS: 'Find Order detail  successfully',
   FIND_ORDER_DETAIL_FAIL: 'Find Order detail fail',
+  CODE_EXPIRED: 'Code expired',
+  CODE_NOT_MATCH: 'Code invalid',
+  VERIFY_SUCCESS: 'Verify successfully',
 };

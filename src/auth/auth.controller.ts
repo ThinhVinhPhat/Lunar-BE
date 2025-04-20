@@ -17,12 +17,17 @@ import { ApiOperationDecorator } from '@/common/decorator/api-operation.decorato
 import { ForgotPasswordDto } from './dto/fogort-password.dto';
 import { RefreshTokenDto } from './dto/refresh_token.dto';
 import { GoogleAuthGuard } from './google-auth.guard';
+import { VerifyAuthDto } from './dto/verify-auth.dto';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @ApiOperationDecorator({
+    summary: 'Login',
+    description: 'Login with email and password',
+  })
   @UseGuards(JwtAuthGuard)
   @ApiOperationDecorator({
     summary: 'Login',
@@ -35,6 +40,10 @@ export class AuthController {
   }
 
   @Public()
+  @ApiOperationDecorator({
+    summary: 'Register',
+    description: 'Register with email and password',
+  })
   @UseGuards(JwtAuthGuard)
   @ApiOperationDecorator({
     summary: 'Register',
@@ -46,6 +55,15 @@ export class AuthController {
     return this.authService.register(registerDTO);
   }
 
+  @Public()
+  @ApiOperationDecorator({
+    summary: 'Verify register user',
+    description: 'Verify register user',
+  })
+  @Post('/verify')
+  verify(@Body() verify: VerifyAuthDto) {
+    return this.authService.verifyCode(verify);
+  }
   @Public()
   @ApiOperationDecorator({
     summary: 'forgot-password',

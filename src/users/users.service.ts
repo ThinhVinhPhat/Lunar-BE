@@ -132,6 +132,7 @@ export class UsersService {
         id: user.id,
         email: user.email,
         password: user.password,
+        status: user.status,
       },
       message: message.USER_CREATE_SUCCESS,
     };
@@ -309,6 +310,7 @@ export class UsersService {
         role: role,
         code_id: randomCode.toString(),
         code_expried: dayjs().add(1, 'seconds'),
+        status: false,
       });
 
       const mail = await this.mailerService.sendMail({
@@ -319,19 +321,14 @@ export class UsersService {
         context: {
           name: user.lastName ?? user.email,
           activationCode: user.code_id,
+          email: user.email,
         },
       });
-
-      console.log(mail);
 
       await this.userEntity.save(user);
       return {
         status: HttpStatus.ACCEPTED,
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        message: message.RESIGTER_SUCCESS,
+        message: 'Send email validation code',
       };
     } else {
       throw new HttpException(message.RESIGTER_FAIL, HttpStatus.BAD_REQUEST);

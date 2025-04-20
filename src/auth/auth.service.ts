@@ -23,6 +23,7 @@ import dayjs from 'dayjs';
 import { config } from '@/config';
 import { RefreshTokenDto } from './dto/refresh_token.dto';
 import { ConfigService } from '@nestjs/config';
+import { VerifyAuthDto } from './dto/verify-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -73,7 +74,7 @@ export class AuthService {
       throw new UnauthorizedException(message.PASSWORD_NOT_MATCH);
     }
 
-    if (user.is_active == false) {
+    if (user.data.status === false) {
       throw new HttpException(message.USER_NOT_ACTIVE, HttpStatus.BAD_REQUEST);
     }
 
@@ -85,6 +86,27 @@ export class AuthService {
 
   async register(registerDTO: RegisterAuthDto) {
     return this.UserService.handleRegister(registerDTO);
+  }
+
+  async verifyCode(verifyCodeDTO: VerifyAuthDto) {
+    const { email, code } = verifyCodeDTO;
+    const user = await this.userRepository.findOne({
+      where: { email: email },
+    });
+    if (!user) {
+      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.NOT_FOUND);
+    }
+    if (user.code_expried < new Date()) {
+      throw new HttpException(message.CODE_EXPIRED, HttpStatus.BAD_REQUEST);
+    }
+    if (user.code_id !== code) {
+      throw new HttpException(message.CODE_NOT_MATCH, HttpStatus.BAD_REQUEST);
+    }
+    user.status = true;
+    user.code_id = null;
+    user.code_expried = null;
+    await this.userRepository.save(user);
+    return { message: message.VERIFY_SUCCESS };
   }
 
   async forgotPassword(forgotPasswordDTO: ForgotPasswordDto) {
