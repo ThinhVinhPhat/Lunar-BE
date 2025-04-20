@@ -222,7 +222,7 @@ export class UsersService {
     userId: string,
     UpdateUserDto: UpdateUserDto,
   ): Promise<createRespond> {
-    const { firstName, lastName, role, status, } = UpdateUserDto;
+    const { firstName, lastName, role, status } = UpdateUserDto;
 
     const user = await this.userEntity.findOne({ where: { id: userId } });
     if (!user) {
@@ -279,15 +279,15 @@ export class UsersService {
     }
   }
 
-  async remove(userId: string): Promise<HttpException> {
+  async remove(userId: string) {
     const user = await this.userEntity.findOne({ where: { id: userId } });
     if (user) {
       await this.userEntity.remove(user);
 
-      return new HttpException(
-        message.USER_DELETE_SUCCESS,
-        HttpStatus.ACCEPTED,
-      );
+      return {
+        status: HttpStatus.ACCEPTED,
+        message: message.USER_DELETE_SUCCESS,
+      };
     } else {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
     }
