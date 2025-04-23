@@ -60,6 +60,12 @@
       ],
       "@app/type/*": [
         "libs/types/src/*"
+      ],
+      "@app/stripe": [
+        "libs/stripe/src"
+      ],
+      "@app/stripe/*": [
+        "libs/stripe/src/*"
       ]
     }
   },
