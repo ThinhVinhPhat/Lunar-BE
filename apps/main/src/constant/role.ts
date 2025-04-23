@@ -18,3 +18,8 @@ export enum CommentSort {
   LOW_RATE = 'LOW_RATE',
   HIGH_RATE = 'HIGH_RATE',
 }
+
+export enum DiscountType {
+  PERCENTAGE = 'PERCENTAGE',
+  FIXED = 'FIXED',
+}

@@ -63,4 +63,12 @@ export const message = {
   DELETE_ORDER_DETAIL_FAIL: 'Delete Order detail  fail',
   FIND_ORDER_DETAIL_SUCCESS: 'Find Order detail  successfully',
   FIND_ORDER_DETAIL_FAIL: 'Find Order detail fail',
+  CREATE_DISCOUNT_SUCCESS: 'Create Discount successfully',
+  CREATE_DISCOUNT_FAIL: 'Create Discount  fail',
+  UPDATE_DISCOUNT_SUCCESS: 'Update Discount  successfully',
+  UPDATE_DISCOUNT_FAIL: 'Update Discount  fail',
+  DELETE_DISCOUNT_SUCCESS: 'Delete Discount  successfully',
+  DELETE_DISCOUNT_FAIL: 'Delete Discount  fail',
+  FIND_DISCOUNT_SUCCESS: 'Find Discount  successfully',
+  FIND_DISCOUNT_FAIL: 'Find Order fail',
 };
