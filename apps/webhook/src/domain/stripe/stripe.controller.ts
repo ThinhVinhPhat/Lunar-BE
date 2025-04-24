@@ -10,6 +10,7 @@ import { StripeWebhookService } from './stripe.service';
 import { Public } from '@app/decorator/public.decorator';
 import { RequestWithRawBody } from '../middleware/raw-body.middleware';
 import { StripeService } from '@app/stripe';
+import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 
 @Controller('stripe')
 export class StripeWebhookController {
@@ -18,6 +19,10 @@ export class StripeWebhookController {
     private readonly stripeService: StripeService,
   ) {}
 
+  @ApiOperationDecorator({
+    description: 'Stripe webhook',
+    summary: 'Stripe webhook',
+  })
   @Public()
   @Post()
   async handleStripeWebhook(
