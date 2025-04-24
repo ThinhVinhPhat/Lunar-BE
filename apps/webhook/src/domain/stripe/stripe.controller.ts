@@ -37,7 +37,7 @@ export class StripeWebhookController {
       await this.stripeService.getCheckoutSession(
         rawBody,
         signature,
-        'whsec_3dcc9f7805a6a99f7c98e5ad0ac364477abad1ce077095863676b43c00020784',
+        'whsec_jtBPbYIhdKskzJlSjyYKpMNcpjriM2d7',
       );
       return {
         message: 'Received webhook',
