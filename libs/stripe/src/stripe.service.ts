@@ -81,23 +81,19 @@ export class StripeService {
     });
   }
 
-  async handleWebhookEvent(event: Stripe.Event) {
-    switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object as Stripe.Checkout.Session;
-        // Handle successful checkout session
-        console.log('Checkout session completed:', session);
-        break;
-      default:
-        console.warn(`Unhandled event type ${event.type}`);
-    }
-  }
   async getCheckoutSession(rawBody: Buffer, signature: string, serect: string) {
     const event = this.stripe.webhooks.constructEvent(
       rawBody,
       signature,
       serect,
     );
-    return this.stripe.checkout.sessions.retrieve(event.id);
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object as Stripe.Checkout.Session;
+        console.log('Checkout session completed:', session);
+        break;
+      default:
+        console.warn(`Unhandled event type ${event.type}`);
+    }
   }
 }
