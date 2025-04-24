@@ -12,7 +12,7 @@ function rawBodyMiddleware() {
       response: Response,
       buffer: Buffer,
     ) => {
-      if (request.url === '/api/stripe/webhook' && Buffer.isBuffer(buffer)) {
+      if (request.url === '/api/v1/webhook/stripe' && Buffer.isBuffer(buffer)) {
         request.rawBody = Buffer.from(buffer);
       }
       return true;
