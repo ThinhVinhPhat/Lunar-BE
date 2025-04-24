@@ -10,7 +10,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import typeorm from '@app/database/typeorm';
-import { User } from './domain/users/entity/user.entity';
+import { User } from '../../../libs/entity/src/user.entity';
 import { ProductModule } from './domain/product/product.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { UploadModule } from './domain/upload/upload.module';
@@ -21,7 +21,7 @@ import { OrderModule } from './domain/order/order.module';
 import { OrderDetailModule } from './domain/order-detail/order-detail.module';
 import { PaymentModule } from './domain/payment/payment.module';
 import { DiscountModule } from './domain/discount/discount.module';
-import { config, validate } from './config/index';
+import { config, validate } from '@app/config/index';
 import { CommentModule } from './domain/comment/comment.module';
 import { StripeModule } from '@app/stripe';
 

@@ -13,7 +13,7 @@ import { UpdateDiscountDto } from './dto/update-discount.dto';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { Roles } from '@app/decorator/role.decorator';
 import { UserReq } from '@app/decorator/user.decorator';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 
 @Controller('discount')
 export class DiscountController {

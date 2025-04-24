@@ -2,14 +2,14 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { Repository } from 'typeorm';
-import { message } from '@/constant/message';
-import { Product } from '@/domain/product/entities/product.entity';
+import { message } from '@app/constant/message';
+import { Product } from '@app/entity/product.entity';
 import { UploadService } from '@/domain/upload/upload.service';
-import { Comment } from './entities/comment.entity';
+import { Comment } from '../../../../../libs/entity/src/comment.entity';
 import { FindCommentDTO } from './dto/find-comment.dto';
-import { CommentSort } from '@/constant/role';
+import { CommentSort } from '@app/constant/role';
 
 @Injectable()
 export class CommentService {

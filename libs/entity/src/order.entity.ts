@@ -1,8 +1,9 @@
-import { OrderStatus } from '@/constant/role';
-import { OrderDetail } from '@/domain/order-detail/entities/order-detail.entity';
+import { OrderStatus } from '@app/constant/role';
+import { OrderDetail } from '@app/entity/order-detail.entity';
 import { BaseEntity } from '@app/shared/base.entity';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Payment } from '@app/entity/payment.entity';
 
 @Entity('order')
 export class Order extends BaseEntity {
@@ -37,4 +38,11 @@ export class Order extends BaseEntity {
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToMany(() => Payment, (payment) => payment.order, {
+    eager: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  payments: Payment[];
 }

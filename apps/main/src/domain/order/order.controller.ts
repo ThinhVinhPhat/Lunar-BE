@@ -14,7 +14,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserReq } from '@app/decorator/user.decorator';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { FindOrderDTO } from './dto/find-order.dto';
 
 @ApiTags('Order')

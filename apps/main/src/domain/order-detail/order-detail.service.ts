@@ -3,11 +3,11 @@ import { CreateOrderDetailDto } from './dto/create-order-detail.dto';
 import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
 import { FindOrderDetailDto } from './dto/find-order-detail.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderDetail } from './entities/order-detail.entity';
+import { OrderDetail } from '../../../../../libs/entity/src/order-detail.entity';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
-import { Order } from '@/domain/order/entities/order.entity';
-import { Product } from '@/domain/product/entities/product.entity';
-import { message } from '@/constant/message';
+import { Order } from '@app/entity/order.entity';
+import { Product } from '@app/entity/product.entity';
+import { message } from '@app/constant/message';
 
 @Injectable()
 export class OrderDetailService {

@@ -2,12 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from './entities/order.entity';
+import { Order } from '@app/entity/index';
 import { DataSource, EntityManager, Repository } from 'typeorm';
-import { User } from '@/domain/users/entity/user.entity';
-import { message } from '@/constant/message';
+import { User } from '@app/entity/user.entity';
+import { message } from '@app/constant/message';
 import { FindOrderDTO } from './dto/find-order.dto';
-import { OrderStatus } from '@/constant/role';
+import { OrderStatus } from '@app/constant/role';
 
 @Injectable()
 export class OrderService {

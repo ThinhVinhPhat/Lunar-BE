@@ -1,6 +1,6 @@
-import { Comment } from '@/domain/comment/entities/comment.entity';
-import { OrderDetail } from '@/domain/order-detail/entities/order-detail.entity';
-import { ProductCategory } from '@/domain/product/entities/product-category.entity';
+import { Comment } from '@app/entity/comment.entity';
+import { OrderDetail } from '@app/entity/order-detail.entity';
+import { ProductCategory } from '@app/entity/product-category.entity';
 import { BaseEntity } from '@app/shared/base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 

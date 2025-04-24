@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from '@/domain/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { message } from '@/constant/message';
+import { message } from '@app/constant/message';
 import {
   hashPasswordCompareHelper,
   hashTokenCompareHelper,
@@ -17,10 +17,10 @@ import { loginRespond } from '@app/type/auth/login.respond';
 import { ForgotPasswordDto } from './dto/fogort-password.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { Repository } from 'typeorm';
 import dayjs from 'dayjs';
-import { config } from '../../config/index';
+import { config } from '@app/config';
 import { RefreshTokenDto } from './dto/refresh_token.dto';
 import { ConfigService } from '@nestjs/config';
 import { VerifyAuthDto } from './dto/verify-auth.dto';

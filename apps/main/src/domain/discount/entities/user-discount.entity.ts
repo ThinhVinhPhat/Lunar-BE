@@ -1,7 +1,7 @@
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { BaseEntity } from '@app/shared';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Discount } from './discount.entity';
+import { Discount } from '../../../../../../libs/entity/src/discount.entity';
 
 @Entity()
 export class UserDiscount extends BaseEntity {

@@ -23,6 +23,15 @@
         "tsConfigPath": "apps/main/tsconfig.app.json"
       }
     },
+    "@apps/webhook": {
+      "type": "application",
+      "root": "apps/webhook",
+      "entryFile": "main",
+      "sourceRoot": "apps/webhook/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/webhook/tsconfig.app.json"
+      }
+    },
     "@app/decorator": {
       "type": "library",
       "root": "libs/decorator",
@@ -75,6 +84,33 @@
       "sourceRoot": "libs/stripe/src",
       "compilerOptions": {
         "tsConfigPath": "libs/stripe/tsconfig.lib.json"
+      }
+    },
+    "@app/entity": {
+      "type": "library",
+      "root": "libs/entity",
+      "entryFile": "index",
+      "sourceRoot": "libs/entity/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/entity/tsconfig.lib.json"
+      }
+    },
+    "@app/config": {
+      "type": "library",
+      "root": "libs/config",
+      "entryFile": "index",
+      "sourceRoot": "libs/config/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/config/tsconfig.lib.json"
+      }
+    },
+    "@app/constant": {
+      "type": "library",
+      "root": "libs/constant",
+      "entryFile": "index",
+      "sourceRoot": "libs/constant/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/constant/tsconfig.lib.json"
       }
     }
   }

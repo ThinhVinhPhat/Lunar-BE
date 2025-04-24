@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Category } from './entities/category.entity';
+import { Category } from '../../../../../libs/entity/src/category.entity';
 import { UploadModule } from '@/domain/upload/upload.module';
 
 @Module({

@@ -1,4 +1,4 @@
-import { OrderStatus } from '@/constant/role';
+import { OrderStatus } from '@app/constant/role';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';

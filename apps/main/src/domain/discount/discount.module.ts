@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { DiscountService } from './discount.service';
 import { DiscountController } from './discount.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Discount } from './entities/discount.entity';
+import { Discount } from '../../../../../libs/entity/src/discount.entity';
 import { UserDiscount } from '@/domain/discount/entities/user-discount.entity';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Discount, UserDiscount, User])],

@@ -1,3 +1,15 @@
+import {
+  Category,
+  CategoryDetail,
+  Comment,
+  Discount,
+  Order,
+  OrderDetail,
+  Payment,
+  Product,
+  ProductCategory,
+  User,
+} from '@app/entity';
 import { registerAs } from '@nestjs/config';
 import { config as dotenvConfig } from 'dotenv';
 import * as process from 'process';
@@ -12,7 +24,18 @@ export const config = {
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: ['dist/**/*.entity{.ts,.js}'],
+  entities: [
+    Category,
+    CategoryDetail,
+    Comment,
+    Discount,
+    OrderDetail,
+    Order,
+    Payment,
+    ProductCategory,
+    Product,
+    User,
+  ],
   migrations: ['dist/migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),
   autoLoadEntities: true,

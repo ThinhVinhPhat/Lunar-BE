@@ -1,9 +1,9 @@
-import { Comment } from '@/domain/comment/entities/comment.entity';
-import { Role } from '@/constant/role';
-import { Order } from '@/domain/order/entities/order.entity';
+import { Comment } from '@app/entity/comment.entity';
+import { Role } from '@app/constant/role';
+import { Order } from '@app/entity/order.entity';
 import { BaseEntity } from '@app/shared/base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { Discount } from '@/domain/discount/entities/discount.entity';
+import { Discount } from '@app/entity/discount.entity';
 import { UserDiscount } from '@/domain/discount/entities/user-discount.entity';
 
 @Entity()

@@ -1,4 +1,4 @@
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
@@ -91,5 +91,13 @@ export class StripeService {
       default:
         console.warn(`Unhandled event type ${event.type}`);
     }
+  }
+  async getCheckoutSession(rawBody: Buffer, signature: string, serect: string) {
+    const event = this.stripe.webhooks.constructEvent(
+      rawBody,
+      signature,
+      serect,
+    );
+    return this.stripe.checkout.sessions.retrieve(event.id);
   }
 }

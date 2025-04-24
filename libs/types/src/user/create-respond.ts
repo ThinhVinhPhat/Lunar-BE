@@ -1,4 +1,4 @@
-import { Role } from '@/constant/role';
+import { Role } from '@app/constant/role';
 
 export interface userRespond {
   id: string;

@@ -110,7 +110,12 @@ export const config = {
   },
   STRIPE: {
     STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY ?? '',
-    STRIPE_SERECT_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_SERECT_KEY:
+      process.env.STRIPE_SECRET_KEY ??
+      'sk_test_51OGcQMDyUwWGhw9iBUBwO52bjgjFen1MJ4o2mH2hwQKjVgzrKpMOTLAOS7SWGifYYVRNfpYuNzkU5FaRLkHyrH4e001nk61hbk',
+    ENDPOINT_SERECT:
+      process.env.ENDPOINT_SERECT ??
+      'whsec_3dcc9f7805a6a99f7c98e5ad0ac364477abad1ce077095863676b43c00020784',
   },
   GOOGLE: {
     GOOGLE_CUSTOMER_ID: process.env.GOOGLE_CUSTOMER_ID ?? '',
@@ -118,4 +123,3 @@ export const config = {
     GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL ?? '',
   },
 };
-

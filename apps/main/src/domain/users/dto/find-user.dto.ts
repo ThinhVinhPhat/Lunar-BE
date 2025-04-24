@@ -1,4 +1,4 @@
-import { Role } from '@/constant/role';
+import { Role } from '@app/constant/role';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';

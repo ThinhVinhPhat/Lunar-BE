@@ -1,10 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from '@/domain/order/entities/order.entity';
+import { Order } from '@app/entity/order.entity';
 import { Repository } from 'typeorm';
-import { OrderStatus } from '@/constant/role';
+import { OrderStatus } from '@app/constant/role';
 import { MailerService } from '@nestjs-modules/mailer';
 import { StripeService } from '@app/stripe';
 

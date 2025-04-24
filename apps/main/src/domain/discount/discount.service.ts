@@ -2,12 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Discount } from './entities/discount.entity';
+import { Discount } from '../../../../../libs/entity/src/discount.entity';
 import { DataSource, EntityManager, Repository } from 'typeorm';
-import { message } from '../../constant/message';
+import { message } from '../../../../../libs/constant/src/message';
 import { CreateDiscountRespond } from '@app/type/discount/create.respond';
 import { FindDiscountRespond } from '@app/type/discount/find.respond';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { UserDiscount } from './entities/user-discount.entity';
 
 @Injectable()

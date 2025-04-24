@@ -1,4 +1,4 @@
-import { DiscountType } from '@/constant/role';
+import { DiscountType } from '@app/constant/role';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,

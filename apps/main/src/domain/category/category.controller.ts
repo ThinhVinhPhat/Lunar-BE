@@ -14,7 +14,7 @@ import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from '@app/decorator/public.decorator';
 import { Roles } from '@app/decorator/role.decorator';
-import { Role } from '@/constant/role';
+import { Role } from '@app/constant/role';
 
 @ApiTags('Category')
 @Controller('category')

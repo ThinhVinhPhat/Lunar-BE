@@ -20,7 +20,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '@app/decorator/public.decorator';
 import { FindProductDTO } from './dto/find-product.dto';
 import { Roles } from '@app/decorator/role.decorator';
-import { Role } from '@/constant/role';
+import { Role } from '@app/constant/role';
 
 @ApiTags('Product')
 @Controller('product')

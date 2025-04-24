@@ -1,4 +1,4 @@
-import { DiscountType } from '@/constant/role';
+import { DiscountType } from '@app/constant/role';
 
 export interface DiscountProp {
   name: string;

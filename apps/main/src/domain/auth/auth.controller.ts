@@ -17,6 +17,7 @@ import { ForgotPasswordDto } from './dto/fogort-password.dto';
 import { RefreshTokenDto } from './dto/refresh_token.dto';
 import { GoogleAuthGuard } from './google-auth.guard';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
+import { Public } from '@app/decorator/public.decorator';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {

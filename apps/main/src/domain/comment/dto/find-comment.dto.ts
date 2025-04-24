@@ -1,4 +1,4 @@
-import { CommentSort } from '@/constant/role';
+import { CommentSort } from '@app/constant/role';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional } from 'class-validator';

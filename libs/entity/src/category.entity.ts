@@ -1,4 +1,4 @@
-import { CategoryDetail } from '@/domain/category-detail/entities/category-detail.entity';
+import { CategoryDetail } from '@app/entity/category-detail.entity';
 import { BaseEntity } from '@app/shared/base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 

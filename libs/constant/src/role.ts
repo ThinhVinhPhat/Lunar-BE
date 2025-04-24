@@ -22,3 +22,9 @@ export enum DiscountType {
   PERCENTAGE = 'Percentage',
   FIXED = 'Fixed',
 }
+
+export enum PaymentStatus {
+  PAID = 'Paid',
+  PENDING = 'Pending',
+  FAILED = 'Failed',
+}

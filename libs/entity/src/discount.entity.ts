@@ -1,7 +1,7 @@
-import { DiscountType } from '../../../constant/role';
+import { DiscountType } from '../../constant/src/role';
 import { BaseEntity } from '@app/shared/base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { UserDiscount } from './user-discount.entity';
+import { UserDiscount } from '../../../apps/main/src/domain/discount/entities/user-discount.entity';
 
 @Entity()
 export class Discount extends BaseEntity {

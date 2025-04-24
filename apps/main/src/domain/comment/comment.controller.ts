@@ -17,7 +17,7 @@ import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UserReq } from '@app/decorator/user.decorator';
-import { User } from '@/domain/users/entity/user.entity';
+import { User } from '@app/entity/user.entity';
 import { Public } from '@app/decorator/public.decorator';
 import { FindCommentDTO } from './dto/find-comment.dto';
 

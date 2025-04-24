@@ -1,5 +1,5 @@
-import { Category } from '@/domain/category/entities/category.entity';
-import { ProductCategory } from '@/domain/product/entities/product-category.entity';
+import { Category } from '@app/entity/category.entity';
+import { ProductCategory } from '@app/entity/product-category.entity';
 import { BaseEntity } from '@app/shared/base.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 

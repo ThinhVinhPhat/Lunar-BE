@@ -1,24 +1,24 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entity/user.entity';
+import { User } from '../../../../../libs/entity/src/user.entity';
 import { createRespond } from '@app/type/user/create-respond';
 import {
   hashedRefreshToken,
   hashPasswordHelper,
 } from '@app/helper/hasPassword';
-import { message } from '@/constant/message';
-import { findRespond } from '@/types/user/find-respond';
-import { RegisterAuthDto } from '@/auth/dto/register-atuth.dto';
+import { message } from '@app/constant/message';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Role } from '@/constant/role';
+import { Role } from '@app/constant/role';
 import { UpdatePasswordDTO } from './dto/update-password.dto';
 import { UploadService } from '@/domain/upload/upload.service';
 import { reverse } from '@app/helper/reverse';
 import { FindDTO } from './dto/find-user.dto';
+import { findRespond } from '@app/type/user/find-respond';
+import { RegisterAuthDto } from '../auth/dto/register-atuth.dto';
 @Injectable()
 export class UsersService {
   constructor(

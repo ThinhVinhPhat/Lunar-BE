@@ -1,4 +1,4 @@
-import { OrderStatus } from '@/constant/role';
+import { OrderStatus } from '@app/constant/role';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsNumber, IsString, IsEnum } from 'class-validator';
 

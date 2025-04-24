@@ -3,14 +3,14 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
-import { message } from '@/constant/message';
-import { CategoryDetail } from '@/domain/category-detail/entities/category-detail.entity';
-import { Product } from './entities/product.entity';
-import { ProductCategory } from '@/domain/product/entities/product-category.entity';
+import { message } from '@app/constant/message';
+import { CategoryDetail } from '@app/entity/category-detail.entity';
+import { Product } from '../../../../../libs/entity/src/product.entity';
+import { ProductCategory } from '@app/entity/product-category.entity';
 import { UploadService } from '@/domain/upload/upload.service';
 import { FindProductDTO } from './dto/find-product.dto';
 import slugify from 'slugify';
-import { OrderDetail } from '@/domain/order-detail/entities/order-detail.entity';
+import { OrderDetail } from '@app/entity/order-detail.entity';
 
 @Injectable()
 export class ProductService {
