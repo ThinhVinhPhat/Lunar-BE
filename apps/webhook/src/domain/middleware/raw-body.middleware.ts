@@ -1,4 +1,5 @@
 import { json } from 'body-parser';
+import { Request, Response } from 'express';
 
 export interface RequestWithRawBody extends Request {
   rawBody: Buffer;
