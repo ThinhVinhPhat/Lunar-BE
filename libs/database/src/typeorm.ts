@@ -8,6 +8,7 @@ import {
   Payment,
   Product,
   ProductCategory,
+  UserDiscount,
   User,
 } from '@app/entity';
 import { registerAs } from '@nestjs/config';
@@ -28,6 +29,7 @@ export const config = {
     Category,
     CategoryDetail,
     Comment,
+    UserDiscount,
     Discount,
     OrderDetail,
     Order,

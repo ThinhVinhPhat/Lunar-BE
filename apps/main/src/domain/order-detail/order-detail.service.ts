@@ -4,7 +4,7 @@ import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
 import { FindOrderDetailDto } from './dto/find-order-detail.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderDetail } from '../../../../../libs/entity/src/order-detail.entity';
-import { DataSource, EntityManager, In, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Order } from '@app/entity/order.entity';
 import { Product } from '@app/entity/product.entity';
 import { message } from '@app/constant/message';

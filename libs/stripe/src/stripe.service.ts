@@ -1,13 +1,21 @@
+import { PaymentStatus } from '@app/constant';
+import { Order, Payment } from '@app/entity';
 import { User } from '@app/entity/user.entity';
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import Stripe from 'stripe';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class StripeService {
   constructor(
     @Inject('STRIPE_CLIENT') private readonly stripe: Stripe,
     private readonly configService: ConfigService,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
+    @InjectRepository(Payment)
+    private readonly paymentRepository: Repository<Payment>,
   ) {}
 
   async getProduct(limit: number, active: boolean): Promise<any> {
@@ -73,6 +81,9 @@ export class StripeService {
       payment_intent_data: {
         setup_future_usage: 'on_session',
       },
+      metadata: {
+        order_id: orderId,
+      },
       success_url:
         this.configService.getOrThrow('STRIPE_URL') +
         `/api/v1/payment/success/?order_id=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
@@ -90,8 +101,32 @@ export class StripeService {
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log('Checkout session completed:', session);
-        break;
+        const orderId = session.metadata.order_id;
+        const sub_total = session.amount_total;
+        const status = session.payment_status;
+
+        const order = await this.orderRepository.findOne({
+          where: {
+            id: orderId,
+          },
+        });
+
+        if (!order) {
+          throw new HttpException('Order not exist', HttpStatus.NOT_FOUND);
+        }
+
+        const payment = this.paymentRepository.create({
+          amount: sub_total,
+          order: order,
+          method: status === 'paid' ? PaymentStatus.PAID : PaymentStatus.FAILED,
+        });
+
+        return {
+          status: HttpStatus.OK,
+          data: payment,
+          message: 'Create Payment Successfully',
+        };
+
       default:
         console.warn(`Unhandled event type ${event.type}`);
     }

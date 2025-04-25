@@ -4,7 +4,7 @@ import { Order } from '@app/entity/order.entity';
 import { BaseEntity } from '@app/shared/base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Discount } from '@app/entity/discount.entity';
-import { UserDiscount } from '@/domain/discount/entities/user-discount.entity';
+import { UserDiscount } from '@app/entity/user-discount.entity';
 
 @Entity()
 export class User extends BaseEntity {

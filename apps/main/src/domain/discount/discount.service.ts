@@ -8,7 +8,7 @@ import { message } from '../../../../../libs/constant/src/message';
 import { CreateDiscountRespond } from '@app/type/discount/create.respond';
 import { FindDiscountRespond } from '@app/type/discount/find.respond';
 import { User } from '@app/entity/user.entity';
-import { UserDiscount } from './entities/user-discount.entity';
+import { UserDiscount } from '../../../../../libs/entity/src/user-discount.entity';
 
 @Injectable()
 export class DiscountService {

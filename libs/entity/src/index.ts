@@ -8,4 +8,4 @@ export * from './order-detail.entity';
 export * from './product-category.entity';
 export * from './product.entity';
 export * from './user.entity';
-
+export * from './user-discount.entity';
