@@ -106,6 +106,7 @@ export class StripeService {
         const orderId = session.metadata.order_id;
         const sub_total = session.amount_total;
         const status = session.payment_status;
+        console.log(session);
 
         const order = await this.orderRepository.findOne({
           where: {
