@@ -5,8 +5,9 @@ import rawBodyMiddleware from './domain/middleware/raw-body.middleware';
 async function bootstrap() {
   const app = await NestFactory.create(WebhookModule);
   app.setGlobalPrefix('api/v1/webhook');
+  const port = process.env.WEBHOOK_PORT || 3101;
   app.use(rawBodyMiddleware());
 
-  await app.listen(3000);
+  await app.listen(port);
 }
 bootstrap();
