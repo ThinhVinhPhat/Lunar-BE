@@ -108,12 +108,23 @@ export class StripeService {
         const status = session.payment_status;
         console.log(orderId);
 
-        const order = await this.orderRepository.findOne({
-          where: {
-            id: orderId,
-          },
+        const wait = (ms: number) =>
+          new Promise((resolve) => setTimeout(resolve, ms));
+
+        let order = await this.orderRepository.findOne({
+          where: { id: orderId },
         });
 
+        if (!order) {
+          await wait(2000); 
+          order = await this.orderRepository.findOne({
+            where: { id: orderId },
+          });
+        }
+
+        if (!order) {
+          throw new HttpException('Order is not exist', HttpStatus.NOT_FOUND);
+        }
         console.log(order);
 
         if (!order) {
