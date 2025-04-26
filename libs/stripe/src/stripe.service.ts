@@ -74,7 +74,7 @@ export class StripeService {
   //   });
   // }
 
-  async createCheckoutSession(customerId: string, order: Order, items: any) {
+  async createCheckoutSession(customerId: string, orderId: string, items: any) {
     return this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -84,37 +84,57 @@ export class StripeService {
         setup_future_usage: 'on_session',
       },
       metadata: {
-        order_id: JSON.stringify(order),
+        order_id: orderId,
       },
       success_url:
         this.configService.getOrThrow('STRIPE_URL') +
-        `/api/v1/payment/success/?order_id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
+        `/api/v1/payment/success/?order_id=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
         this.configService.getOrThrow('STRIPE_URL') + '/api/v1/payment/failed',
     });
   }
 
-  async getCheckoutSession(rawBody: Buffer, signature: string, serect: string) {
-    const event = this.stripe.webhooks.constructEvent(
-      rawBody,
-      signature,
-      serect,
-    );
+  async getCheckoutSession(rawBody: Buffer, signature: string, secret: string) {
+    let event: Stripe.Event;
+
+    try {
+      event = this.stripe.webhooks.constructEvent(rawBody, signature, secret);
+    } catch (err) {
+      console.error('Webhook Error:', err.message);
+      throw new HttpException('Invalid signature', HttpStatus.BAD_REQUEST);
+    }
+
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
-        const order = JSON.parse(session.metadata.order);
+        const orderId = session.metadata.order_id;
         const sub_total = session.amount_total;
         const status = session.payment_status;
-        console.log(order);
+        console.log('Received orderId from Stripe:', orderId);
+
+        const order = await this.orderRepository.findOne({
+          where: { id: orderId },
+          relations: ['orderDetails', 'orderDetails.product'],
+        });
+
+        if (!order) {
+          console.error('Order not found, will retry webhook later.');
+          throw new HttpException(
+            'Order not exist yet, retrying',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+
+        console.log('Order found:', order.id);
 
         const payment = this.paymentRepository.create({
           amount: sub_total,
           order: order,
           method: status === 'paid' ? PaymentStatus.PAID : PaymentStatus.FAILED,
         });
+
         await this.paymentRepository.save(payment);
-        console.log('Thành công');
+        console.log('Payment saved successfully.');
 
         const productList = order.orderDetails.map((item) => {
           return {
@@ -135,21 +155,28 @@ export class StripeService {
             ORDER_DATE: order.createdAt,
             TOTAL_AMOUNT: sub_total,
             PRODUCT_LIST: productList,
-            CUSTOMER_NAME: session.customer_details.name,
-            CUSTOMER_EMAIL: session.customer_details.email,
-            CUSTOMER_PHONE: session.customer_details.phone,
+            CUSTOMER_NAME: session.customer_details?.name,
+            CUSTOMER_EMAIL: session.customer_details?.email,
+            CUSTOMER_PHONE: session.customer_details?.phone,
             SHIPPING_ADDRESS: order.shippingAddress,
             ORDER_TRACKING_URL: session.id,
           },
         });
+
+        console.log('Mail sent successfully.');
 
         return {
           status: HttpStatus.OK,
           data: payment,
           message: 'Create Payment Successfully',
         };
+
       default:
         console.warn(`Unhandled event type ${event.type}`);
+        return {
+          status: HttpStatus.OK,
+          message: `Unhandled event type ${event.type}`,
+        };
     }
   }
 }

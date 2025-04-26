@@ -71,7 +71,7 @@ export class PaymentService {
 
         const session = await this.stripeService.createCheckoutSession(
           customer.id,
-          order,
+          order.id,
           priceResult.map((item) => {
             return { price: item.price, quantity: item.quantity };
           }),
