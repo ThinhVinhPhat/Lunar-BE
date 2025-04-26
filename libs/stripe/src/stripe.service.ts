@@ -117,7 +117,7 @@ export class StripeService {
         console.log(order);
 
         if (!order) {
-          throw new HttpException('Order not exist', HttpStatus.NOT_FOUND);
+          throw new HttpException('Order is not exist', HttpStatus.NOT_FOUND);
         }
 
         const payment = this.paymentRepository.create({
