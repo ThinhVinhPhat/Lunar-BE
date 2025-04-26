@@ -74,7 +74,7 @@ export class StripeService {
   //   });
   // }
 
-  async createCheckoutSession(customerId: string, orderId: string, items: any) {
+  async createCheckoutSession(customerId: string, order: Order, items: any) {
     return this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -84,11 +84,11 @@ export class StripeService {
         setup_future_usage: 'on_session',
       },
       metadata: {
-        order_id: orderId,
+        order_id: JSON.stringify(order),
       },
       success_url:
         this.configService.getOrThrow('STRIPE_URL') +
-        `/api/v1/payment/success/?order_id=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
+        `/api/v1/payment/success/?order_id=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
         this.configService.getOrThrow('STRIPE_URL') + '/api/v1/payment/failed',
     });
@@ -103,33 +103,10 @@ export class StripeService {
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
-        const orderId = session.metadata.order_id;
+        const order = JSON.parse(session.metadata.order);
         const sub_total = session.amount_total;
         const status = session.payment_status;
-        console.log(orderId);
-
-        const wait = (ms: number) =>
-          new Promise((resolve) => setTimeout(resolve, ms));
-
-        let order = await this.orderRepository.findOne({
-          where: { id: orderId },
-        });
-
-        if (!order) {
-          await wait(2000); 
-          order = await this.orderRepository.findOne({
-            where: { id: orderId },
-          });
-        }
-
-        if (!order) {
-          throw new HttpException('Order is not exist', HttpStatus.NOT_FOUND);
-        }
         console.log(order);
-
-        if (!order) {
-          throw new HttpException('Order is not exist', HttpStatus.NOT_FOUND);
-        }
 
         const payment = this.paymentRepository.create({
           amount: sub_total,
