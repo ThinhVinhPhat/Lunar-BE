@@ -134,7 +134,7 @@ export class StripeService {
         });
 
         await this.mailService.sendMail({
-          to: order.user.email,
+          to: 'thinhvinhp@gmail.com',
           subject: '✅ User Have Ordered Your Store!',
           template: './admin-order.hbs',
           context: {
@@ -157,7 +157,6 @@ export class StripeService {
           data: payment,
           message: 'Create Payment Successfully',
         };
-
       default:
         console.warn(`Unhandled event type ${event.type}`);
     }
