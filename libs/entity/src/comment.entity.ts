@@ -1,6 +1,6 @@
-import { Product } from '@app/entity/product.entity';
-import { BaseEntity } from '@app/shared/base.entity';
-import { User } from '@app/entity/user.entity';
+import { Product } from './product.entity';
+import { BaseEntity } from '../../shared/src/index';
+import { User } from './user.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity()

@@ -1,9 +1,9 @@
-import { OrderStatus } from '@app/constant/role';
-import { OrderDetail } from '@app/entity/order-detail.entity';
-import { BaseEntity } from '@app/shared/base.entity';
-import { User } from '@app/entity/user.entity';
+import { OrderStatus } from '../../constant/src/index';
+import { OrderDetail } from './order-detail.entity';
+import { BaseEntity } from '../../shared/src/index';
+import { User } from './user.entity';
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
-import { Payment } from '@app/entity/payment.entity';
+import { Payment } from './payment.entity';
 
 @Entity('order')
 export class Order extends BaseEntity {

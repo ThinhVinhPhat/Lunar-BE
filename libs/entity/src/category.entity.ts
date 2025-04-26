@@ -1,5 +1,5 @@
-import { CategoryDetail } from '@app/entity/category-detail.entity';
-import { BaseEntity } from '@app/shared/base.entity';
+import { CategoryDetail } from './category-detail.entity';
+import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()

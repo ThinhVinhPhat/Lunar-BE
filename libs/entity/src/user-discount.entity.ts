@@ -1,5 +1,5 @@
-import { User } from '@app/entity/user.entity';
-import { BaseEntity } from '@app/shared';
+import { User } from './user.entity';
+import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Discount } from './discount.entity';
 

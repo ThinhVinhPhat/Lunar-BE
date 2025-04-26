@@ -1,7 +1,7 @@
-import { Comment } from '@app/entity/comment.entity';
-import { OrderDetail } from '@app/entity/order-detail.entity';
-import { ProductCategory } from '@app/entity/product-category.entity';
-import { BaseEntity } from '@app/shared/base.entity';
+import { Comment } from './comment.entity';
+import { OrderDetail } from './order-detail.entity';
+import { ProductCategory } from './product-category.entity';
+import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()

@@ -10,7 +10,7 @@ import {
   ProductCategory,
   UserDiscount,
   User,
-} from '@app/entity';
+} from '../../entity/src/index';
 import { registerAs } from '@nestjs/config';
 import { config as dotenvConfig } from 'dotenv';
 import * as process from 'process';
@@ -38,7 +38,7 @@ export const config = {
     Product,
     User,
   ],
-  migrations: ['dist/migrations/*{.ts,.js}'],
+  migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),
   autoLoadEntities: true,
   synchronize: false,

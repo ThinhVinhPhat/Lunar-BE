@@ -1,10 +1,10 @@
-import { Comment } from '@app/entity/comment.entity';
-import { Role } from '@app/constant/role';
-import { Order } from '@app/entity/order.entity';
-import { BaseEntity } from '@app/shared/base.entity';
+import { Comment } from './comment.entity';
+import { Role } from '../../constant/src/index';
+import { Order } from './order.entity';
+import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { Discount } from '@app/entity/discount.entity';
-import { UserDiscount } from '@app/entity/user-discount.entity';
+import { Discount } from './discount.entity';
+import { UserDiscount } from './user-discount.entity';
 
 @Entity()
 export class User extends BaseEntity {

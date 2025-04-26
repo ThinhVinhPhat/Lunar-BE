@@ -1,6 +1,6 @@
-import { CategoryDetail } from '@app/entity/category-detail.entity';
-import { BaseEntity } from '@app/shared/base.entity';
-import { Product } from '@app/entity/product.entity';
+import { CategoryDetail } from './category-detail.entity';
+import { BaseEntity } from '../../shared/src/index';
+import { Product } from './product.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()

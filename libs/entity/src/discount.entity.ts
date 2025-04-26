@@ -1,5 +1,5 @@
 import { DiscountType } from '../../constant/src/role';
-import { BaseEntity } from '@app/shared/base.entity';
+import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { UserDiscount } from './user-discount.entity';
 

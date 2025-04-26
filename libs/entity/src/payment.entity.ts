@@ -1,5 +1,5 @@
-import { PaymentStatus } from '@app/constant';
-import { BaseEntity } from '@app/shared';
+import { PaymentStatus } from '../../constant/src/index';
+import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Order } from './order.entity';
 
