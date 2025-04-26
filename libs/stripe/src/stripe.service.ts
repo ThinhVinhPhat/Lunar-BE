@@ -1,6 +1,7 @@
 import { PaymentStatus } from '@app/constant';
 import { Order, Payment } from '@app/entity';
 import { User } from '@app/entity/user.entity';
+import { MailerService } from '@nestjs-modules/mailer';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,6 +17,7 @@ export class StripeService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
+    private readonly mailService: MailerService,
   ) {}
 
   async getProduct(limit: number, active: boolean): Promise<any> {
@@ -119,6 +121,35 @@ export class StripeService {
           amount: sub_total,
           order: order,
           method: status === 'paid' ? PaymentStatus.PAID : PaymentStatus.FAILED,
+        });
+        await this.paymentRepository.save(payment);
+        console.log('Thành công');
+
+        const productList = order.orderDetails.map((item) => {
+          return {
+            PRODUCT_NAME: item.product.name,
+            PRODUCT_QUANTITY: item.quantity,
+            PRODUCT_PRICE: item.total,
+          };
+        });
+
+        await this.mailService.sendMail({
+          to: order.user.email,
+          subject: '✅ User Have Ordered Your Store!',
+          template: './admin-order.hbs',
+          context: {
+            SELLER_NAME: 'Thình Vĩnh Phát',
+            SELLER_DASHBOARD_URL: 'http://localhost:5173/admin/dashboard',
+            ORDER_ID: order.id,
+            ORDER_DATE: order.createdAt,
+            TOTAL_AMOUNT: sub_total,
+            PRODUCT_LIST: productList,
+            CUSTOMER_NAME: session.customer_details.name,
+            CUSTOMER_EMAIL: session.customer_details.email,
+            CUSTOMER_PHONE: session.customer_details.phone,
+            SHIPPING_ADDRESS: order.shippingAddress,
+            ORDER_TRACKING_URL: session.id,
+          },
         });
 
         return {
