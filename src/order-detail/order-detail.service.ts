@@ -4,7 +4,7 @@ import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
 import { FindOrderDetailDto } from './dto/find-order-detail.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderDetail } from './entities/order-detail.entity';
-import { DataSource, EntityManager, In, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Order } from '@/order/entities/order.entity';
 import { Product } from '@/product/entities/product.entity';
 import { message } from '@/constant/message';
@@ -121,40 +121,10 @@ export class OrderDetailService {
     };
   }
 
-  update(
-    id: string,
-    findOrderDetailDto: FindOrderDetailDto,
-    updateOrderDetailDto: UpdateOrderDetailDto,
-  ) {
+  update(id: string, updateOrderDetailDto: UpdateOrderDetailDto) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
-        const { orderId, productId } = findOrderDetailDto;
-
-        const order = await transactionManager.findOne(Order, {
-          where: { id: orderId },
-          relations: ['orderDetails'],
-        });
-
-        if (!order) {
-          throw new HttpException(
-            message.FIND_ORDER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        const product = await transactionManager.findOne(Product, {
-          where: { id: productId },
-        });
-        if (!product) {
-          throw new HttpException(
-            message.FIND_PRODUCT_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        const productPrice = product.discount_percentage
-          ? Math.floor(product.price * (product.discount_percentage / 100))
-          : product.price;
         const { quantity } = updateOrderDetailDto;
-
         const orderDetail = await transactionManager.findOne(OrderDetail, {
           where: {
             id: id,
@@ -167,20 +137,16 @@ export class OrderDetailService {
           );
         }
         orderDetail.quantity = quantity;
-        orderDetail.price = productPrice;
         orderDetail.total = Math.floor(
           orderDetail.quantity * orderDetail.price,
         );
-        orderDetail.product_name = product.name;
-        orderDetail.product = product;
-        await transactionManager.save(orderDetail);
 
         await transactionManager.save(OrderDetail, orderDetail);
 
         return {
           status: HttpStatus.OK,
           data: orderDetail,
-          message: message.CREATE_ORDER_DETAIL_SUCCESS,
+          message: message.UPDATE_ORDER_DETAIL_SUCCESS,
         };
       },
     );

@@ -35,38 +35,33 @@ export class OrderDetailController {
       createOrderDetailDto,
     );
   }
-  
+
   @ApiBearerAuth()
   @Get('/:id')
   findAllByOrder(@Param('id') id: string) {
     return this.orderDetailService.findAllByOrder(id);
   }
-  
+
   @ApiBearerAuth()
   @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.orderDetailService.findOne(id);
   }
-  
+
   @ApiBearerAuth()
   @ApiOperationDecorator({
     summary: 'Update Order Detail',
     description: 'Update Order Detail',
-    type: UpdateOrderDetailDto
+    type: UpdateOrderDetailDto,
   })
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Query() findOrderDetail: FindOrderDetailDto,
     @Body() updateOrderDetailDto: UpdateOrderDetailDto,
   ) {
-    return this.orderDetailService.update(
-      id,
-      findOrderDetail,
-      updateOrderDetailDto,
-    );
+    return this.orderDetailService.update(id, updateOrderDetailDto);
   }
-  
+
   @ApiBearerAuth()
   @Delete(':id')
   remove(@Param('id') id: string) {
