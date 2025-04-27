@@ -100,29 +100,28 @@ export class StripeService {
     try {
       event = this.stripe.webhooks.constructEvent(rawBody, signature, secret);
     } catch (err) {
-      console.error('Webhook Error:', err.message);
+      console.error('Webhook Error: Invalid signature', err.message);
       throw new HttpException('Invalid signature', HttpStatus.BAD_REQUEST);
     }
 
-    switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object as Stripe.Checkout.Session;
-        const orderId = session.metadata.order_id;
-        const sub_total = session.amount_total;
-        const status = session.payment_status;
-        console.log('Received orderId from Stripe:', orderId);
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const orderId = session.metadata.order_id;
+      const sub_total = session.amount_total;
+      const status = session.payment_status;
+      console.log('Received orderId from Stripe:', orderId);
 
+      try {
         const order = await this.orderRepository.findOne({
           where: { id: orderId },
           relations: ['orderDetails', 'orderDetails.product'],
         });
 
         if (!order) {
-          console.error('Order not found, will retry webhook later.');
-          throw new HttpException(
-            'Order not exist yet, retrying',
-            HttpStatus.INTERNAL_SERVER_ERROR,
+          console.error(
+            'Order not found yet. Throwing error to force Stripe retry...',
           );
+          throw new Error('Order not created yet');
         }
 
         console.log('Order found:', order.id);
@@ -136,13 +135,11 @@ export class StripeService {
         await this.paymentRepository.save(payment);
         console.log('Payment saved successfully.');
 
-        const productList = order.orderDetails.map((item) => {
-          return {
-            PRODUCT_NAME: item.product.name,
-            PRODUCT_QUANTITY: item.quantity,
-            PRODUCT_PRICE: item.total,
-          };
-        });
+        const productList = order.orderDetails.map((item) => ({
+          PRODUCT_NAME: item.product.name,
+          PRODUCT_QUANTITY: item.quantity,
+          PRODUCT_PRICE: item.total,
+        }));
 
         await this.mailService.sendMail({
           to: 'thinhvinhp@gmail.com',
@@ -165,18 +162,21 @@ export class StripeService {
 
         console.log('Mail sent successfully.');
 
-        return {
-          status: HttpStatus.OK,
-          data: payment,
-          message: 'Create Payment Successfully',
-        };
+        return { received: true }; 
+      } catch (err) {
+        console.error(
+          'Processing error, Stripe should retry. Error:',
+          err.message,
+        );
 
-      default:
-        console.warn(`Unhandled event type ${event.type}`);
-        return {
-          status: HttpStatus.OK,
-          message: `Unhandled event type ${event.type}`,
-        };
+        throw new HttpException(
+          'Internal webhook error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    } else {
+      console.warn(`Unhandled event type ${event.type}`);
+      return { received: true };
     }
   }
 }
