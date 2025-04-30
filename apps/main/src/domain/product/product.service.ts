@@ -163,6 +163,7 @@ export class ProductService {
           },
           skip: offset,
           take: limit,
+          relations: ['productCategories', 'productCategories.categoryDetails'],
         }),
         this.productEntity.count({
           where: whereCondition,
