@@ -11,6 +11,8 @@ import { UploadService } from '@/domain/upload/upload.service';
 import { FindProductDTO } from './dto/find-product.dto';
 import slugify from 'slugify';
 import { OrderDetail } from '@app/entity/order-detail.entity';
+import { Favorite } from '@app/entity/favorite.entity';
+import { FindOneProductDTO } from './dto/find-one-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -20,8 +22,8 @@ export class ProductService {
     private readonly categoryDetailEntity: Repository<CategoryDetail>,
     @InjectRepository(Product)
     private readonly productEntity: Repository<Product>,
-    @InjectRepository(ProductCategory)
-    private readonly productCategoryEntity: Repository<ProductCategory>,
+    @InjectRepository(Favorite)
+    private readonly favoriteEntity: Repository<Favorite>,
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
   ) {
@@ -140,45 +142,59 @@ export class ProductService {
 
   async findAll(findDTO: FindProductDTO) {
     try {
-      const { category, limit, offset, name } = findDTO;
+      const { category, limit, offset, name, userId } = findDTO;
 
-      const products = await this.productEntity.find({
-        where: {
-          productCategories: category
-            ? {
-                categoryDetails: {
-                  name: In(category),
-                },
-              }
-            : null,
-          name: name ? name : null,
-        },
-        skip: offset,
-        take: limit,
-        relations: ['productCategories', 'productCategories.categoryDetails'],
-      });
+      const whereCondition = {
+        productCategories: category
+          ? {
+              categoryDetails: {
+                name: In(category),
+              },
+            }
+          : undefined,
+        name: name ? name : undefined,
+      };
 
-      const total = await this.productEntity.count({
-        where: {
-          productCategories: category
-            ? {
-                categoryDetails: {
-                  name: In(category),
-                },
-              }
-            : null,
-          name: name ? name : null,
-        },
-      });
+      const [products, total] = await Promise.all([
+        this.productEntity.find({
+          where: {
+            productCategories: whereCondition.productCategories,
+            name: whereCondition.name,
+          },
+          skip: offset,
+          take: limit,
+        }),
+        this.productEntity.count({
+          where: whereCondition,
+        }),
+      ]);
 
-      // const result = await Promise.all(
-      //   products.map(async (product) => {
-      //     return {
-      //       ...product,
-      //       categories: await this.findProductCategoryDetail(product),
-      //     };
-      //   }),
-      // );
+      if (userId) {
+        const productId = products.map((item) => item.id);
+        const favorites = await this.favoriteEntity.find({
+          where: {
+            user: {
+              id: userId,
+            },
+            product: {
+              id: In(productId),
+            },
+          },
+          relations: ['product'],
+        });
+
+        const favoriteProductIds = new Set(
+          favorites.map((fav) => fav.product.id),
+        );
+        products.forEach((product: any) => {
+          product.isFavorite = favoriteProductIds.has(product.id);
+        });
+      } else {
+        products.forEach((product: any) => {
+          product.isFavorite = false;
+        });
+      }
+
       return {
         status: HttpStatus.OK,
         data: {
@@ -196,21 +212,38 @@ export class ProductService {
     }
   }
 
-  async findOne(slug: string) {
+  async findOne(findDto: FindOneProductDTO) {
     try {
+      const { slug, userId } = findDto;
+
+      const whereCondition = {
+        slug: slug,
+        favorites: null,
+      };
+      if (userId) {
+        whereCondition.favorites = {
+          user: {
+            id: userId,
+          },
+        };
+      }
+
       const product = await this.productEntity.findOne({
-        where: { slug: slug },
+        where: whereCondition,
         relations: [
           'productCategories',
           'productCategories.categoryDetails',
           'comments',
+          'favorites',
         ],
       });
+
       return {
         status: HttpStatus.OK,
         data: {
           ...product,
           categories: await this.findProductCategoryDetail(product),
+          isFavorite: product.favorites.length > 0,
         },
         message: message.FIND_PRODUCT_SUCCESS,
       };

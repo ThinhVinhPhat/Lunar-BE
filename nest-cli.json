@@ -112,6 +112,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/constant/tsconfig.lib.json"
       }
+    },
+    "@app/mail": {
+      "type": "library",
+      "root": "libs/mail",
+      "entryFile": "index",
+      "sourceRoot": "libs/mail/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/mail/tsconfig.lib.json"
+      }
     }
   }
 }

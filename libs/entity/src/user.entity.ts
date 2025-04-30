@@ -5,6 +5,7 @@ import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Discount } from './discount.entity';
 import { UserDiscount } from './user-discount.entity';
+import { Favorite } from './favorite.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -61,4 +62,10 @@ export class User extends BaseEntity {
 
   @OneToMany(() => UserDiscount, (discount) => discount.user)
   userDiscounts: Discount[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  favorites: Favorite[];
 }

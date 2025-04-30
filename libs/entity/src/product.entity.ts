@@ -3,6 +3,7 @@ import { OrderDetail } from './order-detail.entity';
 import { ProductCategory } from './product-category.entity';
 import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, OneToMany } from 'typeorm';
+import { Favorite } from './favorite.entity';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -54,4 +55,10 @@ export class Product extends BaseEntity {
 
   @OneToMany(() => Comment, (comment) => comment.product)
   comments: Comment[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.product, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  favorites: Favorite[];
 }

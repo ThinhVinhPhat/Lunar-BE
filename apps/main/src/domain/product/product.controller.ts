@@ -21,6 +21,7 @@ import { Public } from '@app/decorator/public.decorator';
 import { FindProductDTO } from './dto/find-product.dto';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
+import { FindOneProductDTO } from './dto/find-one-product.dto';
 
 @ApiTags('Product')
 @Controller('product')
@@ -59,9 +60,9 @@ export class ProductController {
     summary: 'Find product by slug',
     description: 'Find product by slug',
   })
-  @Get('/:slug')
-  findOne(@Param('slug') slug: string) {
-    return this.productService.findOne(slug);
+  @Get('/find-by-slug')
+  findOne(@Query() findDto: FindOneProductDTO) {
+    return this.productService.findOne(findDto);
   }
 
   @ApiBearerAuth()

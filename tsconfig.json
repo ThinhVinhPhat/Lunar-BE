@@ -84,6 +84,12 @@
       ],
       "@app/constant/*": [
         "libs/constant/src/*"
+      ],
+      "@app/mail": [
+        "libs/mail/src"
+      ],
+      "@app/mail/*": [
+        "libs/mail/src/*"
       ]
     }
   },
@@ -92,7 +98,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "migrations"  
+    "migrations"
   ],
   "exclude": [
     "node_modules"

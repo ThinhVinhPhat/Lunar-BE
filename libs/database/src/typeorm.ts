@@ -10,6 +10,7 @@ import {
   ProductCategory,
   UserDiscount,
   User,
+  Favorite,
 } from '../../entity/src/index';
 import { registerAs } from '@nestjs/config';
 import { config as dotenvConfig } from 'dotenv';
@@ -37,15 +38,16 @@ export const config = {
     ProductCategory,
     Product,
     User,
+    Favorite,
   ],
   migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),
   autoLoadEntities: true,
   synchronize: false,
   logging: process.env?.DATABASE_DEBUG_MODE === 'true' || false,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
 };
 if (config.logging) {
   console.log('Connect DB Successfully');

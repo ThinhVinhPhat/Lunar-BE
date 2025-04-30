@@ -1,11 +1,45 @@
-import 'tsconfig-paths/register';
-import { connectionSource } from './typeorm';
+import { DataSource } from 'typeorm';
+import {
+  Category,
+  CategoryDetail,
+  Comment,
+  Discount,
+  Order,
+  OrderDetail,
+  Payment,
+  Product,
+  ProductCategory,
+  UserDiscount,
+  User,
+  Favorite,
+} from '../../entity/src';
 
-connectionSource
-  .initialize()
-  .then(() => {
-    console.log('Data Source has been initialized!');
-  })
-  .catch((err) => {
-    console.error('Error during Data Source initialization:', err);
-  });
+export const connectionSource = new DataSource({
+  type: 'postgres',
+  host: process.env?.DATABASE_HOST || 'localhost',
+  port: parseInt(process.env?.DATABASE_PORT) || 5432,
+  username: process.env.DATABASE_USERNAME,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  entities: [
+    Category,
+    CategoryDetail,
+    Comment,
+    UserDiscount,
+    Discount,
+    OrderDetail,
+    Order,
+    Payment,
+    ProductCategory,
+    Product,
+    User,
+    Favorite,
+  ],
+  migrations: ['migrations/*{.ts,.js}'],
+  migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),
+  synchronize: false,
+  logging: process.env?.DATABASE_DEBUG_MODE === 'true' || false,
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
+});

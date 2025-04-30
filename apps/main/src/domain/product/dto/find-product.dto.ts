@@ -39,4 +39,11 @@ export class FindProductDTO {
   @IsOptional()
   @Type(() => Number)
   limit: number;
+
+  @ApiPropertyOptional({
+    description: 'User Id',
+  })
+  @IsOptional()
+  @IsString()
+  userId: string;
 }
