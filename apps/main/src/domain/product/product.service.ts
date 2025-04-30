@@ -221,13 +221,6 @@ export class ProductService {
         slug: slug,
         favorites: null,
       };
-      if (userId) {
-        whereCondition.favorites = {
-          user: {
-            id: userId,
-          },
-        };
-      }
 
       const product = await this.productEntity.findOne({
         where: whereCondition,
@@ -236,15 +229,22 @@ export class ProductService {
           'productCategories.categoryDetails',
           'comments',
           'favorites',
+          'favorites.user',
         ],
       });
+
+      const existFavorite = product.favorites.find(
+        (item) => item.user.id == userId,
+      );
+
+      console.log(existFavorite);
 
       return {
         status: HttpStatus.OK,
         data: {
           ...product,
           categories: await this.findProductCategoryDetail(product),
-          isFavorite: product.favorites.length > 0,
+          isFavorite: existFavorite !== undefined,
         },
         message: message.FIND_PRODUCT_SUCCESS,
       };
