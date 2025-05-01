@@ -85,7 +85,7 @@ export class FavoriteService {
       throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
     }
 
-    const favorites = await this.favoriteRepository.findOne({
+    const favorites = await this.favoriteRepository.find({
       where: {
         user: {
           id: userId,
