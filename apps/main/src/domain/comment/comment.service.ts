@@ -42,18 +42,20 @@ export class CommentService {
     }
     const { comment, rate, images } = createCommentDto;
 
-    const imageUrl = [];
-    if (images) {
-      images.map(async (image) => {
-        const imageResponse = await this.uploadService.uploadS3(image);
-        imageUrl.push(imageResponse);
-      });
+    let imageUrl: string[] = [];
+
+    if (images && images.length > 0) {
+      imageUrl = await Promise.all(
+        images.map((image) => this.uploadService.uploadS3(image)),
+      );
     }
+    
     const createdComment = this.commentRepository.create({
       content: comment,
       rate: rate,
       user: user,
       product: product,
+      images: imageUrl,
     });
     await this.commentRepository.save(createdComment);
 
