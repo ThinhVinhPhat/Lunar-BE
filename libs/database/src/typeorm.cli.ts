@@ -41,7 +41,7 @@ export const connectionSource = new DataSource({
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),
   synchronize: false,
   logging: process.env?.DATABASE_DEBUG_MODE === 'true' || false,
-  // ssl: {
-  //   rejectUnauthorized: false,
-  // },
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
