@@ -22,6 +22,7 @@ import { config } from '@app/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@app/entity';
 import { FavoriteModule } from './domain/favorite/favorite.module';
+import { StatisticModule } from './domain/statistic/statistic.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { FavoriteModule } from './domain/favorite/favorite.module';
     DiscountModule,
     CommentModule,
     FavoriteModule,
+    StatisticModule,
   ],
   controllers: [],
   providers: [

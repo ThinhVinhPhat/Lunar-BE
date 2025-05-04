@@ -10,3 +10,4 @@ export * from './product.entity';
 export * from './user.entity';
 export * from './user-discount.entity';
 export * from './favorite.entity';
+export * from './monthly-statistic.entity';

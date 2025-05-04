@@ -2,10 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from '@app/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '@app/entity/order.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { OrderStatus } from '@app/constant/role';
 import { MailerService } from '@nestjs-modules/mailer';
 import { StripeService } from '@app/stripe';
+import { Product } from '@app/entity';
 
 @Injectable()
 export class PaymentService {
@@ -14,6 +15,8 @@ export class PaymentService {
     private readonly orderRepository: Repository<Order>,
     private readonly mailService: MailerService,
     private readonly stripeService: StripeService,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
   ) {}
 
   async create(orderId: string, user: User) {
@@ -76,7 +79,6 @@ export class PaymentService {
             return { price: item.price, quantity: item.quantity };
           }),
         );
-        console.log(session.url);
 
         return {
           status: HttpStatus.OK,
@@ -103,12 +105,38 @@ export class PaymentService {
       where: {
         id: payment_id.order_id,
       },
-      relations: ['user', 'orderDetails'],
+      relations: ['user', 'orderDetails', 'orderDetails.product'],
     });
 
     if (!order) {
       throw new HttpException('Cannot find Order', HttpStatus.BAD_REQUEST);
     }
+
+    const productIds = order.orderDetails.map((item) => item.product.id);
+
+    const products = await this.productRepository.find({
+      where: {
+        id: In(productIds),
+      },
+    });
+
+    if (!products || products.length == 0) {
+      throw new HttpException('Cannot find Products', HttpStatus.BAD_REQUEST);
+    }
+
+    // Update product quantities based on orderDetails
+    for (const product of products) {
+      const orderDetail = order.orderDetails.find(
+        (item) => item.product.id === product.id,
+      );
+      if (orderDetail) {
+        product.stock = (product.stock ?? 0) - orderDetail.quantity;
+        if (product.stock < 0) {
+          product.stock = 0;
+        }
+      }
+    }
+    await this.productRepository.save(products);
 
     order.paymentId = payment_id.session_id;
     order.status = OrderStatus.CONFIRMED;

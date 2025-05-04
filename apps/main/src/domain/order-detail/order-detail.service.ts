@@ -77,6 +77,7 @@ export class OrderDetailService {
           });
           await transactionManager.save(OrderDetail, orderDetail);
           order.orderDetails.push(orderDetail);
+          order.total_price += Number(orderDetail.total);
           await transactionManager.save(order);
 
           return {
@@ -166,6 +167,7 @@ export class OrderDetailService {
             HttpStatus.BAD_REQUEST,
           );
         }
+        order.total_price -= orderDetail.total;
         orderDetail.quantity = quantity;
         orderDetail.price = productPrice;
         orderDetail.total = Math.floor(
@@ -173,9 +175,10 @@ export class OrderDetailService {
         );
         orderDetail.product_name = product.name;
         orderDetail.product = product;
-        await transactionManager.save(orderDetail);
+        order.total_price += orderDetail.total;
 
         await transactionManager.save(OrderDetail, orderDetail);
+        await transactionManager.save(Order, order);
 
         return {
           status: HttpStatus.OK,
@@ -193,6 +196,7 @@ export class OrderDetailService {
           where: {
             id: id,
           },
+          relations: ['order'],
         });
         if (!orderDetail) {
           throw new HttpException(
@@ -200,7 +204,17 @@ export class OrderDetailService {
             HttpStatus.BAD_REQUEST,
           );
         }
+        const order = await this.orderRepository.findOne({
+          where: {
+            orderDetails: {
+              id: orderDetail.id,
+            },
+          },
+          relations: ['orderDetails'],
+        });
+        order.total_price -= orderDetail.total;
         await transactionManager.remove(OrderDetail, orderDetail);
+        await transactionManager.save(order);
         return {
           status: HttpStatus.OK,
           message: message.DELETE_ORDER_DETAIL_SUCCESS,

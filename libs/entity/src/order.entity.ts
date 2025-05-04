@@ -27,6 +27,17 @@ export class Order extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   paymentId: string;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
+  total_price: number;
 
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order)
   orderDetails: OrderDetail[];

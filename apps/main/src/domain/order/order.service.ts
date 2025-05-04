@@ -94,15 +94,7 @@ export class OrderService {
     return {
       status: HttpStatus.OK,
       data: {
-        orders: orders.map((order) => {
-          return {
-            ...order,
-            total: order.orderDetails.reduce(
-              (acc, item) => acc + item.price * item.quantity,
-              0,
-            ),
-          };
-        }),
+        orders: orders,
         count: orders.length,
       },
       message: message.FIND_ORDER_SUCCESS,

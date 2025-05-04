@@ -43,6 +43,9 @@ export class Product extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   isFeatured: boolean;
 
+  @Column({ type: 'int', default: 0 })
+  views: number;
+
   @OneToMany(
     () => ProductCategory,
     (productCategory) => productCategory.product,

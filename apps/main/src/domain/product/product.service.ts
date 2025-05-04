@@ -236,8 +236,8 @@ export class ProductService {
       const existFavorite = product.favorites.find(
         (item) => item.user.id == userId,
       );
-
-      console.log(existFavorite);
+      product.views += 1;
+      await this.productEntity.save(product);
 
       return {
         status: HttpStatus.OK,

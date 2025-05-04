@@ -12,6 +12,7 @@ import {
   UserDiscount,
   User,
   Favorite,
+  MonthlyAnalytics,
 } from '../../entity/src';
 
 export const connectionSource = new DataSource({
@@ -34,6 +35,7 @@ export const connectionSource = new DataSource({
     Product,
     User,
     Favorite,
+    MonthlyAnalytics,
   ],
   migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),
