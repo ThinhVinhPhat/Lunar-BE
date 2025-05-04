@@ -62,12 +62,7 @@ export class StatisticService {
       ),
     });
 
-    const totalViews = await this.productRepository.sum('views', {
-      createdAt: Between(
-        new Date(now.getFullYear(), now.getMonth(), 1),
-        new Date(now.getFullYear(), now.getMonth() + 1, 0),
-      ),
-    });
+    const totalViews = await this.productRepository.sum('views');
 
     // Create or update monthly analytics
     let monthAnalytic = await this.analyticRepository.findOne({
