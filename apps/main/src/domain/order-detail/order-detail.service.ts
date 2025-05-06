@@ -49,17 +49,25 @@ export class OrderDetailService {
             HttpStatus.BAD_REQUEST,
           );
         }
-        const productPrice = product.discount_percentage
-          ? product.price * (product.discount_percentage / 100)
-          : product.price;
+
+        const productPrice =
+          Number(product.discount_percentage) > 0
+            ? Number(product.price) *
+              (1 - Number(product.discount_percentage) / 100)
+            : product.price;
 
         const existOrderDetail = order.orderDetails.find(
           (ol) => ol.product_name == product.name,
         );
 
         if (existOrderDetail) {
+          const oldQuantity = existOrderDetail.quantity;
           existOrderDetail.quantity = existOrderDetail.quantity + quantity;
-          await transactionManager.save(existOrderDetail);
+          existOrderDetail.total = productPrice * existOrderDetail.quantity;
+          order.total_price +=
+            productPrice * (existOrderDetail.quantity - oldQuantity);
+          await transactionManager.save(OrderDetail, existOrderDetail);
+          await transactionManager.save(Order, order);
 
           return {
             status: HttpStatus.OK,
@@ -77,8 +85,8 @@ export class OrderDetailService {
           });
           await transactionManager.save(OrderDetail, orderDetail);
           order.orderDetails.push(orderDetail);
-          order.total_price += Number(orderDetail.total);
-          await transactionManager.save(order);
+          order.total_price += productPrice * quantity;
+          await transactionManager.save(Order, order);
 
           return {
             status: HttpStatus.OK,
@@ -151,9 +159,11 @@ export class OrderDetailService {
             HttpStatus.BAD_REQUEST,
           );
         }
-        const productPrice = product.discount_percentage
-          ? Math.floor(product.price * (product.discount_percentage / 100))
-          : product.price;
+        const productPrice =
+          product.discount_percentage && Number(product.discount_percentage) > 0
+            ? Number(product.price) *
+              (1 - Number(product.discount_percentage) / 100)
+            : product.price;
         const { quantity } = updateOrderDetailDto;
 
         const orderDetail = await transactionManager.findOne(OrderDetail, {
@@ -170,9 +180,7 @@ export class OrderDetailService {
         order.total_price -= orderDetail.total;
         orderDetail.quantity = quantity;
         orderDetail.price = productPrice;
-        orderDetail.total = Math.floor(
-          orderDetail.quantity * orderDetail.price,
-        );
+        orderDetail.total = orderDetail.quantity * orderDetail.price;
         orderDetail.product_name = product.name;
         orderDetail.product = product;
         order.total_price += orderDetail.total;
@@ -212,9 +220,19 @@ export class OrderDetailService {
           },
           relations: ['orderDetails'],
         });
-        order.total_price -= orderDetail.total;
-        await transactionManager.remove(OrderDetail, orderDetail);
-        await transactionManager.save(order);
+
+        order.orderDetails = order.orderDetails.filter(
+          (od) => od.id !== orderDetail.id,
+        );
+
+        order.total_price -= Number(orderDetail.total);
+
+        if (order.orderDetails.length === 0) {
+          order.total_price = 0;
+        }
+
+        await transactionManager.delete(OrderDetail, orderDetail);
+        await transactionManager.save(Order, order);
         return {
           status: HttpStatus.OK,
           message: message.DELETE_ORDER_DETAIL_SUCCESS,
