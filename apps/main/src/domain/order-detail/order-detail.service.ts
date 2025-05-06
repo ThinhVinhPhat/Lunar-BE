@@ -197,7 +197,7 @@ export class OrderDetailService {
     );
   }
 
-  remove(id: string) {
+  async remove(id: string) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const orderDetail = await transactionManager.findOne(OrderDetail, {
@@ -220,10 +220,6 @@ export class OrderDetailService {
           },
           relations: ['orderDetails'],
         });
-
-        order.orderDetails = order.orderDetails.filter(
-          (od) => od.id !== orderDetail.id,
-        );
 
         order.total_price -= Number(orderDetail.total);
 
