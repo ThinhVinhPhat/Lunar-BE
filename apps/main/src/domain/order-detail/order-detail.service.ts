@@ -204,7 +204,7 @@ export class OrderDetailService {
           where: {
             id: id,
           },
-          relations: ['order'],
+          relations: ['order', 'order.orderDetails'],
         });
         if (!orderDetail) {
           throw new HttpException(
@@ -212,23 +212,20 @@ export class OrderDetailService {
             HttpStatus.BAD_REQUEST,
           );
         }
-        const order = await this.orderRepository.findOne({
-          where: {
-            orderDetails: {
-              id: orderDetail.id,
-            },
-          },
-          relations: ['orderDetails'],
-        });
+        const order = orderDetail.order;
+        let totalPrice = order.total_price;
 
-        order.total_price -= Number(orderDetail.total);
-
-        if (order.orderDetails.length === 0) {
-          order.total_price = 0;
+        if (order.orderDetails.length === 1) {
+          totalPrice = 0;
+        } else {
+          totalPrice -= Number(orderDetail.total);
         }
 
-        await transactionManager.delete(OrderDetail, orderDetail);
-        await transactionManager.save(Order, order);
+        await transactionManager.delete(OrderDetail, { id: orderDetail.id });
+
+        await transactionManager.update(Order, order.id, {
+          total_price: totalPrice,
+        });
         return {
           status: HttpStatus.OK,
           message: message.DELETE_ORDER_DETAIL_SUCCESS,

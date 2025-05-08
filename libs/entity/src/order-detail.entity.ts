@@ -17,10 +17,7 @@ export class OrderDetail extends BaseEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   total: number;
 
-  @ManyToOne(() => Order, (order) => order.orderDetails, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Order, (order) => order.orderDetails)
   @JoinColumn({ name: 'orderId' })
   order: Order;
 

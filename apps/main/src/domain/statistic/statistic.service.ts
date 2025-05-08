@@ -19,17 +19,12 @@ export class StatisticService {
   ) {}
 
   async getSummary() {
-    const maxResult = await this.productRepository
+    const topProducts = await this.productRepository
       .createQueryBuilder('product')
-      .select('MAX(product.views)', 'max')
-      .getRawOne();
-    const max = maxResult?.max ?? 0;
-
-    const topProducts = await this.productRepository.find({
-      where: {
-        views: max,
-      },
-    });
+      .where('product.isActive = :isActive', { isActive: true })
+      .orderBy('product.views', 'DESC')
+      .limit(3)
+      .getMany();
     const validSlugs = topProducts.map((product) => product.slug);
 
     const now = new Date();
@@ -62,7 +57,12 @@ export class StatisticService {
       ),
     });
 
-    const totalViews = await this.productRepository.sum('views');
+    const totalViews = await this.productRepository.sum('views', {
+      createdAt: Between(
+        new Date(now.getFullYear(), now.getMonth(), 1),
+        new Date(now.getFullYear(), now.getMonth() + 1, 0),
+      ),
+    });
 
     // Create or update monthly analytics
     let monthAnalytic = await this.analyticRepository.findOne({
@@ -104,19 +104,18 @@ export class StatisticService {
     const { totalCustomer, totalOrder, totalRevenue, totalView } =
       compareValueDto;
     const now = new Date();
-    const month = new Date(now.getFullYear(), now.getMonth(), 1)
-      .toISOString()
-      .split('T')[0];
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthStr = lastMonth.toISOString().split('T')[0];
 
     const value = await this.analyticRepository.findOne({
       where: {
-        month: month,
+        month: lastMonthStr,
       },
     });
 
     if (!value) {
       throw new HttpException(
-        'There are no value recorded in this month',
+        'There are no value recorded in last month',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -144,6 +143,50 @@ export class StatisticService {
         changeView,
       },
       message: 'Comparison with last month calculated successfully',
+    };
+  }
+
+  async getRevenueAndCategories() {
+    const monthlyRevenues = await this.analyticRepository.find();
+
+    const totalRevenue = monthlyRevenues.reduce(
+      (acc, revenue) => acc + (revenue.totalRevenue ?? 0),
+      0,
+    );
+
+    const categoryNames = [
+      'Metal Originals',
+      'Wood Classics',
+      'Acetate Originals',
+      'Smokey Bear',
+      'CAMP Classics',
+      'National Parks',
+      'Pendleton Eyewear',
+      'ACTV Performance',
+    ];
+
+    // Count products in each category-detail
+    const categoryCounts = {};
+
+    for (const categoryName of categoryNames) {
+      const count = await this.productRepository
+        .createQueryBuilder('product')
+        .innerJoin('product.productCategories', 'productCategory')
+        .innerJoin('productCategory.categoryDetails', 'categoryDetail')
+        .where('categoryDetail.name = :categoryName', { categoryName })
+        .getCount();
+
+      categoryCounts[categoryName] = count;
+    }
+
+    return {
+      status: HttpStatus.OK,
+      data: {
+        monthlyRevenues,
+        totalRevenue: totalRevenue.toFixed(2),
+        categoryCounts,
+      },
+      message: 'Revenue and category product counts retrieved successfully',
     };
   }
 }
