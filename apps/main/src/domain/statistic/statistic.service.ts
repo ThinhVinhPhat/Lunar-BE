@@ -21,7 +21,7 @@ export class StatisticService {
   async getSummary() {
     const topProducts = await this.productRepository
       .createQueryBuilder('product')
-      .where('product.isActive = :isActive', { isActive: true })
+      .where('product.status = :status', { status: true })
       .orderBy('product.views', 'DESC')
       .limit(3)
       .getMany();
@@ -183,7 +183,7 @@ export class StatisticService {
       status: HttpStatus.OK,
       data: {
         monthlyRevenues,
-        totalRevenue: totalRevenue.toFixed(2),
+        totalRevenue: Number(totalRevenue).toFixed(2),
         categoryCounts,
       },
       message: 'Revenue and category product counts retrieved successfully',
