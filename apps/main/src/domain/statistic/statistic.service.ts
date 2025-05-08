@@ -103,7 +103,12 @@ export class StatisticService {
     const { totalCustomer, totalOrder, totalRevenue, totalView } =
       compareValueDto;
     const now = new Date();
-    const lastMonth = now.toISOString().split('T')[0].split('-')[1];
+    const lastMonth = new Date(now.getFullYear(), now.getMonth())
+      .toISOString()
+      .split('T')[0]
+      .split('-')[1];
+
+    console.log(lastMonth);
 
     const value = await this.analyticRepository.findOne({
       where: {
