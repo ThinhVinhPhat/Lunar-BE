@@ -28,9 +28,7 @@ export class StatisticService {
     const validSlugs = topProducts.map((product) => product.slug);
 
     const now = new Date();
-    const month = new Date(now.getFullYear(), now.getMonth(), 1)
-      .toISOString()
-      .split('T')[0];
+    const month = now.toISOString().split('T')[0].split('-')[1];
 
     const totalNewUsers = await this.userRepository.count({
       where: {
@@ -66,8 +64,9 @@ export class StatisticService {
 
     // Create or update monthly analytics
     let monthAnalytic = await this.analyticRepository.findOne({
-      where: { month },
+      where: { month: month },
     });
+
     if (!monthAnalytic) {
       monthAnalytic = this.analyticRepository.create({
         month,
@@ -104,12 +103,11 @@ export class StatisticService {
     const { totalCustomer, totalOrder, totalRevenue, totalView } =
       compareValueDto;
     const now = new Date();
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthStr = lastMonth.toISOString().split('T')[0];
+    const lastMonth = now.toISOString().split('T')[0].split('-')[1];
 
     const value = await this.analyticRepository.findOne({
       where: {
-        month: lastMonthStr,
+        month: lastMonth,
       },
     });
 
@@ -137,9 +135,9 @@ export class StatisticService {
     return {
       status: HttpStatus.OK,
       data: {
-        changeCustomer,
-        changeOrder,
-        changeRevenue,
+        changeCustomer: changeCustomer.toFixed(2),
+        changeOrder: changeOrder.toFixed(2),
+        changeRevenue: changeRevenue.toFixed(2),
         changeView,
       },
       message: 'Comparison with last month calculated successfully',
@@ -150,7 +148,7 @@ export class StatisticService {
     const monthlyRevenues = await this.analyticRepository.find();
 
     const totalRevenue = monthlyRevenues.reduce(
-      (acc, revenue) => acc + (revenue.totalRevenue ?? 0),
+      (acc, revenue) => acc + (Number(revenue.totalRevenue) ?? 0),
       0,
     );
 
@@ -165,7 +163,6 @@ export class StatisticService {
       'ACTV Performance',
     ];
 
-    // Count products in each category-detail
     const categoryCounts = {};
 
     for (const categoryName of categoryNames) {
@@ -187,6 +184,37 @@ export class StatisticService {
         categoryCounts,
       },
       message: 'Revenue and category product counts retrieved successfully',
+    };
+  }
+
+  async updateSummary(id: string, month: string) {
+    const analytic = await this.analyticRepository.findOne({
+      where: { id: id },
+    });
+    if (!analytic) {
+      throw new HttpException('Analytic not found', HttpStatus.NOT_FOUND);
+    }
+
+    analytic.month = month || analytic.month;
+    await this.analyticRepository.save(analytic);
+    return {
+      status: HttpStatus.OK,
+      data: analytic,
+      message: 'Summary updated successfully',
+    };
+  }
+
+  async deleteSummary(id: string) {
+    const summary = await this.analyticRepository.findOne({
+      where: { id: id },
+    });
+    if (!summary) {
+      throw new HttpException('Summary not found', HttpStatus.NOT_FOUND);
+    }
+    await this.analyticRepository.delete(id);
+    return {
+      status: HttpStatus.OK,
+      message: 'Summary deleted successfully',
     };
   }
 }

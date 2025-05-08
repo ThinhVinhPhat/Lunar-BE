@@ -1,11 +1,5 @@
 import { BaseEntity } from '../../shared/src/index';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, Column } from 'typeorm';
 
 @Entity({ name: 'monthly_analytics' })
 export class MonthlyAnalytics extends BaseEntity {
