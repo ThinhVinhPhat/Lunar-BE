@@ -55,12 +55,7 @@ export class StatisticService {
       ),
     });
 
-    const totalViews = await this.productRepository.sum('views', {
-      createdAt: Between(
-        new Date(now.getFullYear(), now.getMonth(), 1),
-        new Date(now.getFullYear(), now.getMonth() + 1, 0),
-      ),
-    });
+    const totalViews = await this.productRepository.sum('views');
 
     // Create or update monthly analytics
     let monthAnalytic = await this.analyticRepository.findOne({
@@ -103,10 +98,10 @@ export class StatisticService {
     const { totalCustomer, totalOrder, totalRevenue, totalView } =
       compareValueDto;
     const now = new Date();
-    const lastMonth = new Date(now.getFullYear(), now.getMonth())
-      .toISOString()
-      .split('T')[0]
-      .split('-')[1];
+    const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1);
+    const lastMonth = (prevMonthDate.getMonth() + 1)
+      .toString()
+      .padStart(2, '0');
 
     console.log(lastMonth);
 
@@ -129,8 +124,6 @@ export class StatisticService {
       }
       return ((current - previous) / previous) * 100;
     };
-
-    console.log(value);
 
     const changeCustomer = calcChange(totalCustomer, value.totalNewUsers);
     const changeOrder = calcChange(totalOrder, value.totalOrders);
