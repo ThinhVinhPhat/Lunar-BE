@@ -185,4 +185,8 @@ export class OrderService {
       },
     );
   }
+
+  async finOneById(id: string) {
+    return this.orderRepository.findOne({ where: { id: id } });
+  }
 }

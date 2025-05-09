@@ -5,6 +5,6 @@ import { StripeWebhookController } from './stripe.controller';
 @Module({
   imports: [],
   controllers: [StripeWebhookController],
-  providers: [StripeWebhookService],
+  providers: [StripeWebhookService, ],
 })
 export class StripeWebhookModule {}

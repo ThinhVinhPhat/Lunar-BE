@@ -94,89 +94,15 @@ export class StripeService {
     });
   }
 
-  async getCheckoutSession(rawBody: Buffer, signature: string, secret: string) {
-    let event: Stripe.Event;
-
+  constructEvent(
+    rawBody: Buffer,
+    signature: string,
+    secret: string,
+  ): Stripe.Event {
     try {
-      event = this.stripe.webhooks.constructEvent(rawBody, signature, secret);
+      return this.stripe.webhooks.constructEvent(rawBody, signature, secret);
     } catch (err) {
-      console.error('Webhook Error: Invalid signature', err.message);
       throw new HttpException('Invalid signature', HttpStatus.BAD_REQUEST);
-    }
-
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const orderId = session.metadata.order_id;
-      const sub_total = session.amount_total;
-      const status = session.payment_status;
-      console.log('Received orderId from Stripe:', orderId);
-
-      try {
-        const order = await this.orderRepository.findOne({
-          where: { id: orderId },
-          relations: ['orderDetails', 'orderDetails.product'],
-        });
-
-        if (!order) {
-          console.error(
-            'Order not found yet. Throwing error to force Stripe retry...',
-          );
-          throw new Error('Order not created yet');
-        }
-
-        console.log('Order found:', order.id);
-
-        const payment = this.paymentRepository.create({
-          amount: sub_total,
-          order: order,
-          method: status === 'paid' ? PaymentStatus.PAID : PaymentStatus.FAILED,
-        });
-
-        await this.paymentRepository.save(payment);
-        console.log('Payment saved successfully.');
-
-        const productList = order.orderDetails.map((item) => ({
-          PRODUCT_NAME: item.product.name,
-          PRODUCT_QUANTITY: item.quantity,
-          PRODUCT_PRICE: item.total,
-        }));
-
-        await this.mailService.sendMail({
-          to: 'thinhvinhp@gmail.com',
-          subject: '✅ User Have Ordered Your Store!',
-          template: './admin-order.hbs',
-          context: {
-            SELLER_NAME: 'Thình Vĩnh Phát',
-            SELLER_DASHBOARD_URL: 'http://localhost:5173/admin/dashboard',
-            ORDER_ID: order.id,
-            ORDER_DATE: order.createdAt,
-            TOTAL_AMOUNT: sub_total,
-            PRODUCT_LIST: productList,
-            CUSTOMER_NAME: session.customer_details?.name,
-            CUSTOMER_EMAIL: session.customer_details?.email,
-            CUSTOMER_PHONE: session.customer_details?.phone,
-            SHIPPING_ADDRESS: order.shippingAddress,
-            ORDER_TRACKING_URL: session.id,
-          },
-        });
-
-        console.log('Mail sent successfully.');
-
-        return { received: true }; 
-      } catch (err) {
-        console.error(
-          'Processing error, Stripe should retry. Error:',
-          err.message,
-        );
-
-        throw new HttpException(
-          'Internal webhook error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    } else {
-      console.warn(`Unhandled event type ${event.type}`);
-      return { received: true };
     }
   }
 }
