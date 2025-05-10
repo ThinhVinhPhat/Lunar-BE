@@ -43,12 +43,13 @@ export class StripeWebhookController {
       const amount = session.amount_total;
       const status = session.payment_status;
 
-      await this.stripeQueue.add('checkout-completed', {
+      const redisApp = await this.stripeQueue.add('checkout-completed', {
         orderId,
         session,
         amount,
         status,
       });
+      console.log(redisApp);
 
       return { received: true };
     }
