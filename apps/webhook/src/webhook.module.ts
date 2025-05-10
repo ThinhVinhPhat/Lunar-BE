@@ -3,7 +3,6 @@ import { SharedModule } from '@app/shared';
 import { StripeModule } from '@app/stripe';
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-
 import { StripeWebhookModule } from './domain/stripe/stripe.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -25,6 +24,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
     }),
+
     StripeWebhookModule,
   ],
   exports: [BullModule],

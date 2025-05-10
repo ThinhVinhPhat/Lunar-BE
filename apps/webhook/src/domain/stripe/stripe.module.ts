@@ -5,9 +5,9 @@ import { OrderModule } from '@/domain/order/order.module';
 import { StripeProcessor } from './stripe.processor';
 import { PaymentModule } from '@/domain/payment/payment.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { BullModule } from '@nestjs/bull';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Payment } from '@app/entity';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [

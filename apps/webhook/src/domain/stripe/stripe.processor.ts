@@ -1,4 +1,3 @@
-// stripe/stripe.processor.ts
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
 import { OrderService } from '@/domain/order/order.service';
@@ -32,10 +31,14 @@ export class StripeProcessor {
   ) {
     const { orderId, session, amount, status } = job.data;
 
+    console.log(job);
+
     const order = await this.orderService.finOneById(orderId);
     if (!order) {
       throw new Error(`Order ${orderId} not found yet`);
     }
+
+    console.log(order);
 
     const payment = this.paymentRepository.create({
       order: order,
@@ -43,6 +46,8 @@ export class StripeProcessor {
       status: status,
     });
     await this.paymentRepository.save(payment);
+    console.log(payment);
+    
 
     const productList = order.orderDetails.map((item) => {
       return {
