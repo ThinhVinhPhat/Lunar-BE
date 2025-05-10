@@ -22,7 +22,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           port: config.get<number>('REDIS_PORT'),
           username: config.get('REDIS_USERNAME'),
           password: config.get('REDIS_PASSWORD'),
-          tls: {},
         },
       }),
     }),
