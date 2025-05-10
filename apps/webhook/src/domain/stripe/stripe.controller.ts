@@ -35,12 +35,13 @@ export class StripeWebhookController {
       return { error: 'Invalid signature' };
     }
 
+    console.log(event.type);
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const orderId = session.metadata.order_id;
       const amount = session.amount_total;
       const status = session.payment_status;
-      
 
       await this.stripeQueue.add('checkout-completed', {
         orderId,
