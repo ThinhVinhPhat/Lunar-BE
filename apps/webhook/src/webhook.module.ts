@@ -3,10 +3,9 @@ import { SharedModule } from '@app/shared';
 import { StripeModule } from '@app/stripe';
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { StripeWebhookController } from './domain/stripe/stripe.controller';
-import { StripeProcessor } from './domain/stripe/stripe.processor';
+
 import { StripeWebhookModule } from './domain/stripe/stripe.module';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -15,12 +14,15 @@ import { ConfigService } from '@nestjs/config';
     }),
     SharedModule,
     BullModule.forRootAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: async (config: ConfigService) => ({
         redis: {
-          host: configService.get<string>('REDIS_HOST'),
-          port: configService.get<number>('REDIS_PORT'),
-          maxRetriesPerRequest: 30,
+          host: config.get('REDIS_HOST'),
+          port: config.get<number>('REDIS_PORT'),
+          username: config.get('REDIS_USERNAME'),
+          password: config.get('REDIS_PASSWORD'),
+          tls: {},
         },
       }),
     }),
