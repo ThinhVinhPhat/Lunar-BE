@@ -52,7 +52,7 @@ export class StripeProcessor {
       };
     });
 
-    await this.mailService.sendMail({
+    const mail = await this.mailService.sendMail({
       to: 'thinhvinhp@gmail.com',
       subject: '✅ User Have Ordered Your Store!',
       template: './admin-order.hbs',
@@ -70,5 +70,6 @@ export class StripeProcessor {
         ORDER_TRACKING_URL: session.id,
       },
     });
+    console.log('Mail sent:', mail);
   }
 }
