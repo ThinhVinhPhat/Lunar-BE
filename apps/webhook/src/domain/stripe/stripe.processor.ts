@@ -7,14 +7,16 @@ import { Payment } from '@app/entity';
 import { Repository } from 'typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PaymentStatus } from '@app/constant';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 @Processor('stripe-webhook')
 export class StripeProcessor {
   constructor(
-    private readonly orderService: OrderService,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
     private readonly mailService: MailerService,
+    private readonly orderService: OrderService,
   ) {}
 
   @Process({

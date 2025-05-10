@@ -5,6 +5,8 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { StripeWebhookController } from './domain/stripe/stripe.controller';
 import { StripeProcessor } from './domain/stripe/stripe.processor';
+import { StripeWebhookModule } from './domain/stripe/stripe.module';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -12,15 +14,17 @@ import { StripeProcessor } from './domain/stripe/stripe.processor';
       secretKey: config.STRIPE.STRIPE_SERECT_KEY,
     }),
     SharedModule,
-    BullModule.forRoot({
-      redis: { host: process.env.REDIS_HOST, port: +process.env.REDIS_PORT },
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+        },
+      }),
     }),
-    BullModule.registerQueue({
-      name: 'stripe-webhook',
-    }),
+    StripeWebhookModule,
   ],
-  controllers: [StripeWebhookController],
-  providers: [StripeProcessor],
-  exports: [BullModule]
+  exports: [BullModule],
 })
 export class WebhookModule {}
