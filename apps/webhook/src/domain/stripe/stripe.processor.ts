@@ -29,52 +29,61 @@ export class StripeProcessor {
       status: PaymentStatus;
     }>,
   ) {
-    const { orderId, session, amount, status } = job.data;
+    try {
+      const { orderId, session, amount, status } = job.data;
 
-    console.log(job);
+      console.log('🔍 Fetching order with ID:', orderId);
+      const order = await this.orderService.finOneById(orderId);
+      if (!order) {
+        console.error(`❌ Order not found: ${orderId}`);
+        return;
+      }
 
-    const order = await this.orderService.finOneById(orderId);
-    if (!order) {
-      throw new Error(`Order ${orderId} not found yet`);
+      console.log('✅ Order found:', order);
+
+      const payment = this.paymentRepository.create({
+        order,
+        amount,
+        status,
+      });
+
+      console.log('💰 Creating payment:', payment);
+      await this.paymentRepository.save(payment);
+      console.log('✅ Payment saved:', payment);
+
+      const productList =
+        order.orderDetails?.map((item) => {
+          return {
+            PRODUCT_NAME: item.product?.name,
+            PRODUCT_QUANTITY: item.quantity,
+            PRODUCT_PRICE: item.total,
+          };
+        }) || [];
+
+      console.log('📦 Product List:', productList);
+
+      const mail = await this.mailService.sendMail({
+        to: 'thinhvinhp@gmail.com',
+        subject: '✅ User Have Ordered Your Store!',
+        template: './admin-order.hbs',
+        context: {
+          SELLER_NAME: 'Thình Vĩnh Phát',
+          SELLER_DASHBOARD_URL: 'http://localhost:5173/admin/dashboard',
+          ORDER_ID: order.id,
+          ORDER_DATE: order.createdAt,
+          TOTAL_AMOUNT: amount,
+          PRODUCT_LIST: productList,
+          CUSTOMER_NAME: session.customer_details?.name,
+          CUSTOMER_EMAIL: session.customer_details?.email,
+          CUSTOMER_PHONE: session.customer_details?.phone,
+          SHIPPING_ADDRESS: order.shippingAddress,
+          ORDER_TRACKING_URL: session.id,
+        },
+      });
+
+      console.log('📧 Mail sent:', mail);
+    } catch (err) {
+      console.error('🔥 Error in processor:', err);
     }
-
-    console.log(order);
-
-    const payment = this.paymentRepository.create({
-      order: order,
-      amount,
-      status: status,
-    });
-    await this.paymentRepository.save(payment);
-    console.log(payment);
-    
-
-    const productList = order.orderDetails.map((item) => {
-      return {
-        PRODUCT_NAME: item.product.name,
-        PRODUCT_QUANTITY: item.quantity,
-        PRODUCT_PRICE: item.total,
-      };
-    });
-
-    const mail = await this.mailService.sendMail({
-      to: 'thinhvinhp@gmail.com',
-      subject: '✅ User Have Ordered Your Store!',
-      template: './admin-order.hbs',
-      context: {
-        SELLER_NAME: 'Thình Vĩnh Phát',
-        SELLER_DASHBOARD_URL: 'http://localhost:5173/admin/dashboard',
-        ORDER_ID: order.id,
-        ORDER_DATE: order.createdAt,
-        TOTAL_AMOUNT: amount,
-        PRODUCT_LIST: productList,
-        CUSTOMER_NAME: session.customer_details?.name,
-        CUSTOMER_EMAIL: session.customer_details?.email,
-        CUSTOMER_PHONE: session.customer_details?.phone,
-        SHIPPING_ADDRESS: order.shippingAddress,
-        ORDER_TRACKING_URL: session.id,
-      },
-    });
-    console.log('Mail sent:', mail);
   }
 }
