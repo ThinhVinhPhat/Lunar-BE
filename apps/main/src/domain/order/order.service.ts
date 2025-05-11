@@ -187,6 +187,9 @@ export class OrderService {
   }
 
   async finOneById(id: string) {
-    return await this.orderRepository.findOne({ where: { id: id } });
+    return await this.orderRepository.findOne({
+      where: { id: id },
+      relations: ['orderDetails'],
+    });
   }
 }
