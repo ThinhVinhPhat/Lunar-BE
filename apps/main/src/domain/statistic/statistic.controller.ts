@@ -1,10 +1,13 @@
-import { Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Query, Delete } from '@nestjs/common';
 import { StatisticService } from './statistic.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { CompareValueDTO } from './dto/compare.dto';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant';
+import { UserReq } from '@app/decorator/user.decorator';
+import { User } from '@app/entity/user.entity';
+import { GetUserOrdersDTO } from './dto/get-user-orders.dto';
 
 @ApiTags('Statistic')
 @Controller('statistic')
@@ -66,5 +69,17 @@ export class StatisticController {
     return this.statisticService.deleteSummary(id);
   }
 
-
+  @ApiBearerAuth()
+  @ApiOperationDecorator({
+    summary: 'Get orders placed by the authenticated user',
+    description:
+      'Get a paginated list of orders placed by the user filtered by time range',
+  })
+  @Get('/user-orders')
+  getUserOrders(
+    @Query() query: GetUserOrdersDTO,
+    @UserReq() currentUser: User,
+  ) {
+    return this.statisticService.getUserOrders(currentUser.id, query);
+  }
 }

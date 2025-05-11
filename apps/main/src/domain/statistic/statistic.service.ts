@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { MonthlyAnalytics } from '@app/entity/monthly-statistic.entity';
 import { CompareValueDTO } from './dto/compare.dto';
+import { message } from '@app/constant';
 
 @Injectable()
 export class StatisticService {
@@ -13,7 +14,7 @@ export class StatisticService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<Order>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(MonthlyAnalytics)
     private readonly analyticRepository: Repository<MonthlyAnalytics>,
   ) {}
@@ -91,6 +92,87 @@ export class StatisticService {
         // monthAnalytic,
       },
       message: 'Get Summary Successfully',
+    };
+  }
+
+  async getUserOrders(
+    userId: string,
+    query: { offset?: number; limit?: number; filter: string },
+  ) {
+    const { offset = 0, limit = 10, filter } = query;
+    const now = new Date();
+    let startDate: Date | null = null;
+
+    switch (filter) {
+      case 'last 24 hour':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case 'last 2 days':
+        startDate = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+        break;
+      case 'last 7 day':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'last month':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case 'Recent':
+      default:
+        startDate = null;
+        break;
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.NOT_FOUND);
+    }
+
+    const queryBuilder = this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.user.id = :userId', { userId })
+      .orderBy('order.createdAt', 'DESC')
+      .skip(offset)
+      .take(limit);
+
+    if (startDate) {
+      queryBuilder.andWhere('order.createdAt >= :startDate', { startDate });
+    }
+
+    const [orders, total] = await queryBuilder.getManyAndCount();
+
+    // Add time difference between now and order creation time
+    const ordersWithTimeDiff = orders.map((order) => {
+      const diffMs = now.getTime() - order.createdAt.getTime();
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMinutes / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      let timeDiffStr = '';
+      if (diffDays > 0) {
+        timeDiffStr = `${diffDays} day(s) ago`;
+      } else if (diffHours > 0) {
+        timeDiffStr = `${diffHours} hour(s) ago`;
+      } else if (diffMinutes > 0) {
+        timeDiffStr = `${diffMinutes} minute(s) ago`;
+      } else {
+        timeDiffStr = 'Just now';
+      }
+
+      return {
+        ...order,
+        timeSinceOrder: timeDiffStr,
+      };
+    });
+
+    return {
+      status: HttpStatus.OK,
+      data: {
+        orders: ordersWithTimeDiff,
+        total,
+      },
+      message: 'User orders retrieved successfully',
     };
   }
 
