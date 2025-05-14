@@ -74,4 +74,12 @@ export const message = {
   CODE_EXPIRED: 'Code expired',
   CODE_NOT_MATCH: 'Code invalid',
   VERIFY_SUCCESS: 'Verify successfully',
+  CREATE_ORDER_HISTORY_SUCCESS: 'Create OrderHistory successfully',
+  CREATE_ORDER_HISTORY_FAIL: 'Create OrderHistory  fail',
+  UPDATE_ORDER_HISTORY_SUCCESS: 'Update OrderHistory  successfully',
+  UPDATE_ORDER_HISTORY_FAIL: 'Update OrderHistory  fail',
+  DELETE_ORDER_HISTORY_SUCCESS: 'Delete OrderHistory  successfully',
+  DELETE_ORDER_HISTORY_FAIL: 'Delete OrderHistory  fail',
+  FIND_ORDER_HISTORY_SUCCESS: 'Find OrderHistory  successfully',
+  FIND_ORDER_HISTORY_FAIL: 'Find Order fail',
 };

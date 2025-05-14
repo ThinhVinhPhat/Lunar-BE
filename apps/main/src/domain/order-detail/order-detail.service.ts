@@ -8,6 +8,8 @@ import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Order } from '@app/entity/order.entity';
 import { Product } from '@app/entity/product.entity';
 import { message } from '@app/constant/message';
+import { OrderHistory } from '@app/entity';
+import { OrderHistoryAction } from '@app/constant';
 
 @Injectable()
 export class OrderDetailService {
@@ -16,8 +18,8 @@ export class OrderDetailService {
     private readonly orderDetailRepository: Repository<OrderDetail>,
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
-    @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
+    @InjectRepository(OrderHistory)
+    private readonly orderHistoryRepository: Repository<OrderHistory>,
     private readonly dataSource: DataSource,
   ) {}
   create(
@@ -31,7 +33,7 @@ export class OrderDetailService {
 
         const order = await transactionManager.findOne(Order, {
           where: { id: orderId },
-          relations: ['orderDetails'],
+          relations: ['orderDetails', 'user', 'histories'],
         });
 
         if (!order) {
@@ -83,9 +85,18 @@ export class OrderDetailService {
             total: productPrice * quantity,
             product_name: product.name,
           });
+
+          const orderHistory = transactionManager.create(OrderHistory, {
+            order: order,
+            action: OrderHistoryAction.ADD_PRODUCT,
+            description: `Add product ${product.name} to order ${order.id}`,
+          });
+
+          await transactionManager.save(OrderHistory, orderHistory);
           await transactionManager.save(OrderDetail, orderDetail);
           order.orderDetails.push(orderDetail);
           order.total_price += productPrice * quantity;
+          order.histories.push(orderHistory);
           await transactionManager.save(Order, order);
 
           return {
@@ -223,8 +234,16 @@ export class OrderDetailService {
 
         await transactionManager.delete(OrderDetail, { id: orderDetail.id });
 
+        const orderHistory = transactionManager.create(OrderHistory, {
+          order: order,
+          action: OrderHistoryAction.REMOVE_PRODUCT,
+          description: `Remove product ${orderDetail.product_name} from order ${order.id} `,
+        });
+
+        await transactionManager.save(OrderHistory, orderHistory);
         await transactionManager.update(Order, order.id, {
           total_price: totalPrice,
+          histories: order.histories.concat(orderHistory),
         });
         return {
           status: HttpStatus.OK,

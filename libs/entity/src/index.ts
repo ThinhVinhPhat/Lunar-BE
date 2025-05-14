@@ -11,3 +11,4 @@ export * from './user.entity';
 export * from './user-discount.entity';
 export * from './favorite.entity';
 export * from './monthly-statistic.entity';
+export * from './order-history.entity';

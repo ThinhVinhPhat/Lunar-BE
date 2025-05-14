@@ -1,17 +1,7 @@
-import { OrderStatus } from '@app/constant/role';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsNumber, IsString, IsEnum } from 'class-validator';
+import { IsOptional, IsNumber, IsString } from 'class-validator';
 
 export class UpdateOrderDto {
-  @ApiPropertyOptional({
-    description: 'Order status',
-    example: OrderStatus.PENDING,
-    enum: OrderStatus,
-  })
-  @IsOptional()
-  @IsEnum(OrderStatus)
-  status: OrderStatus;
-
   @ApiPropertyOptional({
     description: 'Order shippingAddress',
     example: '123 Main St, Anytown, USA',

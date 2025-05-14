@@ -28,3 +28,11 @@ export enum PaymentStatus {
   PENDING = 'Pending',
   FAILED = 'Failed',
 }
+
+export enum OrderHistoryAction {
+  CREATE_ORDER = 'CREATE_ORDER',
+  UPDATE_STATUS = 'UPDATE_STATUS',
+  ADD_PRODUCT = 'ADD_PRODUCT',
+  REMOVE_PRODUCT = 'REMOVE_PRODUCT',
+  UPDATE_NOTE = 'UPDATE_NOTE',
+}

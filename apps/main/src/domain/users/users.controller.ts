@@ -20,7 +20,7 @@ import { User } from '../../../../../libs/entity/src/user.entity';
 import { Public } from '@app/decorator/public.decorator';
 import { UpdatePasswordDTO } from './dto/update-password.dto';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
-import { JwtAuthGuard } from '@/domain/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '@/domain/guard/jwt-auth.guard';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { FilesInterceptor } from '@nestjs/platform-express';

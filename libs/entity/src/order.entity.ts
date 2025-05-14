@@ -4,6 +4,7 @@ import { BaseEntity } from '../../shared/src/index';
 import { User } from './user.entity';
 import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Payment } from './payment.entity';
+import { OrderHistory } from './order-history.entity';
 
 @Entity('order')
 export class Order extends BaseEntity {
@@ -56,4 +57,7 @@ export class Order extends BaseEntity {
     onDelete: 'CASCADE',
   })
   payments: Payment[];
+
+  @OneToMany(() => OrderHistory, (history) => history.order)
+  histories: OrderHistory[];
 }

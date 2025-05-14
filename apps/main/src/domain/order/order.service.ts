@@ -2,12 +2,13 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from '@app/entity/index';
+import { Order, OrderDetail, OrderHistory } from '@app/entity/index';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { User } from '@app/entity/user.entity';
 import { message } from '@app/constant/message';
 import { FindOrderDTO } from './dto/find-order.dto';
-import { OrderStatus } from '@app/constant/role';
+import { OrderHistoryAction, OrderStatus } from '@app/constant/role';
+import { UpdateOrderStatusDTO } from './dto/update-order-status.dto';
 
 @Injectable()
 export class OrderService {
@@ -16,6 +17,8 @@ export class OrderService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(OrderHistory)
+    private readonly orderHistoryRepository: Repository<OrderHistory>,
     private readonly dataSource: DataSource,
   ) {}
   async create(createOrderDto: CreateOrderDto, id: string) {
@@ -57,12 +60,21 @@ export class OrderService {
         const order = transactionManager.create(Order, {
           orderDate: new Date(Date.now()),
           orderDetails: [],
+          histories: [],
           shippingAddress,
           shippingFee,
           shipPhone,
           note,
           user: user,
         });
+        const orderHistory = transactionManager.create(OrderHistory, {
+          order: order,
+          action: OrderHistoryAction.CREATE_ORDER,
+          performedBy: user,
+          description: `Create order with id: ${order.id}`,
+        });
+        await transactionManager.save(OrderHistory, orderHistory);
+        order.histories.push(orderHistory);
         await transactionManager.save(Order, order);
 
         return {
@@ -77,7 +89,7 @@ export class OrderService {
   async findAll(findByOrderDTO: FindOrderDTO, id: string) {
     const user = await this.userRepository.findOne({
       where: { id: id },
-      relations: ['orders', 'orders.orderDetails'],
+      relations: ['orders', 'orders.orderDetails', 'orders.histories'],
     });
     if (!user) {
       throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
@@ -115,7 +127,7 @@ export class OrderService {
           id: userId,
         },
       },
-      relations: ['orderDetails', 'user', 'orderDetails.product'],
+      relations: ['orderDetails', 'user', 'orderDetails.product', 'histories'],
     });
     if (!order) {
       throw new HttpException(message.FIND_ORDER_FAIL, HttpStatus.BAD_REQUEST);
@@ -134,7 +146,7 @@ export class OrderService {
           where: {
             id: id,
           },
-          relations: ['orderDetails'],
+          relations: ['orderDetails', 'histories'],
         });
         if (!order) {
           throw new HttpException(
@@ -143,14 +155,13 @@ export class OrderService {
           );
         }
 
-        const { shipPhone, shippingAddress, shippingFee, note, status } =
+        const { shipPhone, shippingAddress, shippingFee, note } =
           updateOrderDto;
 
         order.shipPhone = shipPhone;
         order.shippingAddress = shippingAddress;
         order.shippingFee = shippingFee;
         order.note = note;
-        order.status = status;
 
         await transactionManager.save(Order, order);
 
@@ -163,13 +174,14 @@ export class OrderService {
     );
   }
 
-  async remove(id: string) {
+  async updateStatus(id: string, updateOrderStatusDTO: UpdateOrderStatusDTO) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const order = await transactionManager.findOne(Order, {
           where: {
             id: id,
           },
+          relations: ['orderDetails', 'histories'],
         });
         if (!order) {
           throw new HttpException(
@@ -177,6 +189,39 @@ export class OrderService {
             HttpStatus.BAD_REQUEST,
           );
         }
+        const { status } = updateOrderStatusDTO;
+        order.status = status;
+        const orderHistory = await transactionManager.create(OrderHistory, {
+          order: order,
+          action: OrderHistoryAction.UPDATE_STATUS,
+        });
+        await transactionManager.save(OrderHistory, orderHistory);
+        order.histories.push(orderHistory);
+        await transactionManager.save(Order, order);
+        return {
+          status: HttpStatus.OK,
+          data: order,
+          message: message.UPDATE_ORDER_SUCCESS,
+        };
+      },
+    );
+  }
+  async remove(id: string) {
+    return this.dataSource.transaction(
+      async (transactionManager: EntityManager) => {
+        const order = await transactionManager.findOne(Order, {
+          where: {
+            id: id,
+          },
+          relations: ['orderDetails'],
+        });
+        if (!order) {
+          throw new HttpException(
+            message.FIND_ORDER_FAIL,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        await transactionManager.remove(OrderDetail, order.orderDetails);
         await transactionManager.remove(Order, order);
         return {
           status: HttpStatus.OK,

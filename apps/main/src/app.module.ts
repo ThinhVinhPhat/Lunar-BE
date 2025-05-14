@@ -4,7 +4,7 @@ import { AuthModule } from './domain/auth/auth.module';
 import { AuthService } from './domain/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './domain/auth/jwt-auth.guard';
+import { JwtAuthGuard } from './domain/guard/jwt-auth.guard';
 import { ProductModule } from './domain/product/product.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { UploadModule } from './domain/upload/upload.module';
