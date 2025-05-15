@@ -21,6 +21,20 @@ export class OrderService {
     private readonly orderHistoryRepository: Repository<OrderHistory>,
     private readonly dataSource: DataSource,
   ) {}
+
+  private canTransition(from: OrderStatus, to: OrderStatus): boolean {
+    const validTransitions: Record<OrderStatus, OrderStatus[]> = {
+      [OrderStatus.ALL_ORDER]: [],
+      [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.REJECTED],
+      [OrderStatus.CONFIRMED]: [OrderStatus.SHIPPED, OrderStatus.REJECTED],
+      [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
+      [OrderStatus.DELIVERED]: [],
+      [OrderStatus.REJECTED]: [],
+    };
+
+    return validTransitions[from]?.includes(to);
+  }
+
   async create(createOrderDto: CreateOrderDto, id: string) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
@@ -177,6 +191,7 @@ export class OrderService {
   async updateStatus(id: string, updateOrderStatusDTO: UpdateOrderStatusDTO) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
+        const { status, description } = updateOrderStatusDTO;
         const order = await transactionManager.findOne(Order, {
           where: {
             id: id,
@@ -189,11 +204,20 @@ export class OrderService {
             HttpStatus.BAD_REQUEST,
           );
         }
-        const { status } = updateOrderStatusDTO;
+        if (!this.canTransition(order.status, status) && !description) {
+          throw new HttpException(
+            `Order status is ${order.status}, cannot update status to ${status}`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
         order.status = status;
         const orderHistory = await transactionManager.create(OrderHistory, {
           order: order,
           action: OrderHistoryAction.UPDATE_STATUS,
+          description: description
+            ? description
+            : `Order status updated to ${status} by ${order.user.firstName} ${order.user.lastName} at ${new Date().toISOString()}`,
         });
         await transactionManager.save(OrderHistory, orderHistory);
         order.histories.push(orderHistory);
