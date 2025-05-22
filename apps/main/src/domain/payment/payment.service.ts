@@ -3,10 +3,10 @@ import { User } from '@app/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '@app/entity/order.entity';
 import { In, Repository } from 'typeorm';
-import { OrderStatus } from '@app/constant/role';
+import { OrderStatus, PaymentMethod, PaymentStatus } from '@app/constant/role';
 import { MailerService } from '@nestjs-modules/mailer';
 import { StripeService } from '@app/stripe';
-import { Product } from '@app/entity';
+import { Payment, Product } from '@app/entity';
 
 @Injectable()
 export class PaymentService {
@@ -17,6 +17,8 @@ export class PaymentService {
     private readonly stripeService: StripeService,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(Payment)
+    private readonly paymentRepository: Repository<Payment>,
   ) {}
 
   async create(orderId: string, user: User) {
@@ -138,8 +140,16 @@ export class PaymentService {
     }
     await this.productRepository.save(products);
 
-    order.paymentId = payment_id.session_id;
+    const payment = this.paymentRepository.create({
+      method: PaymentMethod.CREDIT_CARD,
+      amount: order.total_price,
+      status: PaymentStatus.PAID,
+      order: order,
+    });
+
+    await this.paymentRepository.save(payment);
     order.status = OrderStatus.CONFIRMED;
+    order.payment = payment;
     await this.orderRepository.save(order);
 
     await this.mailService.sendMail({

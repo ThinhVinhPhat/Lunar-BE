@@ -2,9 +2,17 @@ import { OrderStatus } from '../../constant/src/index';
 import { OrderDetail } from './order-detail.entity';
 import { BaseEntity } from '../../shared/src/index';
 import { User } from './user.entity';
-import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
 import { Payment } from './payment.entity';
 import { OrderHistory } from './order-history.entity';
+import { OrderTracking } from './order-tracking.entity';
 
 @Entity('order')
 export class Order extends BaseEntity {
@@ -26,8 +34,6 @@ export class Order extends BaseEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
-  @Column({ type: 'varchar', nullable: true })
-  paymentId: string;
   @Column({
     type: 'decimal',
     precision: 10,
@@ -51,12 +57,15 @@ export class Order extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToMany(() => Payment, (payment) => payment.order, {
+  @OneToOne(() => Payment, (payment) => payment.order, {
     eager: true,
     cascade: true,
     onDelete: 'CASCADE',
   })
-  payments: Payment[];
+  payment: Payment;
+
+  @OneToMany(() => OrderTracking, (track) => track.order)
+  orderTracks: OrderTracking[];
 
   @OneToMany(() => OrderHistory, (history) => history.order)
   histories: OrderHistory[];

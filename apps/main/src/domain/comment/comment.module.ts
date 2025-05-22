@@ -11,5 +11,6 @@ import { Comment } from '../../../../../libs/entity/src/comment.entity';
   imports: [TypeOrmModule.forFeature([Comment, User, Product]), UploadModule],
   controllers: [CommentController],
   providers: [CommentService],
+  exports: [CommentService],
 })
 export class CommentModule {}

@@ -3,7 +3,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order, OrderDetail, OrderHistory } from '@app/entity/index';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, LessThan, Repository } from 'typeorm';
 import { User } from '@app/entity/user.entity';
 import { message } from '@app/constant/message';
 import { FindOrderDTO } from './dto/find-order.dto';
@@ -75,6 +75,7 @@ export class OrderService {
           orderDate: new Date(Date.now()),
           orderDetails: [],
           histories: [],
+          payment: null,
           shippingAddress,
           shippingFee,
           shipPhone,
@@ -259,6 +260,18 @@ export class OrderService {
     return await this.orderRepository.findOne({
       where: { id: id },
       relations: ['orderDetails', 'orderDetails.product'],
+    });
+  }
+
+  async findAllShippedOrder() {
+    return await this.orderRepository.find({
+      where: {
+        status: OrderStatus.SHIPPED,
+        orderTracks: {
+          createdAt: LessThan(new Date(Date.now() - 10 * 60 * 1000)),
+        },
+      },
+      relations: ['orderDetails', 'orderDetails.product', 'orderTracks'],
     });
   }
 }

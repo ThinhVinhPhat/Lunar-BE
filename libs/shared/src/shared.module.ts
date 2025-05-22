@@ -42,7 +42,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) =>
-        configService.get('typeorm'),
+        configService.getOrThrow('typeorm'),
     }),
   ],
   exports: [MailerModule, ConfigModule, TypeOrmModule],

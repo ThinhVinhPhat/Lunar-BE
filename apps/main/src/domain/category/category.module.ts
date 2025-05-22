@@ -9,5 +9,6 @@ import { UploadModule } from '@/domain/upload/upload.module';
   imports: [TypeOrmModule.forFeature([Category]), UploadModule],
   controllers: [CategoryController],
   providers: [CategoryService],
+  exports: [CategoryService],
 })
 export class CategoryModule {}

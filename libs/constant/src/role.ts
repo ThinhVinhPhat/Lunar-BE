@@ -35,4 +35,12 @@ export enum OrderHistoryAction {
   ADD_PRODUCT = 'ADD_PRODUCT',
   REMOVE_PRODUCT = 'REMOVE_PRODUCT',
   UPDATE_NOTE = 'UPDATE_NOTE',
+  CHANGE_DELIVERY_ADDRESS = 'CHANGE_DELIVERY_ADDRESS',
+}
+
+export enum PaymentMethod {
+  CREDIT_CARD = 'Credit Card',
+  PAYPAL = 'PayPal',
+  BANK_TRANSFER = 'Bank Transfer',
+  CASH_ON_DELIVERY = 'Cash on Delivery',
 }

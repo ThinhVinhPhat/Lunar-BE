@@ -14,7 +14,8 @@ import {
   Favorite,
   MonthlyAnalytics,
   OrderHistory,
-} from '../../entity/src';
+  OrderTracking,
+} from '../../entity/src/index';
 
 export const connectionSource = new DataSource({
   type: 'postgres',
@@ -38,6 +39,7 @@ export const connectionSource = new DataSource({
     Favorite,
     MonthlyAnalytics,
     OrderHistory,
+    OrderTracking,
   ],
   migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),

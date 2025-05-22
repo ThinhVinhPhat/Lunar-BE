@@ -10,5 +10,6 @@ import { User } from '@app/entity/user.entity';
   imports: [TypeOrmModule.forFeature([Discount, UserDiscount, User])],
   controllers: [DiscountController],
   providers: [DiscountService],
+  exports: [DiscountService],
 })
 export class DiscountModule {}

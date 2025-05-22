@@ -13,5 +13,6 @@ import { OrderHistory } from '@app/entity';
   ],
   controllers: [OrderDetailController],
   providers: [OrderDetailService],
+  exports: [OrderDetailService],
 })
 export class OrderDetailModule {}

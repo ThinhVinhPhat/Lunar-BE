@@ -13,6 +13,7 @@ import {
   Favorite,
   MonthlyAnalytics,
   OrderHistory,
+  OrderTracking,
 } from '../../entity/src/index';
 import { registerAs } from '@nestjs/config';
 import { config as dotenvConfig } from 'dotenv';
@@ -32,7 +33,6 @@ export const config = {
     Category,
     CategoryDetail,
     Comment,
-    UserDiscount,
     Discount,
     OrderDetail,
     Order,
@@ -41,8 +41,10 @@ export const config = {
     Product,
     User,
     Favorite,
+    UserDiscount,
     MonthlyAnalytics,
-    OrderHistory
+    OrderHistory,
+    OrderTracking,
   ],
   migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),

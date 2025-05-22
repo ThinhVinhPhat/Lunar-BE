@@ -32,6 +32,16 @@
         "tsConfigPath": "apps/webhook/tsconfig.app.json"
       }
     },
+
+     "@apps/cron": {
+      "type": "application",
+      "root": "apps/cron",
+      "entryFile": "main",
+      "sourceRoot": "apps/cron/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cron/tsconfig.app.json"
+      }
+    },
     "@app/decorator": {
       "type": "library",
       "root": "libs/decorator",
@@ -122,5 +132,6 @@
         "tsConfigPath": "libs/mail/tsconfig.lib.json"
       }
     }
+   
   }
 }

@@ -21,5 +21,6 @@ import { BullModule } from '@nestjs/bull';
   ],
   controllers: [StripeWebhookController],
   providers: [StripeWebhookService, StripeProcessor],
+  exports: [StripeWebhookService],
 })
 export class StripeWebhookModule {}

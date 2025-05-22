@@ -5,8 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order, Product, User, MonthlyAnalytics } from '@app/entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Product, Order, MonthlyAnalytics ])],
+  imports: [TypeOrmModule.forFeature([User, Product, Order, MonthlyAnalytics])],
   controllers: [StatisticController],
   providers: [StatisticService],
+  exports: [StatisticService],
 })
 export class StatisticModule {}

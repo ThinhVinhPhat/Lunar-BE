@@ -20,5 +20,6 @@ import { Favorite } from '@app/entity';
   ],
   controllers: [ProductController],
   providers: [ProductService],
+  exports: [ProductService],
 })
 export class ProductModule {}

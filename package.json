@@ -12,7 +12,8 @@
     "packages": [
       "apps/*",
       "libs/*",
-      "webhook/*"
+      "webhook/*",
+      "cron/*"
     ]
   },
   "scripts": {
@@ -23,6 +24,7 @@
     "start:dev": "nest start --watch",
     "start:webhook": "nest start @apps/webhook",
     "start:main": "nest start @apps/main",
+    "start:cron": "nest start @apps/cron",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/main/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -51,6 +53,7 @@
     "@nestjs/mongoose": "^10.0.10",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/schedule": "^6.0.0",
     "@nestjs/swagger": "^7.4.0",
     "@nestjs/throttler": "^6.3.0",
     "@nestjs/typeorm": "^10.0.2",

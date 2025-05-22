@@ -1,0 +1,30 @@
+import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bull';
+import { OrderTrackingModule } from './domain/order-tracking/order-tracking.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SharedModule } from '@app/shared';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
+@Module({
+  imports: [
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        redis: {
+          host: config.get('REDIS_HOST'),
+          port: config.get<number>('REDIS_PORT'),
+          username: config.get('REDIS_USERNAME'),
+          password: config.get('REDIS_PASSWORD'),
+        },
+      }),
+    }),
+    SharedModule,
+    ScheduleModule.forRoot(),
+    OrderTrackingModule,
+  ],
+  controllers: [],
+  providers: [],
+  exports: [OrderTrackingModule],
+})
+export class CronServiceModule {}
