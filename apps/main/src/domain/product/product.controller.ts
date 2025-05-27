@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import { ProductService } from './product.service';
@@ -22,6 +23,7 @@ import { FindProductDTO } from './dto/find-product.dto';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { FindOneProductDTO } from './dto/find-one-product.dto';
+import { RolesGuard } from '../guard/roles.guard';
 
 @ApiTags('Product')
 @Controller('product')
@@ -29,6 +31,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiConsumes('multipart/form-data')
   @ApiOperationDecorator({
@@ -66,6 +69,7 @@ export class ProductController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @ApiConsumes('multipart/form-data')
   @ApiOperationDecorator({
     summary: 'Update a product',
@@ -86,7 +90,13 @@ export class ProductController {
     });
   }
 
+  @ApiOperationDecorator({
+    summary: 'Delete a product',
+    description: 'Delete a product',
+    type: CreateProductDto,
+  })
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Delete('/:id')
   remove(@Param('id') id: string) {

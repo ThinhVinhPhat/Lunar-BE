@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Patch, Query, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { StatisticService } from './statistic.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
@@ -8,6 +16,7 @@ import { Role } from '@app/constant';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
 import { GetUserOrdersDTO } from './dto/get-user-orders.dto';
+import { RolesGuard } from '../guard/roles.guard';
 
 @ApiTags('Statistic')
 @Controller('statistic')
@@ -15,6 +24,7 @@ export class StatisticController {
   constructor(private readonly statisticService: StatisticService) {}
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
     summary: 'All app summary',
@@ -26,10 +36,11 @@ export class StatisticController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
-    summary: 'All app summary',
-    description: 'All app summary',
+    summary: 'Compare last month value summary',
+    description: 'Compare last month value summary',
   })
   @Get('/compare-last-month')
   compareLastMonth(@Query() compareValueDto: CompareValueDTO) {
@@ -37,6 +48,7 @@ export class StatisticController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
     summary: 'Get Year Revenue',
@@ -48,6 +60,7 @@ export class StatisticController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
     summary: 'Update Summary',
@@ -59,6 +72,7 @@ export class StatisticController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
     summary: 'Delete Summary',
@@ -70,6 +84,7 @@ export class StatisticController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @ApiOperationDecorator({
     summary: 'Get orders placed by the authenticated user',
     description:

@@ -13,6 +13,7 @@ import {
 import { Payment } from './payment.entity';
 import { OrderHistory } from './order-history.entity';
 import { OrderTracking } from './order-tracking.entity';
+import { Shipment } from './shipment.entity';
 
 @Entity('order')
 export class Order extends BaseEntity {
@@ -69,4 +70,7 @@ export class Order extends BaseEntity {
 
   @OneToMany(() => OrderHistory, (history) => history.order)
   histories: OrderHistory[];
+
+  @OneToMany(() => Shipment, (shipment) => shipment.order)
+  shipments: Shipment[];
 }

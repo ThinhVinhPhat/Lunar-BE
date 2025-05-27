@@ -26,6 +26,7 @@ import { Role } from '@app/constant/role';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FindDTO } from './dto/find-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { RolesGuard } from '../guard/roles.guard';
 
 @ApiTags('User')
 @Controller('users')
@@ -33,6 +34,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
     summary: 'Create User',
@@ -44,18 +46,34 @@ export class UsersController {
   }
 
   @ApiBearerAuth()
+  @ApiOperationDecorator({
+    summary: 'Find User Detail',
+    description: 'Find User Detail',
+  })
   @Get('/me')
   getMe(@UserReq() user: User) {
     return this.usersService.findMe(user);
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperationDecorator({
+    summary: 'Find all User',
+    description: 'Find all User',
+  })
   @Get('/find-all')
   findAll(@Query() query: FindDTO) {
     return this.usersService.findAll(query);
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperationDecorator({
+    summary: 'Find User by Id',
+    description: 'Find User by Id',
+  })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
@@ -83,6 +101,7 @@ export class UsersController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
     summary: 'Update user By Admin',
@@ -120,6 +139,11 @@ export class UsersController {
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
+  @ApiOperationDecorator({
+    summary: 'User reset password',
+    description: 'User reset password',
+    type: UpdatePasswordDTO,
+  })
   @Delete('delete/:id')
   remove(@Param('id') userId: string) {
     return this.usersService.remove(userId);

@@ -243,7 +243,6 @@ export class OrderDetailService {
         await transactionManager.save(OrderHistory, orderHistory);
         await transactionManager.update(Order, order.id, {
           total_price: totalPrice,
-          histories: order.histories.concat(orderHistory),
         });
         return {
           status: HttpStatus.OK,

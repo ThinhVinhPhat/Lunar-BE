@@ -36,6 +36,7 @@ export enum OrderHistoryAction {
   REMOVE_PRODUCT = 'REMOVE_PRODUCT',
   UPDATE_NOTE = 'UPDATE_NOTE',
   CHANGE_DELIVERY_ADDRESS = 'CHANGE_DELIVERY_ADDRESS',
+  SHIPMENT = 'CHANGE_SHIPMENT'
 }
 
 export enum PaymentMethod {
@@ -43,4 +44,10 @@ export enum PaymentMethod {
   PAYPAL = 'PayPal',
   BANK_TRANSFER = 'Bank Transfer',
   CASH_ON_DELIVERY = 'Cash on Delivery',
+}
+
+export enum ShipmentStatus {
+  PENDING = 'Pending',
+  SHIPPED = 'Shipped',
+  DELIVERED = 'Delivered',
 }

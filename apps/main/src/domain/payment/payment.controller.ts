@@ -11,6 +11,11 @@ import { Public } from '@app/decorator/public.decorator';
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
+  @Public()
+  @ApiOperationDecorator({
+    summary: 'Create payment',
+    description: 'Create payment',
+  })
   @ApiBearerAuth()
   @Get('/:id')
   createPayment(@Param('id') orderId: string, @UserReq() currentUser: User) {

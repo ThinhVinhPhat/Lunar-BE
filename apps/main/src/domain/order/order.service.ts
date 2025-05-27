@@ -2,13 +2,19 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order, OrderDetail, OrderHistory } from '@app/entity/index';
+import { Order, OrderDetail, OrderHistory, Shipment } from '@app/entity/index';
 import { DataSource, EntityManager, LessThan, Repository } from 'typeorm';
 import { User } from '@app/entity/user.entity';
 import { message } from '@app/constant/message';
 import { FindOrderDTO } from './dto/find-order.dto';
-import { OrderHistoryAction, OrderStatus } from '@app/constant/role';
+import {
+  OrderHistoryAction,
+  OrderStatus,
+  ShipmentStatus,
+} from '@app/constant/role';
 import { UpdateOrderStatusDTO } from './dto/update-order-status.dto';
+import { CreateOrderShipmentDTO } from './dto/create-order-shipment.dto';
+import { UpdateOrderShipmentDTO } from './dto/update-order-shipment.dto';
 
 @Injectable()
 export class OrderService {
@@ -75,6 +81,7 @@ export class OrderService {
           orderDate: new Date(Date.now()),
           orderDetails: [],
           histories: [],
+          shipments: [],
           payment: null,
           shippingAddress,
           shippingFee,
@@ -86,7 +93,7 @@ export class OrderService {
           order: order,
           action: OrderHistoryAction.CREATE_ORDER,
           performedBy: user,
-          description: `Create order with id: ${order.id}`,
+          description: `Create order Successfully`,
         });
         await transactionManager.save(OrderHistory, orderHistory);
         order.histories.push(orderHistory);
@@ -101,10 +108,81 @@ export class OrderService {
     );
   }
 
+  async createShipment(id: string, updateShipmentDTO: CreateOrderShipmentDTO) {
+    return this.dataSource.transaction(
+      async (transactionManager: EntityManager) => {
+        const order = await transactionManager.findOne(Order, {
+          where: {
+            id: id,
+          },
+          relations: ['orderDetails', 'shipments'],
+        });
+        if (!order) {
+          throw new HttpException(
+            message.FIND_ORDER_FAIL,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        if (order.status !== OrderStatus.SHIPPED) {
+          throw new HttpException(
+            ' Order status is not SHIPPED',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        const { deliveredDate, estimateDate, shippingCarrier } =
+          updateShipmentDTO;
+
+        const existShipment = await transactionManager.findOne(Shipment, {
+          where: {
+            order: {
+              id: order.id,
+            },
+            shippingCarrier: shippingCarrier,
+          },
+        });
+        if (existShipment) {
+          throw new HttpException(
+            'Shipment already exists',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        const newDeliveredDate = new Date(deliveredDate);
+        const newEstimateDate = new Date(estimateDate);
+
+        const shipment = transactionManager.create(Shipment, {
+          order: order,
+          deliveredAt: newDeliveredDate,
+          estimatedDeliveryDate: newEstimateDate,
+          shippingCarrier: shippingCarrier,
+          status: ShipmentStatus.SHIPPED,
+        });
+        await transactionManager.save(Shipment, shipment);
+        const orderHistory = transactionManager.create(OrderHistory, {
+          action: OrderHistoryAction.SHIPMENT,
+          description: `Order is arrived at ${shipment.shippingCarrier} ${new Date().toISOString()} and prepare to be shipped`,
+          order: order,
+        });
+        await transactionManager.save(OrderHistory, orderHistory);
+
+        return {
+          status: HttpStatus.OK,
+          data: order,
+          message: message.UPDATE_ORDER_SUCCESS,
+        };
+      },
+    );
+  }
+
   async findAll(findByOrderDTO: FindOrderDTO, id: string) {
     const user = await this.userRepository.findOne({
       where: { id: id },
-      relations: ['orders', 'orders.orderDetails', 'orders.histories'],
+      relations: [
+        'orders',
+        'orders.orderDetails',
+        'orders.histories',
+        'orders.shipments',
+      ],
     });
     if (!user) {
       throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
@@ -142,7 +220,13 @@ export class OrderService {
           id: userId,
         },
       },
-      relations: ['orderDetails', 'user', 'orderDetails.product', 'histories'],
+      relations: [
+        'orderDetails',
+        'user',
+        'orderDetails.product',
+        'histories',
+        'shipments',
+      ],
     });
     if (!order) {
       throw new HttpException(message.FIND_ORDER_FAIL, HttpStatus.BAD_REQUEST);
@@ -231,6 +315,71 @@ export class OrderService {
       },
     );
   }
+
+  private canTransitionShipmentStatus(
+    from: ShipmentStatus,
+    to: ShipmentStatus,
+  ): boolean {
+    const validTransitions: Record<ShipmentStatus, ShipmentStatus[]> = {
+      [ShipmentStatus.PENDING]: [ShipmentStatus.SHIPPED],
+      [ShipmentStatus.SHIPPED]: [ShipmentStatus.DELIVERED],
+      [ShipmentStatus.DELIVERED]: [],
+    };
+    return validTransitions[from]?.includes(to);
+  }
+
+  async updateShipmentStatus(
+    shipmentId: string,
+    updateShipmentStatusDTO: UpdateOrderShipmentDTO,
+  ) {
+    return this.dataSource.transaction(
+      async (transactionManager: EntityManager) => {
+        const { status, description } = updateShipmentStatusDTO;
+        const shipment = await transactionManager.findOne(Shipment, {
+          where: { id: shipmentId },
+          relations: ['order', 'order.histories'],
+        });
+        if (!shipment) {
+          throw new HttpException(
+            message.FIND_ORDER_FAIL,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        if (
+          status &&
+          !this.canTransitionShipmentStatus(shipment.status, status) &&
+          !description
+        ) {
+          throw new HttpException(
+            `Shipment status is ${shipment.status}, cannot update status to ${status}`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        shipment.status = status ?? shipment.status;
+
+        const orderHistory = transactionManager.create(OrderHistory, {
+          order: shipment.order,
+          action: OrderHistoryAction.SHIPMENT,
+          description: description
+            ? description
+            : `Shipment status updated to ${shipment.status} at ${new Date().toISOString()}`,
+        });
+        await transactionManager.save(OrderHistory, orderHistory);
+        shipment.order.histories.push(orderHistory);
+
+        await transactionManager.save(Shipment, shipment);
+        await transactionManager.save(Order, shipment.order);
+
+        return {
+          status: HttpStatus.OK,
+          data: shipment,
+          message: message.UPDATE_ORDER_SUCCESS,
+        };
+      },
+    );
+  }
+
   async remove(id: string) {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {

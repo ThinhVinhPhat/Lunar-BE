@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryDetailService } from './category-detail.service';
 import { CreateCategoryDetailDto } from './dto/create-category-detail.dto';
@@ -18,6 +19,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '@app/decorator/public.decorator';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
+import { RolesGuard } from '../guard/roles.guard';
 
 @ApiTags('CategoryDetail')
 @Controller('category-details')
@@ -32,6 +34,7 @@ export class CategoryDetailController {
     type: CreateCategoryDetailDto,
   })
   @UseInterceptors(FilesInterceptor('images'))
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Post('/:id')
   create(
@@ -82,6 +85,7 @@ export class CategoryDetailController {
     type: UpdateCategoryDetailDto,
   })
   @UseInterceptors(FilesInterceptor('images'))
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Patch('/:id')
   update(
@@ -96,7 +100,13 @@ export class CategoryDetailController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperationDecorator({
+    summary: 'Delete Category Detail by Id',
+    description: 'Delete Category Detail by Id',
+    type: UpdateCategoryDetailDto,
+  })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoryDetailService.remove(id);

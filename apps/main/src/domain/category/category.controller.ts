@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -15,6 +16,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from '@app/decorator/public.decorator';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
+import { RolesGuard } from '../guard/roles.guard';
 
 @ApiTags('Category')
 @Controller('category')
@@ -27,6 +29,7 @@ export class CategoryController {
     type: CreateCategoryDto,
   })
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Post('/')
   create(@Body() createCategoryDto: CreateCategoryDto) {
@@ -54,6 +57,7 @@ export class CategoryController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
     summary: 'Update a category',
@@ -69,7 +73,13 @@ export class CategoryController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperationDecorator({
+    summary: 'Delete a category by Id',
+    description: 'Delete a category by Id',
+    type: UpdateCategoryDto,
+  })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoryService.remove(id);

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -17,6 +18,11 @@ import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
 import { FindOrderDTO } from './dto/find-order.dto';
 import { UpdateOrderStatusDTO } from './dto/update-order-status.dto';
+import { CreateOrderShipmentDTO } from './dto/create-order-shipment.dto';
+import { UpdateOrderShipmentDTO } from './dto/update-order-shipment.dto';
+import { RolesGuard } from '../guard/roles.guard';
+import { Roles } from '@app/decorator/role.decorator';
+import { Role } from '@app/constant';
 
 @ApiTags('Order')
 @Controller('order')
@@ -35,6 +41,25 @@ export class OrderController {
     return this.orderService.create(createOrderDto, id);
   }
 
+  @ApiBearerAuth()
+  @ApiOperationDecorator({
+    summary: 'Create order Shipment',
+    description: 'Create an existing order Shipment',
+  })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post('/shipment/:id')
+  updateShipment(
+    @Param('id') id: string,
+    @Body() updateShipmentDto: CreateOrderShipmentDTO,
+  ) {
+    return this.orderService.createShipment(id, updateShipmentDto);
+  }
+
+  @ApiOperationDecorator({
+    summary: 'Find all Order By User',
+    description: 'Find all Order By User',
+  })
   @ApiBearerAuth()
   @Get('')
   findAll(@Query() findOrderDTO: FindOrderDTO, @UserReq() currentUser: User) {
@@ -58,6 +83,8 @@ export class OrderController {
     summary: 'Update order',
     description: 'Update an existing order',
   })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.orderService.update(id, updateOrderDto);
@@ -77,6 +104,26 @@ export class OrderController {
     return this.orderService.updateStatus(id, updateStatusDto);
   }
 
+  @ApiBearerAuth()
+  @ApiOperationDecorator({
+    type: UpdateOrderDto,
+    summary: 'Update order shipment status',
+    description: 'Update an existing order shipment status',
+  })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('/shipment/:id')
+  updateShipmentStatus(
+    @Param('id') id: string,
+    @Body() updateShipmentStatusDto: UpdateOrderShipmentDTO,
+  ) {
+    return this.orderService.updateShipmentStatus(id, updateShipmentStatusDto);
+  }
+
+  @ApiOperationDecorator({
+    summary: 'Delete order by Id',
+    description: 'Delete an existing order by Id',
+  })
   @ApiBearerAuth()
   @Delete(':id')
   remove(@Param('id') id: string) {
