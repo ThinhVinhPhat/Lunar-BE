@@ -2,9 +2,10 @@ import { config } from '@app/config';
 import { SharedModule } from '@app/shared';
 import { StripeModule } from '@app/stripe';
 import { BullModule } from '@nestjs/bull';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { StripeWebhookModule } from './domain/stripe/stripe.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LoggingMiddleware } from '@app/middleware';
 
 @Module({
   imports: [
@@ -29,4 +30,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   exports: [BullModule],
 })
-export class WebhookModule {}
+export class WebhookModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}

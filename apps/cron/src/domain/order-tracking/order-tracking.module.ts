@@ -53,6 +53,6 @@ import { BullModule } from '@nestjs/bull';
     OrderTrackingProcessor,
     OrderTrackingService,
   ],
-  exports: [OrderTrackingService],
+  exports: [OrderTrackingService, OrderTrackingProcessor],
 })
 export class OrderTrackingModule {}

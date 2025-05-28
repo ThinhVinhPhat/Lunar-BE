@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -23,6 +24,8 @@ import { UpdateOrderShipmentDTO } from './dto/update-order-shipment.dto';
 import { RolesGuard } from '../guard/roles.guard';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant';
+import { UpdateOrderAddressDTO } from './dto/update-order-address.dto';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 @ApiTags('Order')
 @Controller('order')
@@ -49,7 +52,7 @@ export class OrderController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Post('/shipment/:id')
-  updateShipment(
+  createShipment(
     @Param('id') id: string,
     @Body() updateShipmentDto: CreateOrderShipmentDTO,
   ) {
@@ -60,6 +63,8 @@ export class OrderController {
     summary: 'Find all Order By User',
     description: 'Find all Order By User',
   })
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60) // Cache for 60 seconds
   @ApiBearerAuth()
   @Get('')
   findAll(@Query() findOrderDTO: FindOrderDTO, @UserReq() currentUser: User) {
@@ -120,11 +125,30 @@ export class OrderController {
     return this.orderService.updateShipmentStatus(id, updateShipmentStatusDto);
   }
 
+  // Stupid duplicate code, remove this later
+  @ApiBearerAuth()
+  @ApiOperationDecorator({
+    type: UpdateOrderDto,
+    summary: 'Update order current address',
+    description: 'Update an existing order current address',
+  })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('/update-address/:id')
+  updateCurrentAddress(
+    @Param('id') id: string,
+    @Body() updateShipmentStatusDto: UpdateOrderAddressDTO,
+  ) {
+    return this.orderService.processOrderTracking(id, updateShipmentStatusDto);
+  }
+
   @ApiOperationDecorator({
     summary: 'Delete order by Id',
     description: 'Delete an existing order by Id',
   })
   @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.orderService.remove(id);

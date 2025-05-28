@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { OrderTrackingModule } from './domain/order-tracking/order-tracking.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SharedModule } from '@app/shared';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LoggingMiddleware } from '@app/middleware';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           port: config.get<number>('REDIS_PORT'),
           username: config.get('REDIS_USERNAME'),
           password: config.get('REDIS_PASSWORD'),
+          keepAlive: 5000,
         },
       }),
     }),
@@ -27,4 +29,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   providers: [],
   exports: [OrderTrackingModule],
 })
-export class CronServiceModule {}
+export class CronServiceModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { Category } from '../../../../../libs/entity/src/category.entity';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { message } from '@app/constant/message';
 import { UploadService } from '@/domain/upload/upload.service';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class CategoryService {
@@ -14,6 +15,7 @@ export class CategoryService {
     private readonly categoryEntity: Repository<Category>,
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -55,15 +57,23 @@ export class CategoryService {
   }
 
   async findAll() {
+    const cachedCategories = await this.cacheManager.get('categories');
+
+    if (cachedCategories) {
+      return cachedCategories;
+    }
+
     const categories = await this.categoryEntity.find({
       relations: ['categoryDetails'],
     });
-
-    return {
+    const result = {
       status: HttpStatus.OK,
       data: categories,
       message: message.FIND_CATEGORY_SUCCESS,
     };
+    await this.cacheManager.set('categories', result);
+
+    return result;
   }
 
   async findOne(id: string) {

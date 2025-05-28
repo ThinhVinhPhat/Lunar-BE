@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +19,7 @@ import slugify from 'slugify';
 import { OrderDetail } from '@app/entity/order-detail.entity';
 import { Favorite } from '@app/entity/favorite.entity';
 import { FindOneProductDTO } from './dto/find-one-product.dto';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class ProductService {
@@ -26,6 +33,7 @@ export class ProductService {
     private readonly favoriteEntity: Repository<Favorite>,
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.logger = new Logger('ProductService');
   }
@@ -142,6 +150,15 @@ export class ProductService {
 
   async findAll(findDTO: FindProductDTO) {
     try {
+      const cacheKey = `products:${JSON.stringify(findDTO)}`;
+
+      const cached = await this.cacheManager.get(cacheKey);
+
+      if (cached) {
+        this.logger.log('Cache hit for findAll products');
+        return cached;
+      }
+
       const { category, limit, offset, name, userId } = findDTO;
 
       const whereCondition = {
@@ -196,7 +213,7 @@ export class ProductService {
         });
       }
 
-      return {
+      const result = {
         status: HttpStatus.OK,
         data: {
           products: products,
@@ -204,6 +221,10 @@ export class ProductService {
         },
         message: message.FIND_PRODUCT_SUCCESS,
       };
+
+      await this.cacheManager.set(cacheKey, result, 60);
+
+      return result;
     } catch (e) {
       this.logger.warn(e);
       return {

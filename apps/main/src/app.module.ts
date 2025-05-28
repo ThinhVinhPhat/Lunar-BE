@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UsersModule } from './domain/users/users.module';
 import { AuthModule } from './domain/auth/auth.module';
 import { AuthService } from './domain/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtAuthGuard } from './domain/guard/jwt-auth.guard';
 import { ProductModule } from './domain/product/product.module';
 import { MulterModule } from '@nestjs/platform-express';
@@ -23,13 +23,27 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@app/entity';
 import { FavoriteModule } from './domain/favorite/favorite.module';
 import { StatisticModule } from './domain/statistic/statistic.module';
-
+import { LoggingMiddleware } from '@app/middleware';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { redisStore } from 'cache-manager-ioredis';
 @Module({
   imports: [
     StripeModule.forRoot({
       secretKey: config.STRIPE.STRIPE_SERECT_KEY,
     }),
     SharedModule,
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        store: redisStore as any,
+        host: config.get('REDIS_HOST'),
+        port: config.get<number>('REDIS_PORT'),
+        ttl: 60,
+      }),
+      isGlobal: true,
+    }),
     TypeOrmModule.forFeature([User]),
     UsersModule,
     AuthModule,
@@ -57,6 +71,14 @@ import { StatisticModule } from './domain/statistic/statistic.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingMiddleware,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}

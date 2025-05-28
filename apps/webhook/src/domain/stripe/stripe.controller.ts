@@ -1,6 +1,6 @@
 import { Controller, Post, Req, Headers } from '@nestjs/common';
 import { Public } from '@app/decorator/public.decorator';
-import { RequestWithRawBody } from '../middleware/raw-body.middleware';
+import { RequestWithRawBody } from '@app/middleware';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { StripeWebhookService } from './stripe.service';
 

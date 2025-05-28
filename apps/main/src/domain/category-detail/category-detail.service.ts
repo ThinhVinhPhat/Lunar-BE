@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateCategoryDetailDto } from './dto/create-category-detail.dto';
 import { UpdateCategoryDetailDto } from './dto/update-category-detail.dto';
 import { DataSource, EntityManager, Repository } from 'typeorm';
@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryDetail } from '../../../../../libs/entity/src/category-detail.entity';
 import { message } from '@app/constant/message';
 import { UploadService } from '@/domain/upload/upload.service';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class CategoryDetailService {
@@ -17,6 +18,7 @@ export class CategoryDetailService {
     private readonly categoryDetailEntity: Repository<CategoryDetail>,
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async create(
@@ -80,13 +82,22 @@ export class CategoryDetailService {
   }
 
   async findAll() {
-    const categories = await this.categoryDetailEntity.find();
+    const cachedCategoryDetails =
+      await this.cacheManager.get('category-details');
 
-    return {
+    if (cachedCategoryDetails) {
+      return cachedCategoryDetails;
+    }
+
+    const categories = await this.categoryDetailEntity.find();
+    const result = {
       status: HttpStatus.OK,
       data: categories,
       message: message.FIND_CATEGORY_DETAIL_SUCCESS,
     };
+    await this.cacheManager.set('category-details', result);
+
+    return result;
   }
 
   async findOne(id: string) {

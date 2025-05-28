@@ -24,6 +24,7 @@ import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { FindOneProductDTO } from './dto/find-one-product.dto';
 import { RolesGuard } from '../guard/roles.guard';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 
 @ApiTags('Product')
 @Controller('product')
@@ -49,11 +50,13 @@ export class ProductController {
   }
 
   @Public()
+  @UseInterceptors(CacheInterceptor)
   @ApiOperationDecorator({
     summary: 'Find all product',
     description: 'Find all product',
   })
   @Get('/')
+  @CacheTTL(60) // Cache for 60 seconds
   findAll(@Query() findDto: FindProductDTO) {
     return this.productService.findAll(findDto);
   }

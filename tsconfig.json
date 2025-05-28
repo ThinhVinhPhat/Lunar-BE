@@ -90,6 +90,18 @@
       ],
       "@app/mail/*": [
         "libs/mail/src/*"
+      ],
+      "@app/middleware": [
+        "libs/middleware/src"
+      ],
+      "@app/middleware/*": [
+        "libs/middleware/src/*"
+      ],
+      "@app/interceptors": [
+        "libs/interceptors/src"
+      ],
+      "@app/interceptors/*": [
+        "libs/interceptors/src/*"
       ]
     }
   },

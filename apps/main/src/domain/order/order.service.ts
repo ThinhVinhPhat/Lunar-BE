@@ -1,8 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order, OrderDetail, OrderHistory, Shipment } from '@app/entity/index';
+import {
+  Order,
+  OrderDetail,
+  OrderHistory,
+  OrderTracking,
+  Shipment,
+} from '@app/entity/index';
 import { DataSource, EntityManager, LessThan, Repository } from 'typeorm';
 import { User } from '@app/entity/user.entity';
 import { message } from '@app/constant/message';
@@ -15,9 +21,12 @@ import {
 import { UpdateOrderStatusDTO } from './dto/update-order-status.dto';
 import { CreateOrderShipmentDTO } from './dto/create-order-shipment.dto';
 import { UpdateOrderShipmentDTO } from './dto/update-order-shipment.dto';
+import { UpdateOrderAddressDTO } from './dto/update-order-address.dto';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class OrderService {
+  private readonly logger: Logger;
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
@@ -25,8 +34,13 @@ export class OrderService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(OrderHistory)
     private readonly orderHistoryRepository: Repository<OrderHistory>,
+    @InjectRepository(OrderTracking)
+    private readonly orderTrackingRepository: Repository<OrderTracking>,
     private readonly dataSource: DataSource,
-  ) {}
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) {
+    this.logger = new Logger(OrderService.name);
+  }
 
   private canTransition(from: OrderStatus, to: OrderStatus): boolean {
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
@@ -175,6 +189,14 @@ export class OrderService {
   }
 
   async findAll(findByOrderDTO: FindOrderDTO, id: string) {
+    const cacheKey = `orders:${JSON.stringify(findByOrderDTO)}:user:${id}`;
+
+    const cachedOrders = await this.cacheManager.get(cacheKey);
+    if (cachedOrders) {
+      this.logger.log(`Cache hit for key: ${cacheKey}`);
+      return cachedOrders;
+    }
+
     const user = await this.userRepository.findOne({
       where: { id: id },
       relations: [
@@ -182,6 +204,7 @@ export class OrderService {
         'orders.orderDetails',
         'orders.histories',
         'orders.shipments',
+        'orders.orderTracks',
       ],
     });
     if (!user) {
@@ -196,7 +219,7 @@ export class OrderService {
             .slice(offset, limit)
         : user.orders.slice(offset, limit);
 
-    return {
+    const result = {
       status: HttpStatus.OK,
       data: {
         orders: orders,
@@ -204,6 +227,10 @@ export class OrderService {
       },
       message: message.FIND_ORDER_SUCCESS,
     };
+
+    await this.cacheManager.set(cacheKey, result, 60);
+
+    return result;
   }
 
   async findOne(userId: string, id: string) {
@@ -226,6 +253,7 @@ export class OrderService {
         'orderDetails.product',
         'histories',
         'shipments',
+        'orderTracks',
       ],
     });
     if (!order) {
@@ -378,6 +406,56 @@ export class OrderService {
         };
       },
     );
+  }
+
+  async processOrderTracking(
+    orderId: string,
+    updateShipmentStatusDto: UpdateOrderAddressDTO,
+  ) {
+    const { shippingAddress } = updateShipmentStatusDto;
+    console.log(`Processing order tracking for order ID: ${orderId}`);
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
+    if (!order) {
+      throw new Error(`Order with ID ${orderId} not found`);
+    }
+
+    if (order.status !== OrderStatus.SHIPPED) {
+      throw new HttpException(
+        'Order status is not SHIPPED',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const orderTracking = await this.orderTrackingRepository.findOne({
+      where: {
+        order: {
+          id: orderId,
+        },
+      },
+      relations: ['order'],
+    });
+    if (!orderTracking) {
+      const newOrderTracking = this.orderTrackingRepository.create({
+        order: order,
+        currentAddress: shippingAddress,
+      });
+      await this.orderTrackingRepository.save(newOrderTracking);
+      return {
+        status: HttpStatus.OK,
+        data: newOrderTracking,
+        message: `Order tracking created for order ID: ${orderId}`,
+      };
+    }
+    orderTracking.currentAddress = shippingAddress;
+    orderTracking.status = order.status;
+    await this.orderTrackingRepository.save(orderTracking);
+    return {
+      status: HttpStatus.OK,
+      data: orderTracking,
+      message: `Order tracking created for order ID: ${orderId}`,
+    };
   }
 
   async remove(id: string) {

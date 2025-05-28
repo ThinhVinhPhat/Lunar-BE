@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { WebhookModule } from './webhook.module';
-import rawBodyMiddleware from './domain/middleware/raw-body.middleware';
+import rawBodyMiddleware from '../../../libs/middleware/src/raw-body.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(WebhookModule);

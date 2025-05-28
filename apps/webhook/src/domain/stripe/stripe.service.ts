@@ -2,7 +2,7 @@ import { StripeService } from '@app/stripe';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
-import { RequestWithRawBody } from '../middleware/raw-body.middleware';
+import { RequestWithRawBody } from '@app/middleware';
 
 @Injectable()
 export class StripeWebhookService {

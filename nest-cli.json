@@ -32,8 +32,7 @@
         "tsConfigPath": "apps/webhook/tsconfig.app.json"
       }
     },
-
-     "@apps/cron": {
+    "@apps/cron": {
       "type": "application",
       "root": "apps/cron",
       "entryFile": "main",
@@ -131,7 +130,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/mail/tsconfig.lib.json"
       }
+    },
+    "@app/middleware": {
+      "type": "library",
+      "root": "libs/middleware",
+      "entryFile": "index",
+      "sourceRoot": "libs/middleware/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/middleware/tsconfig.lib.json"
+      }
+    },
+    "@app/interceptors": {
+      "type": "library",
+      "root": "libs/interceptors",
+      "entryFile": "index",
+      "sourceRoot": "libs/interceptors/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/interceptors/tsconfig.lib.json"
+      }
     }
-   
   }
 }

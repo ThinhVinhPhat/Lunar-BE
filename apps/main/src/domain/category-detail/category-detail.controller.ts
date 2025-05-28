@@ -20,6 +20,7 @@ import { Public } from '@app/decorator/public.decorator';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { RolesGuard } from '../guard/roles.guard';
+import { CacheInterceptor, CacheTTL, CacheKey } from '@nestjs/cache-manager';
 
 @ApiTags('CategoryDetail')
 @Controller('category-details')
@@ -56,6 +57,9 @@ export class CategoryDetailController {
     summary: 'Find all Category Detail',
     description: 'Find all Category Detail',
   })
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60) // Cache for 60 seconds
+  @CacheKey('category-details')
   @Get()
   findAll() {
     return this.categoryDetailService.findAll();

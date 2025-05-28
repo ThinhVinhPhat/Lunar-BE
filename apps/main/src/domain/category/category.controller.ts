@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -17,6 +18,7 @@ import { Public } from '@app/decorator/public.decorator';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { RolesGuard } from '../guard/roles.guard';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @ApiTags('Category')
 @Controller('category')
@@ -41,6 +43,9 @@ export class CategoryController {
     summary: 'Find all categories',
     description: 'Find all categories',
   })
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60) // Cache for 60 seconds
+  @CacheKey('categories')
   @Get('/')
   findAll() {
     return this.categoryService.findAll();
