@@ -145,7 +145,8 @@
       "^@app/constant(|/.*)$": "<rootDir>/libs/constant/src/$1",
       "^@app/mail(|/.*)$": "<rootDir>/libs/mail/src/$1",
       "^@app/middleware(|/.*)$": "<rootDir>/libs/middleware/src/$1",
-      "^@app/interceptors(|/.*)$": "<rootDir>/libs/interceptors/src/$1"
+      "^@app/interceptors(|/.*)$": "<rootDir>/libs/interceptors/src/$1",
+      "^@app/filter(|/.*)$": "<rootDir>/libs/filter/src/$1"
     }
   }
 }

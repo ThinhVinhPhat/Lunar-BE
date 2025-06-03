@@ -5,6 +5,13 @@ import { Repository, Between } from 'typeorm';
 import { MonthlyAnalytics } from '@app/entity/monthly-statistic.entity';
 import { CompareValueDTO } from './dto/compare.dto';
 import { message } from '@app/constant';
+import { GetAllOrderResponse } from '@app/type/order/order.respond';
+import {
+  CompareLastMonthResponse,
+  GetRevenueAndCategoriesResponse,
+  UpdateSummaryResponse,
+} from '@app/type/statistic/statistic.respond';
+import { Respond } from '@app/type';
 
 @Injectable()
 export class StatisticService {
@@ -98,7 +105,7 @@ export class StatisticService {
   async getUserOrders(
     userId: string,
     query: { offset?: number; limit?: number; filter: string },
-  ) {
+  ): Promise<GetAllOrderResponse> {
     const { offset = 0, limit = 10, filter } = query;
     const now = new Date();
     let startDate: Date | null = null;
@@ -168,15 +175,15 @@ export class StatisticService {
 
     return {
       status: HttpStatus.OK,
-      data: {
-        orders: ordersWithTimeDiff,
-        total,
-      },
+      data: ordersWithTimeDiff,
+      total: total,
       message: 'User orders retrieved successfully',
     };
   }
 
-  async compareLastMonth(compareValueDto: CompareValueDTO) {
+  async compareLastMonth(
+    compareValueDto: CompareValueDTO,
+  ): Promise<CompareLastMonthResponse> {
     const { totalCustomer, totalOrder, totalRevenue, totalView } =
       compareValueDto;
     const now = new Date();
@@ -224,7 +231,7 @@ export class StatisticService {
     };
   }
 
-  async getRevenueAndCategories() {
+  async getRevenueAndCategories(): Promise<GetRevenueAndCategoriesResponse> {
     const monthlyRevenues = await this.analyticRepository.find();
 
     const totalRevenue = monthlyRevenues.reduce(
@@ -267,7 +274,10 @@ export class StatisticService {
     };
   }
 
-  async updateSummary(id: string, month: string) {
+  async updateSummary(
+    id: string,
+    month: string,
+  ): Promise<UpdateSummaryResponse> {
     const analytic = await this.analyticRepository.findOne({
       where: { id: id },
     });
@@ -284,7 +294,7 @@ export class StatisticService {
     };
   }
 
-  async deleteSummary(id: string) {
+  async deleteSummary(id: string): Promise<Respond> {
     const summary = await this.analyticRepository.findOne({
       where: { id: id },
     });

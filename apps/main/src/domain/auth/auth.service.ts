@@ -36,7 +36,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async generateJwt(user: User) {
+  async generateJwt(user: any) {
     const accessToken = await this.jwtService.signAsync(
       {
         iss: config.JWT.ISSUER,

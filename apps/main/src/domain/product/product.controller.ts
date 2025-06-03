@@ -19,7 +19,10 @@ import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '@app/decorator/public.decorator';
-import { FindProductDTO } from './dto/find-product.dto';
+import {
+  FindProductDTO,
+  FindSuggestionProductDTO,
+} from './dto/find-product.dto';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { FindOneProductDTO } from './dto/find-one-product.dto';
@@ -69,6 +72,16 @@ export class ProductController {
   @Get('/find-by-slug')
   findOne(@Query() findDto: FindOneProductDTO) {
     return this.productService.findOne(findDto);
+  }
+
+  @Public()
+  @ApiOperationDecorator({
+    summary: 'Find product by suggestion',
+    description: 'Find product by suggestion',
+  })
+  @Get('/find-by-suggestion')
+  findSuggestion(@Query() name: FindSuggestionProductDTO) {
+    return this.productService.findSuggestion(name);
   }
 
   @ApiBearerAuth()

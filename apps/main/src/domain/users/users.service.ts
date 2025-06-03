@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../../../../../libs/entity/src/user.entity';
-import { createRespond } from '@app/type/user/create-respond';
 import {
   hashedRefreshToken,
   hashPasswordHelper,
@@ -17,8 +16,14 @@ import { UpdatePasswordDTO } from './dto/update-password.dto';
 import { UploadService } from '@/domain/upload/upload.service';
 import { reverse } from '@app/helper/reverse';
 import { FindDTO } from './dto/find-user.dto';
-import { findRespond } from '@app/type/user/find-respond';
 import { RegisterAuthDto } from '../auth/dto/register-atuth.dto';
+import {
+  CreateUserResponse,
+  GetAllUserResponse,
+  GetUserByIdResponse,
+  Respond,
+  UpdateUserResponse,
+} from '@app/type';
 @Injectable()
 export class UsersService {
   constructor(
@@ -36,7 +41,7 @@ export class UsersService {
     };
   }
 
-  async create(createUserDto: CreateUserDto): Promise<createRespond> {
+  async create(createUserDto: CreateUserDto): Promise<CreateUserResponse> {
     const { firstName, lastName, email, password, role } = createUserDto;
 
     const hashedPassword = await hashPasswordHelper(password);
@@ -59,17 +64,7 @@ export class UsersService {
 
       return {
         status: HttpStatus.ACCEPTED,
-        data: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          company: user.company,
-          address: user.address,
-          phone: user.phone,
-          city: user.city,
-          role: user.role,
-        },
+        data: user,
         message: message.USER_CREATE_SUCCESS,
       };
     } else {
@@ -80,7 +75,7 @@ export class UsersService {
     }
   }
 
-  async findAll(query: FindDTO): Promise<findRespond> {
+  async findAll(query: FindDTO): Promise<GetAllUserResponse> {
     console.log(query);
 
     const queryList = {
@@ -90,7 +85,7 @@ export class UsersService {
       role: query.role ? query.role : Role.CUSTOMER,
     };
 
-    const users = await this.userEntity.find({
+    const [users, total] = await this.userEntity.findAndCount({
       where: {
         email: queryList.email,
         role: queryList.role,
@@ -105,43 +100,31 @@ export class UsersService {
 
     return {
       status: HttpStatus.ACCEPTED,
-      data: users.map((user) => ({
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        avatar: user.avatar,
-        company: user.company,
-        address: user.address,
-        phone: user.phone,
-        city: user.city,
-        role: user.role,
-        status: user.status,
-        createdAt: user.createdAt,
-      })),
+      data: users,
+      total: total,
       message: message.FIND_USER_SUCCESS,
     };
   }
 
-  async findUser(email: string): Promise<any> {
+  async findUser(email: string) {
     const user = await this.userEntity.findOne({
       where: {
         email: email,
       },
     });
+
+    if (!user) {
+      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+    }
+
     return {
       status: HttpStatus.ACCEPTED,
-      data: {
-        id: user.id,
-        email: user.email,
-        password: user.password,
-        status: user.status,
-      },
+      data: user,
       message: message.USER_CREATE_SUCCESS,
     };
   }
 
-  async findOne(id: string): Promise<createRespond> {
+  async findOne(id: string): Promise<GetUserByIdResponse> {
     const user = await this.userEntity.findOne({
       where: {
         id: id,
@@ -153,18 +136,7 @@ export class UsersService {
     }
     return {
       status: HttpStatus.ACCEPTED,
-      data: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        company: user.company,
-        address: user.address,
-        phone: user.phone,
-        city: user.city,
-        role: user.role,
-        avatar: user.avatar,
-      },
+      data: user,
       message: message.USER_CREATE_SUCCESS,
     };
   }
@@ -172,7 +144,7 @@ export class UsersService {
   async update(
     userId: string,
     updateUserDto: UpdateUserDto,
-  ): Promise<createRespond> {
+  ): Promise<UpdateUserResponse> {
     const { firstName, lastName, address, phone, city, company, avatar } =
       updateUserDto;
 
@@ -203,18 +175,7 @@ export class UsersService {
 
       return {
         status: HttpStatus.OK,
-        data: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          company: user.company,
-          address: user.address,
-          phone: user.phone,
-          city: user.city,
-          role: user.role,
-          avatar: user.avatar,
-        },
+        data: user,
         message: message.USER_CREATE_SUCCESS,
       };
     } else {
@@ -225,7 +186,7 @@ export class UsersService {
   async updateByAdmin(
     userId: string,
     UpdateUserDto: UpdateUserDto,
-  ): Promise<createRespond> {
+  ): Promise<UpdateUserResponse> {
     const { firstName, lastName, role, status } = UpdateUserDto;
 
     const user = await this.userEntity.findOne({ where: { id: userId } });
@@ -239,18 +200,7 @@ export class UsersService {
     await this.userEntity.save(user);
     return {
       status: HttpStatus.OK,
-      data: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        company: user.company,
-        address: user.address,
-        phone: user.phone,
-        city: user.city,
-        role: user.role,
-        avatar: user.avatar,
-      },
+      data: user,
       message: message.USER_CREATE_SUCCESS,
     };
   }
@@ -264,7 +214,9 @@ export class UsersService {
     }
   }
 
-  async updatePassword(UpdatePasswordDTO: UpdatePasswordDTO) {
+  async updatePassword(
+    UpdatePasswordDTO: UpdatePasswordDTO,
+  ): Promise<UpdateUserResponse> {
     const { password, code, email } = UpdatePasswordDTO;
     const user = await this.userEntity.findOne({ where: { email: email } });
     if (user) {
@@ -283,7 +235,7 @@ export class UsersService {
     }
   }
 
-  async remove(userId: string) {
+  async remove(userId: string): Promise<Respond> {
     const user = await this.userEntity.findOne({ where: { id: userId } });
     if (user) {
       await this.userEntity.remove(user);
@@ -296,7 +248,7 @@ export class UsersService {
       throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
     }
   }
-  async handleRegister(registerDTO: RegisterAuthDto) {
+  async handleRegister(registerDTO: RegisterAuthDto): Promise<Respond> {
     const { firstName, lastName, email, password, role } = registerDTO;
 
     const hashedPassword = await hashPasswordHelper(password);

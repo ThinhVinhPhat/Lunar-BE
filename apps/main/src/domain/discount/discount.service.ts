@@ -5,10 +5,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Discount } from '../../../../../libs/entity/src/discount.entity';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { message } from '../../../../../libs/constant/src/message';
-import { CreateDiscountRespond } from '@app/type/discount/create.respond';
-import { FindDiscountRespond } from '@app/type/discount/find.respond';
+
 import { User } from '@app/entity/user.entity';
 import { UserDiscount } from '../../../../../libs/entity/src/user-discount.entity';
+import {
+  CreateDiscountResponse,
+  GetAllDiscountResponse,
+  GetDiscountByIdResponse,
+  Respond,
+  UpdateDiscountResponse,
+} from '@app/type';
 
 @Injectable()
 export class DiscountService {
@@ -23,7 +29,7 @@ export class DiscountService {
   ) {}
   async create(
     createDiscountDto: CreateDiscountDto,
-  ): Promise<CreateDiscountRespond> {
+  ): Promise<CreateDiscountResponse> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const {
         name,
@@ -52,7 +58,7 @@ export class DiscountService {
     });
   }
 
-  async findAll(): Promise<FindDiscountRespond> {
+  async findAll(): Promise<GetAllDiscountResponse> {
     const discounts = await this.discountRepository.find();
     return {
       status: HttpStatus.OK,
@@ -82,7 +88,7 @@ export class DiscountService {
       message: message.FIND_DISCOUNT_SUCCESS,
     };
   }
-  async findOne(id: string): Promise<CreateDiscountRespond> {
+  async findOne(id: string): Promise<GetDiscountByIdResponse> {
     const discount = await this.discountRepository.findOne({
       where: {
         id: id,
@@ -101,7 +107,7 @@ export class DiscountService {
   async update(
     id: string,
     updateDiscountDto: UpdateDiscountDto,
-  ): Promise<CreateDiscountRespond> {
+  ): Promise<UpdateDiscountResponse> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const {
         name,
@@ -137,7 +143,7 @@ export class DiscountService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<Respond> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const discount = await entityManager.findOne(Discount, {
         where: {

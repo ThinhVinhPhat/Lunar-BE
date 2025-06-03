@@ -8,6 +8,13 @@ import { CategoryDetail } from '../../../../../libs/entity/src/category-detail.e
 import { message } from '@app/constant/message';
 import { UploadService } from '@/domain/upload/upload.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import {
+  CreateCategoryDetailsResponse,
+  GetAllCategoryDetailsResponse,
+  GetCategoryDetailsResponse,
+  Respond,
+  UpdateCategoryDetailsResponse,
+} from '@app/type';
 
 @Injectable()
 export class CategoryDetailService {
@@ -24,7 +31,7 @@ export class CategoryDetailService {
   async create(
     createCategoryDetailDto: CreateCategoryDetailDto,
     categoryId: string,
-  ) {
+  ): Promise<CreateCategoryDetailsResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { name, description, images } = createCategoryDetailDto;
@@ -81,12 +88,12 @@ export class CategoryDetailService {
     );
   }
 
-  async findAll() {
+  async findAll(): Promise<GetAllCategoryDetailsResponse> {
     const cachedCategoryDetails =
       await this.cacheManager.get('category-details');
 
     if (cachedCategoryDetails) {
-      return cachedCategoryDetails;
+      return cachedCategoryDetails as GetAllCategoryDetailsResponse;
     }
 
     const categories = await this.categoryDetailEntity.find();
@@ -100,7 +107,7 @@ export class CategoryDetailService {
     return result;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<GetCategoryDetailsResponse> {
     const category = await this.categoryDetailEntity.findOne({
       where: { id: id },
       relations: ['productCategories', 'category'],
@@ -113,7 +120,7 @@ export class CategoryDetailService {
     };
   }
 
-  async findByCategory(name: string) {
+  async findByCategory(name: string): Promise<GetAllCategoryDetailsResponse> {
     const category = await this.categoryEntity.findOne({
       where: { name: name },
       relations: ['categoryDetails'],
@@ -130,7 +137,10 @@ export class CategoryDetailService {
     };
   }
 
-  async update(id: string, updateCategoryDetailDto: UpdateCategoryDetailDto) {
+  async update(
+    id: string,
+    updateCategoryDetailDto: UpdateCategoryDetailDto,
+  ): Promise<UpdateCategoryDetailsResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { name, description, images, status } = updateCategoryDetailDto;
@@ -180,7 +190,7 @@ export class CategoryDetailService {
     );
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<Respond> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         try {

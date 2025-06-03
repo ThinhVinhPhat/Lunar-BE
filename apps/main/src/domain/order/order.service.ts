@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,6 +29,16 @@ import { CreateOrderShipmentDTO } from './dto/create-order-shipment.dto';
 import { UpdateOrderShipmentDTO } from './dto/update-order-shipment.dto';
 import { UpdateOrderAddressDTO } from './dto/update-order-address.dto';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Respond } from '@app/type';
+import {
+  CreateOrderResponse,
+  GetAllOrderResponse,
+  GetOrderByIdResponse,
+  UpdateOrderResponse,
+  UpdateOrderShipmentResponse,
+  UpdateOrderTrackingResponse,
+} from '@app/type/order/order.respond';
+import { AssertType, assertValues } from '@app/helper/assert';
 
 @Injectable()
 export class OrderService {
@@ -55,7 +71,10 @@ export class OrderService {
     return validTransitions[from]?.includes(to);
   }
 
-  async create(createOrderDto: CreateOrderDto, id: string) {
+  async create(
+    createOrderDto: CreateOrderDto,
+    id: string,
+  ): Promise<CreateOrderResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         console.log(id);
@@ -122,29 +141,21 @@ export class OrderService {
     );
   }
 
-  async createShipment(id: string, updateShipmentDTO: CreateOrderShipmentDTO) {
+  async createShipment(
+    id: string,
+    updateShipmentDTO: CreateOrderShipmentDTO,
+  ): Promise<CreateOrderResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
+        const { deliveredDate, estimateDate, shippingCarrier } =
+          updateShipmentDTO;
+
         const order = await transactionManager.findOne(Order, {
           where: {
             id: id,
           },
           relations: ['orderDetails', 'shipments'],
         });
-        if (!order) {
-          throw new HttpException(
-            message.FIND_ORDER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        if (order.status !== OrderStatus.SHIPPED) {
-          throw new HttpException(
-            ' Order status is not SHIPPED',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        const { deliveredDate, estimateDate, shippingCarrier } =
-          updateShipmentDTO;
 
         const existShipment = await transactionManager.findOne(Shipment, {
           where: {
@@ -154,29 +165,47 @@ export class OrderService {
             shippingCarrier: shippingCarrier,
           },
         });
-        if (existShipment) {
-          throw new HttpException(
-            'Shipment already exists',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
 
-        const newDeliveredDate = new Date(deliveredDate);
-        const newEstimateDate = new Date(estimateDate);
+        const values = [
+          {
+            type: AssertType.NOT_FOUND,
+            params: {
+              value: order,
+            },
+            message: 'Order is not found',
+          },
+          {
+            type: AssertType.INVALID_STATUS,
+            params: {
+              value: order.status,
+              status: OrderStatus.SHIPPED,
+            },
+            message: 'Order status is not SHIPPED',
+          },
+          {
+            type: AssertType.NOT_FOUND,
+            params: {
+              value: existShipment,
+            },
+            message: 'Shipment is not found',
+          },
+        ];
+
+        assertValues(values);
 
         const shipment = transactionManager.create(Shipment, {
           order: order,
-          deliveredAt: newDeliveredDate,
-          estimatedDeliveryDate: newEstimateDate,
+          deliveredAt: deliveredDate,
+          estimatedDeliveryDate: estimateDate,
           shippingCarrier: shippingCarrier,
           status: ShipmentStatus.SHIPPED,
         });
-        await transactionManager.save(Shipment, shipment);
         const orderHistory = transactionManager.create(OrderHistory, {
           action: OrderHistoryAction.SHIPMENT,
           description: `Order is arrived at ${shipment.shippingCarrier} ${new Date().toISOString()} and prepare to be shipped`,
           order: order,
         });
+        await transactionManager.save(Shipment, shipment);
         await transactionManager.save(OrderHistory, orderHistory);
 
         return {
@@ -188,13 +217,16 @@ export class OrderService {
     );
   }
 
-  async findAll(findByOrderDTO: FindOrderDTO, id: string) {
+  async findAll(
+    findByOrderDTO: FindOrderDTO,
+    id: string,
+  ): Promise<GetAllOrderResponse> {
     const cacheKey = `orders:${JSON.stringify(findByOrderDTO)}:user:${id}`;
 
     const cachedOrders = await this.cacheManager.get(cacheKey);
     if (cachedOrders) {
       this.logger.log(`Cache hit for key: ${cacheKey}`);
-      return cachedOrders;
+      return cachedOrders as GetAllOrderResponse;
     }
 
     const user = await this.userRepository.findOne({
@@ -221,10 +253,8 @@ export class OrderService {
 
     const result = {
       status: HttpStatus.OK,
-      data: {
-        orders: orders,
-        count: orders.length,
-      },
+      data: orders,
+      total: orders.length,
       message: message.FIND_ORDER_SUCCESS,
     };
 
@@ -233,7 +263,7 @@ export class OrderService {
     return result;
   }
 
-  async findOne(userId: string, id: string) {
+  async findOne(userId: string, id: string): Promise<GetOrderByIdResponse> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -266,7 +296,10 @@ export class OrderService {
     };
   }
 
-  async update(id: string, updateOrderDto: UpdateOrderDto) {
+  async update(
+    id: string,
+    updateOrderDto: UpdateOrderDto,
+  ): Promise<UpdateOrderResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const order = await transactionManager.findOne(Order, {
@@ -301,7 +334,10 @@ export class OrderService {
     );
   }
 
-  async updateStatus(id: string, updateOrderStatusDTO: UpdateOrderStatusDTO) {
+  async updateStatus(
+    id: string,
+    updateOrderStatusDTO: UpdateOrderStatusDTO,
+  ): Promise<UpdateOrderResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { status, description } = updateOrderStatusDTO;
@@ -359,7 +395,7 @@ export class OrderService {
   async updateShipmentStatus(
     shipmentId: string,
     updateShipmentStatusDTO: UpdateOrderShipmentDTO,
-  ) {
+  ): Promise<UpdateOrderShipmentResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { status, description } = updateShipmentStatusDTO;
@@ -410,9 +446,9 @@ export class OrderService {
 
   async processOrderTracking(
     orderId: string,
-    updateShipmentStatusDto: UpdateOrderAddressDTO,
-  ) {
-    const { shippingAddress } = updateShipmentStatusDto;
+    updateOrderTrackingDTO: UpdateOrderAddressDTO,
+  ): Promise<UpdateOrderTrackingResponse> {
+    const { shippingAddress } = updateOrderTrackingDTO;
     console.log(`Processing order tracking for order ID: ${orderId}`);
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
@@ -458,7 +494,7 @@ export class OrderService {
     };
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<Respond> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const order = await transactionManager.findOne(Order, {

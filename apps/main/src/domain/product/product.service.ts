@@ -8,18 +8,28 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, In, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Like, Repository } from 'typeorm';
 import { message } from '@app/constant/message';
 import { CategoryDetail } from '@app/entity/category-detail.entity';
 import { Product } from '../../../../../libs/entity/src/product.entity';
 import { ProductCategory } from '@app/entity/product-category.entity';
 import { UploadService } from '@/domain/upload/upload.service';
-import { FindProductDTO } from './dto/find-product.dto';
+import {
+  FindProductDTO,
+  FindSuggestionProductDTO,
+} from './dto/find-product.dto';
 import slugify from 'slugify';
 import { OrderDetail } from '@app/entity/order-detail.entity';
 import { Favorite } from '@app/entity/favorite.entity';
 import { FindOneProductDTO } from './dto/find-one-product.dto';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import {
+  CreateProductResponse,
+  GetAllProductResponse,
+  GetProductByIdResponse,
+  Respond,
+  UpdateProductResponse,
+} from '@app/type';
 
 @Injectable()
 export class ProductService {
@@ -55,7 +65,9 @@ export class ProductService {
     const slug = slugify(name + '-' + Date.now());
     return slug;
   }
-  async create(createProductDto: CreateProductDto) {
+  async create(
+    createProductDto: CreateProductDto,
+  ): Promise<CreateProductResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const {
@@ -148,18 +160,16 @@ export class ProductService {
     );
   }
 
-  async findAll(findDTO: FindProductDTO) {
+  async findAll(findDTO: FindProductDTO): Promise<GetAllProductResponse> {
     try {
       const cacheKey = `products:${JSON.stringify(findDTO)}`;
-
+      const { category, limit, offset, name, userId } = findDTO;
       const cached = await this.cacheManager.get(cacheKey);
 
       if (cached) {
         this.logger.log('Cache hit for findAll products');
-        return cached;
+        return cached as GetAllProductResponse;
       }
-
-      const { category, limit, offset, name, userId } = findDTO;
 
       const whereCondition = {
         productCategories: category
@@ -215,10 +225,8 @@ export class ProductService {
 
       const result = {
         status: HttpStatus.OK,
-        data: {
-          products: products,
-          productCount: total,
-        },
+        data: products,
+        total: total,
         message: message.FIND_PRODUCT_SUCCESS,
       };
 
@@ -226,15 +234,14 @@ export class ProductService {
 
       return result;
     } catch (e) {
-      this.logger.warn(e);
-      return {
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: message.FIND_PRODUCT_FAIL,
-      };
+      throw new HttpException(
+        message.FIND_PRODUCT_FAIL,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
-  async findOne(findDto: FindOneProductDTO) {
+  async findOne(findDto: FindOneProductDTO): Promise<GetProductByIdResponse> {
     try {
       const { slug, userId } = findDto;
 
@@ -278,7 +285,49 @@ export class ProductService {
       );
     }
   }
-  async update(id: string, updateProductDto: UpdateProductDto) {
+
+  async findSuggestion(
+    name: FindSuggestionProductDTO,
+  ): Promise<GetAllProductResponse> {
+    try {
+      const { name: productName } = name;
+      const cacheKey = `suggestion:${productName}`;
+      const cached = await this.cacheManager.get(cacheKey);
+
+      if (cached) {
+        this.logger.log('Cache hit for findSuggestion products');
+        return cached as GetAllProductResponse;
+      }
+
+      const [products, total] = await this.productEntity.findAndCount({
+        where: {
+          name: Like(`%${productName}%`),
+        },
+        take: 10,
+      });
+
+      const result = {
+        status: HttpStatus.OK,
+        data: products,
+        total: total,
+        message: message.FIND_PRODUCT_SUCCESS,
+      };
+
+      await this.cacheManager.set(cacheKey, result, 60);
+
+      return result;
+    } catch (e) {
+      throw new HttpException(
+        message.FIND_PRODUCT_FAIL,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+  ): Promise<UpdateProductResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         try {
@@ -345,7 +394,7 @@ export class ProductService {
     );
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<Respond> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const product = await transactionManager.findOne(Product, {

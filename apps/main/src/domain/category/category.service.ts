@@ -7,6 +7,13 @@ import { DataSource, EntityManager, Repository } from 'typeorm';
 import { message } from '@app/constant/message';
 import { UploadService } from '@/domain/upload/upload.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import {
+  CreateCategoryResponse,
+  GetAllCategoryResponse,
+  GetCategoryResponse,
+  Respond,
+  UpdateCategoryResponse,
+} from '@app/type';
 
 @Injectable()
 export class CategoryService {
@@ -18,7 +25,9 @@ export class CategoryService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(
+    createCategoryDto: CreateCategoryDto,
+  ): Promise<CreateCategoryResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { name } = createCategoryDto;
@@ -56,11 +65,11 @@ export class CategoryService {
     );
   }
 
-  async findAll() {
+  async findAll(): Promise<GetAllCategoryResponse> {
     const cachedCategories = await this.cacheManager.get('categories');
 
     if (cachedCategories) {
-      return cachedCategories;
+      return cachedCategories as GetAllCategoryResponse;
     }
 
     const categories = await this.categoryEntity.find({
@@ -76,7 +85,7 @@ export class CategoryService {
     return result;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<GetCategoryResponse> {
     const category = await this.categoryEntity.findOne({ where: { id: id } });
 
     return {
@@ -86,7 +95,10 @@ export class CategoryService {
     };
   }
 
-  update(id: string, updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<UpdateCategoryResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { name, status } = updateCategoryDto;
@@ -123,7 +135,7 @@ export class CategoryService {
     );
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<Respond> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         try {

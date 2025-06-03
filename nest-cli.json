@@ -148,6 +148,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/interceptors/tsconfig.lib.json"
       }
+    },
+    "@app/filter": {
+      "type": "library",
+      "root": "libs/filter",
+      "entryFile": "index",
+      "sourceRoot": "libs/filter/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/filter/tsconfig.lib.json"
+      }
     }
   }
 }

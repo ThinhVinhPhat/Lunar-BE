@@ -102,6 +102,12 @@
       ],
       "@app/interceptors/*": [
         "libs/interceptors/src/*"
+      ],
+      "@app/filter": [
+        "libs/filter/src"
+      ],
+      "@app/filter/*": [
+        "libs/filter/src/*"
       ]
     }
   },

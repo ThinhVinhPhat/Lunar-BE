@@ -7,6 +7,8 @@ import { OrderStatus, PaymentMethod, PaymentStatus } from '@app/constant/role';
 import { MailerService } from '@nestjs-modules/mailer';
 import { StripeService } from '@app/stripe';
 import { Payment, Product } from '@app/entity';
+import { Respond } from '@app/type';
+import { CreatePaymentResponse } from '@app/type/order/order.respond';
 
 @Injectable()
 export class PaymentService {
@@ -21,7 +23,10 @@ export class PaymentService {
     private readonly paymentRepository: Repository<Payment>,
   ) {}
 
-  async create(orderId: string, user: User) {
+  async create(
+    orderId: string,
+    user: User,
+  ): Promise<CreatePaymentResponse | Respond> {
     try {
       const customer = await this.stripeService.createCustomer(user, orderId);
 
@@ -102,7 +107,7 @@ export class PaymentService {
   async successCheckoutSession(payment_id: {
     order_id: string;
     session_id: string;
-  }) {
+  }): Promise<Respond> {
     const order = await this.orderRepository.findOne({
       where: {
         id: payment_id.order_id,
@@ -173,7 +178,7 @@ export class PaymentService {
     };
   }
 
-  async failedCheckoutSession() {
+  async failedCheckoutSession(): Promise<Respond> {
     return {
       status: HttpStatus.BAD_REQUEST,
       message: 'Order failed',

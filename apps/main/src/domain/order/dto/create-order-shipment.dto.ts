@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsDateString, IsNotEmpty, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateOrderShipmentDTO {
   @ApiProperty({
@@ -10,6 +10,7 @@ export class CreateOrderShipmentDTO {
     format: 'date-time',
   })
   @IsDateString()
+  @Type(() => Date)
   @IsNotEmpty()
   estimateDate: Date;
 
@@ -20,6 +21,7 @@ export class CreateOrderShipmentDTO {
     format: 'date-time',
   })
   @IsDateString()
+  @Type(() => Date)
   @IsNotEmpty()
   deliveredDate: Date;
 

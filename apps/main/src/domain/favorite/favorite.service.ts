@@ -1,6 +1,8 @@
 import { message } from '@app/constant';
 import { Product, User } from '@app/entity';
 import { Favorite } from '@app/entity/favorite.entity';
+import { Respond } from '@app/type';
+import { GetAllFavoriteResponse } from '@app/type/favorite/favorite.respond';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,7 +18,7 @@ export class FavoriteService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async handleFavorite(productId: string, userId: string) {
+  async handleFavorite(productId: string, userId: string): Promise<Respond> {
     const user = await this.userRepository.findOne({
       where: {
         id: userId,
@@ -74,7 +76,7 @@ export class FavoriteService {
     }
   }
 
-  async getUserFavorite(userId: string) {
+  async getUserFavorite(userId: string): Promise<GetAllFavoriteResponse> {
     const user = await this.userRepository.findOne({
       where: {
         id: userId,

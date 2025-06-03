@@ -10,6 +10,13 @@ import { UploadService } from '@/domain/upload/upload.service';
 import { Comment } from '../../../../../libs/entity/src/comment.entity';
 import { FindCommentDTO } from './dto/find-comment.dto';
 import { CommentSort } from '@app/constant/role';
+import {
+  CreateCommentResponse,
+  GetAllCommentResponse,
+  GetCommentByIdResponse,
+  Respond,
+  UpdateCommentResponse,
+} from '@app/type';
 
 @Injectable()
 export class CommentService {
@@ -26,7 +33,7 @@ export class CommentService {
     userId: string,
     createCommentDto: CreateCommentDto,
     productId: string,
-  ) {
+  ): Promise<CreateCommentResponse> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -49,7 +56,7 @@ export class CommentService {
         images.map((image) => this.uploadService.uploadS3(image)),
       );
     }
-    
+
     const createdComment = this.commentRepository.create({
       content: comment,
       rate: rate,
@@ -66,7 +73,10 @@ export class CommentService {
     };
   }
 
-  async findAllByProductId(productId: string, query: FindCommentDTO) {
+  async findAllByProductId(
+    productId: string,
+    query: FindCommentDTO,
+  ): Promise<GetAllCommentResponse> {
     const product = await this.productRepository.findOne({
       where: { id: productId },
       relations: ['comments'],
@@ -107,7 +117,10 @@ export class CommentService {
     };
   }
 
-  async findAllByUser(userId: string, query: FindCommentDTO) {
+  async findAllByUser(
+    userId: string,
+    query: FindCommentDTO,
+  ): Promise<GetAllCommentResponse> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['comments'],
@@ -151,7 +164,7 @@ export class CommentService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<GetCommentByIdResponse> {
     const comment = await this.commentRepository.findOne({
       where: { id: id },
       relations: ['product', 'user'],
@@ -166,7 +179,11 @@ export class CommentService {
     };
   }
 
-  async update(userId: string, id: string, updateCommentDto: UpdateCommentDto) {
+  async update(
+    userId: string,
+    id: string,
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<UpdateCommentResponse> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['comments'],
@@ -200,7 +217,7 @@ export class CommentService {
     };
   }
 
-  async remove(userId: string, id: string) {
+  async remove(userId: string, id: string): Promise<Respond> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['comments'],

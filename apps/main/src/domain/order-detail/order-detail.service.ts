@@ -10,6 +10,15 @@ import { Product } from '@app/entity/product.entity';
 import { message } from '@app/constant/message';
 import { OrderHistory } from '@app/entity';
 import { OrderHistoryAction } from '@app/constant';
+import {
+  CreateOrderDetailResponse,
+  GetAllOrderDetailResponse,
+  GetOrderDetailByIdResponse,
+  UpdateOrderDetailResponse,
+} from '@app/type/order/order.respond';
+import { assertValues } from '@app/helper/assert';
+import { AssertType } from '@app/helper/assert';
+import { Respond } from '@app/type';
 
 @Injectable()
 export class OrderDetailService {
@@ -25,42 +34,42 @@ export class OrderDetailService {
   create(
     findOrderDetailDto: FindOrderDetailDto,
     createOrderDetailDto: CreateOrderDetailDto,
-  ) {
+  ): Promise<CreateOrderDetailResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { orderId, productId } = findOrderDetailDto;
         const { quantity } = createOrderDetailDto;
-
+        let currentOrderDetail: OrderDetail = null;
         const order = await transactionManager.findOne(Order, {
           where: { id: orderId },
           relations: ['orderDetails', 'user', 'histories'],
         });
-
-        if (!order) {
-          throw new HttpException(
-            message.FIND_ORDER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
         const product = await transactionManager.findOne(Product, {
           where: { id: productId },
         });
-        if (!product) {
-          throw new HttpException(
-            message.FIND_PRODUCT_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
+
+        assertValues([
+          {
+            type: AssertType.NOT_FOUND,
+            params: { value: order },
+            message: message.FIND_ORDER_FAIL,
+          },
+          {
+            type: AssertType.NOT_FOUND,
+            params: { value: product },
+            message: message.FIND_PRODUCT_FAIL,
+          },
+        ]);
+
+        const existOrderDetail = order.orderDetails.find(
+          (ol) => ol.product_name == product.name,
+        );
 
         const productPrice =
           Number(product.discount_percentage) > 0
             ? Number(product.price) *
               (1 - Number(product.discount_percentage) / 100)
             : product.price;
-
-        const existOrderDetail = order.orderDetails.find(
-          (ol) => ol.product_name == product.name,
-        );
 
         if (existOrderDetail) {
           const oldQuantity = existOrderDetail.quantity;
@@ -70,12 +79,7 @@ export class OrderDetailService {
             productPrice * (existOrderDetail.quantity - oldQuantity);
           await transactionManager.save(OrderDetail, existOrderDetail);
           await transactionManager.save(Order, order);
-
-          return {
-            status: HttpStatus.OK,
-            data: existOrderDetail,
-            message: message.CREATE_ORDER_DETAIL_SUCCESS,
-          };
+          currentOrderDetail = existOrderDetail;
         } else {
           const orderDetail = transactionManager.create(OrderDetail, {
             order: order,
@@ -98,18 +102,18 @@ export class OrderDetailService {
           order.total_price += productPrice * quantity;
           order.histories.push(orderHistory);
           await transactionManager.save(Order, order);
-
-          return {
-            status: HttpStatus.OK,
-            data: orderDetail,
-            message: message.CREATE_ORDER_DETAIL_SUCCESS,
-          };
+          currentOrderDetail = orderDetail;
         }
+        return {
+          status: HttpStatus.OK,
+          data: currentOrderDetail,
+          message: message.CREATE_ORDER_DETAIL_SUCCESS,
+        };
       },
     );
   }
 
-  async findAllByOrder(id: string) {
+  async findAllByOrder(id: string): Promise<GetAllOrderDetailResponse> {
     const order = await this.orderRepository.findOne({
       where: { id },
       relations: ['orderDetails'],
@@ -124,7 +128,7 @@ export class OrderDetailService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<GetOrderDetailByIdResponse> {
     const orderDetail = await this.orderDetailRepository.findOne({
       where: { id },
     });
@@ -145,7 +149,7 @@ export class OrderDetailService {
     id: string,
     findOrderDetailDto: FindOrderDetailDto,
     updateOrderDetailDto: UpdateOrderDetailDto,
-  ) {
+  ): Promise<UpdateOrderDetailResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { orderId, productId } = findOrderDetailDto;
@@ -208,7 +212,7 @@ export class OrderDetailService {
     );
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<Respond> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const orderDetail = await transactionManager.findOne(OrderDetail, {
