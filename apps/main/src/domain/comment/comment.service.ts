@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,13 +39,13 @@ export class CommentService {
     });
 
     if (!user) {
-      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_USER_FAIL);
     }
     const product = await this.productRepository.findOne({
       where: { id: productId },
     });
     if (!product) {
-      throw new HttpException(message.FIND_PRODUCT_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_PRODUCT_FAIL);
     }
     const { comment, rate, images } = createCommentDto;
 
@@ -82,7 +82,7 @@ export class CommentService {
       relations: ['comments'],
     });
     if (!product) {
-      throw new HttpException(message.FIND_PRODUCT_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_PRODUCT_FAIL);
     }
     const { sort, limit, offset } = query;
 
@@ -126,7 +126,7 @@ export class CommentService {
       relations: ['comments'],
     });
     if (!user) {
-      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_USER_FAIL);
     }
 
     const { sort, limit, offset } = query;
@@ -170,7 +170,7 @@ export class CommentService {
       relations: ['product', 'user'],
     });
     if (!comment) {
-      throw new HttpException(message.FIND_COMMENT_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_COMMENT_FAIL);
     }
     return {
       status: HttpStatus.OK,
@@ -192,7 +192,7 @@ export class CommentService {
     const userComment = user.comments.find((comment) => comment.id === id);
 
     if (!userComment) {
-      throw new HttpException(message.FIND_COMMENT_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_COMMENT_FAIL);
     }
     const { comment, images, rate, status } = updateCommentDto;
     userComment.content = comment;
@@ -225,7 +225,7 @@ export class CommentService {
 
     const userComment = user.comments.find((comment) => comment.id === id);
     if (!userComment) {
-      throw new HttpException(message.FIND_COMMENT_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_COMMENT_FAIL);
     }
     await this.commentRepository.remove(userComment);
 

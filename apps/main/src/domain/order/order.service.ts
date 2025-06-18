@@ -1,9 +1,11 @@
 import {
-  HttpException,
+  ConflictException,
+  ForbiddenException,
   HttpStatus,
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -77,17 +79,13 @@ export class OrderService {
   ): Promise<CreateOrderResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
-        console.log(id);
 
         const user = await transactionManager.findOne(User, {
           where: { id: id },
         });
 
         if (!user) {
-          throw new HttpException(
-            message.FIND_USER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_USER_FAIL);
         }
         const existOrder = await transactionManager.findOne(Order, {
           where: {
@@ -240,7 +238,7 @@ export class OrderService {
       ],
     });
     if (!user) {
-      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.FIND_USER_FAIL);
     }
     const { status, offset, limit } = findByOrderDTO;
 
@@ -268,7 +266,7 @@ export class OrderService {
       where: { id: userId },
     });
     if (!user) {
-      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.FIND_USER_FAIL);
     }
     const order = await this.orderRepository.findOne({
       where: {
@@ -287,7 +285,7 @@ export class OrderService {
       ],
     });
     if (!order) {
-      throw new HttpException(message.FIND_ORDER_FAIL, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.FIND_ORDER_FAIL);
     }
     return {
       status: HttpStatus.OK,
@@ -309,10 +307,7 @@ export class OrderService {
           relations: ['orderDetails', 'histories'],
         });
         if (!order) {
-          throw new HttpException(
-            message.FIND_ORDER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_ORDER_FAIL);
         }
 
         const { shipPhone, shippingAddress, shippingFee, note } =
@@ -348,15 +343,11 @@ export class OrderService {
           relations: ['orderDetails', 'histories'],
         });
         if (!order) {
-          throw new HttpException(
-            message.FIND_ORDER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_ORDER_FAIL);
         }
         if (!this.canTransition(order.status, status) && !description) {
-          throw new HttpException(
+          throw new ConflictException(
             `Order status is ${order.status}, cannot update status to ${status}`,
-            HttpStatus.BAD_REQUEST,
           );
         }
 
@@ -404,19 +395,15 @@ export class OrderService {
           relations: ['order', 'order.histories'],
         });
         if (!shipment) {
-          throw new HttpException(
-            message.FIND_ORDER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_ORDER_FAIL);
         }
         if (
           status &&
           !this.canTransitionShipmentStatus(shipment.status, status) &&
           !description
         ) {
-          throw new HttpException(
+          throw new ForbiddenException(
             `Shipment status is ${shipment.status}, cannot update status to ${status}`,
-            HttpStatus.BAD_REQUEST,
           );
         }
 
@@ -458,10 +445,7 @@ export class OrderService {
     }
 
     if (order.status !== OrderStatus.SHIPPED) {
-      throw new HttpException(
-        'Order status is not SHIPPED',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ForbiddenException('Order status is not SHIPPED');
     }
 
     const orderTracking = await this.orderTrackingRepository.findOne({
@@ -504,10 +488,7 @@ export class OrderService {
           relations: ['orderDetails'],
         });
         if (!order) {
-          throw new HttpException(
-            message.FIND_ORDER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_ORDER_FAIL);
         }
         await transactionManager.remove(OrderDetail, order.orderDetails);
         await transactionManager.remove(Order, order);

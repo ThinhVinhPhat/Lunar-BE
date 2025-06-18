@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { Order, Product, User } from '@app/entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
@@ -133,12 +133,11 @@ export class StatisticService {
       where: { id: userId },
     });
     if (!user) {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
 
     const queryBuilder = this.orderRepository
       .createQueryBuilder('order')
-      .where('order.user.id = :userId', { userId })
       .orderBy('order.createdAt', 'DESC')
       .skip(offset)
       .take(limit);
@@ -192,8 +191,6 @@ export class StatisticService {
       .toString()
       .padStart(2, '0');
 
-    console.log(lastMonth);
-
     const value = await this.analyticRepository.findOne({
       where: {
         month: lastMonth,
@@ -201,10 +198,7 @@ export class StatisticService {
     });
 
     if (!value) {
-      throw new HttpException(
-        'There are no value recorded in last month',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException('There are no value recorded in last month');
     }
 
     const calcChange = (current: number, previous: number) => {
@@ -225,7 +219,7 @@ export class StatisticService {
         changeCustomer: changeCustomer.toFixed(2),
         changeOrder: changeOrder.toFixed(2),
         changeRevenue: changeRevenue.toFixed(2),
-        changeView,
+        changeView: changeView.toFixed(2),
       },
       message: 'Comparison with last month calculated successfully',
     };
@@ -282,7 +276,7 @@ export class StatisticService {
       where: { id: id },
     });
     if (!analytic) {
-      throw new HttpException('Analytic not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('Analytic not found');
     }
 
     analytic.month = month || analytic.month;
@@ -299,7 +293,7 @@ export class StatisticService {
       where: { id: id },
     });
     if (!summary) {
-      throw new HttpException('Summary not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('Summary not found');
     }
     await this.analyticRepository.delete(id);
     return {

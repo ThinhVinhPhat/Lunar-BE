@@ -17,6 +17,7 @@ import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
 import { GetUserOrdersDTO } from './dto/get-user-orders.dto';
 import { RolesGuard } from '../guard/roles.guard';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Statistic')
 @Controller('statistic')
@@ -67,7 +68,10 @@ export class StatisticController {
     description: 'Update Summary',
   })
   @Patch('/delete-summary/:id')
-  updateSummary(@Param('id') id: string, @Query('month') month: string) {
+  updateSummary(
+    @Param('id', UuidValidatePipe) id: string,
+    @Query('month') month: string,
+  ) {
     return this.statisticService.updateSummary(id, month);
   }
 
@@ -79,7 +83,7 @@ export class StatisticController {
     description: 'Delete Summary',
   })
   @Delete('/delete-summary/:id')
-  deleteSummary(@Param('id') id: string) {
+  deleteSummary(@Param('id', UuidValidatePipe) id: string) {
     return this.statisticService.deleteSummary(id);
   }
 

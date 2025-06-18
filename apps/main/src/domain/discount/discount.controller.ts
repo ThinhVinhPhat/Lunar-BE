@@ -18,6 +18,7 @@ import { User } from '@app/entity/user.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@app/constant';
 import { RolesGuard } from '../guard/roles.guard';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Discount')
 @Controller('discount')
@@ -69,7 +70,7 @@ export class DiscountController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', UuidValidatePipe) id: string) {
     return this.discountService.findOne(id);
   }
 
@@ -83,7 +84,7 @@ export class DiscountController {
   @Roles(Role.ADMIN)
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @Body() updateDiscountDto: UpdateDiscountDto,
   ) {
     return this.discountService.update(id, updateDiscountDto);
@@ -98,7 +99,7 @@ export class DiscountController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', UuidValidatePipe) id: string) {
     return this.discountService.remove(id);
   }
 }

@@ -3,7 +3,7 @@ import { Product, User } from '@app/entity';
 import { Favorite } from '@app/entity/favorite.entity';
 import { Respond } from '@app/type';
 import { GetAllFavoriteResponse } from '@app/type/favorite/favorite.respond';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -26,7 +26,7 @@ export class FavoriteService {
     });
 
     if (!user) {
-      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.FIND_USER_FAIL);
     }
     const product = await this.productRepository.findOne({
       where: {
@@ -35,14 +35,11 @@ export class FavoriteService {
     });
 
     if (!user) {
-      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.FIND_USER_FAIL);
     }
 
     if (!product) {
-      throw new HttpException(
-        message.FIND_PRODUCT_FAIL,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException(message.FIND_PRODUCT_FAIL);
     }
 
     const existFavorite = await this.favoriteRepository.findOne({
@@ -84,7 +81,7 @@ export class FavoriteService {
     });
 
     if (!user) {
-      throw new HttpException(message.FIND_USER_FAIL, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.FIND_USER_FAIL);
     }
 
     const favorites = await this.favoriteRepository.find({

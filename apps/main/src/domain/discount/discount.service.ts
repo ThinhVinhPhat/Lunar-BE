@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,6 +15,7 @@ import {
   Respond,
   UpdateDiscountResponse,
 } from '@app/type';
+import { NotFound } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class DiscountService {
@@ -74,7 +75,7 @@ export class DiscountService {
     });
 
     if (!user) {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
 
     const userDiscount = await this.userDiscountRepository.findOne({
@@ -95,7 +96,7 @@ export class DiscountService {
       },
     });
     if (!discount) {
-      throw new HttpException(message.FIND_DISCOUNT_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_DISCOUNT_FAIL);
     }
     return {
       status: HttpStatus.OK,
@@ -124,7 +125,7 @@ export class DiscountService {
         },
       });
       if (!discount) {
-        throw new HttpException('Discount not found', HttpStatus.BAD_REQUEST);
+        throw new NotFoundException('Discount not found');
       }
       discount.name = name;
       discount.description = description;
@@ -151,7 +152,7 @@ export class DiscountService {
         },
       });
       if (!discount) {
-        throw new HttpException('Discount not found', HttpStatus.BAD_REQUEST);
+        throw new NotFoundException('Discount not found');
       }
       await entityManager.delete(Discount, discount);
       return {

@@ -28,6 +28,7 @@ import { Role } from '@app/constant/role';
 import { FindOneProductDTO } from './dto/find-one-product.dto';
 import { RolesGuard } from '../guard/roles.guard';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Product')
 @Controller('product')
@@ -96,7 +97,7 @@ export class ProductController {
   @Roles(Role.ADMIN)
   @Patch('/:id')
   update(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @UploadedFiles() images: Express.Multer.File[],
     @Body() updateProductDto: UpdateProductDto,
   ) {
@@ -115,7 +116,7 @@ export class ProductController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Delete('/:id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', UuidValidatePipe) id: string) {
     return this.productService.remove(id);
   }
 }

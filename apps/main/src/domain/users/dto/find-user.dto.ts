@@ -1,7 +1,14 @@
 import { Role } from '@app/constant/role';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class FindDTO {
   @ApiPropertyOptional({
@@ -13,13 +20,27 @@ export class FindDTO {
   email: string;
 
   @ApiPropertyOptional({
-    description: 'user role',
-    nullable: true,
+    description: 'User roles',
     enum: Role,
+    isArray: true,
+    type: String,
+    example: ['Admin', 'User'],
   })
   @IsOptional()
-  @IsEnum(Role)
-  role: Role;
+  @IsArray()
+  @IsEnum(Role, { each: true })
+  @Type(() => String)
+  role?: Role[];
+
+  @ApiPropertyOptional({
+    description: 'user isOnline',
+    nullable: true,
+    example: true,
+  })
+  @IsOptional()
+  @Transform(({ value }) => (value === 'true' || value === true ? true : false))
+  @IsBoolean()
+  isOnline: boolean;
 
   @ApiPropertyOptional({
     description: 'limit',

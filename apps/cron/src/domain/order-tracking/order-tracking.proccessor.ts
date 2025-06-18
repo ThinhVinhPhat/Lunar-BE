@@ -8,7 +8,6 @@ export class OrderTrackingProcessor {
   async processOrderTracking(orderId: string, newAddress: string) {
     console.log(`Processing order tracking for order ID: ${orderId}`);
     try {
-      // Update the order address
       await this.orderService.processOrderTracking(orderId, {
         shippingAddress: newAddress,
       });

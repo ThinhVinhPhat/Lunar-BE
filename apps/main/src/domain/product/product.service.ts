@@ -1,9 +1,11 @@
 import {
-  HttpException,
+  BadRequestException,
+  ConflictException,
   HttpStatus,
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -88,10 +90,7 @@ export class ProductService {
             where: { id: In(categoryId) },
           });
           if (!category || category.length === 0) {
-            throw new HttpException(
-              message.FIND_CATEGORY_FAIL,
-              HttpStatus.NOT_FOUND,
-            );
+            throw new NotFoundException(message.FIND_CATEGORY_FAIL);
           }
 
           const existingProduct = await transactionManager.findOne(Product, {
@@ -101,10 +100,7 @@ export class ProductService {
           });
 
           if (existingProduct) {
-            throw new HttpException(
-              'Product already exist',
-              HttpStatus.BAD_REQUEST,
-            );
+            throw new ConflictException('Product already exist');
           } else {
             const imageUrls = [];
             for (const image of images) {
@@ -133,7 +129,6 @@ export class ProductService {
               .into(ProductCategory)
               .values(
                 category.map((item) => {
-                  console.log(item);
                   return {
                     product: product,
                     categoryDetails: item,
@@ -151,10 +146,7 @@ export class ProductService {
           }
         } catch (e) {
           this.logger.warn(e);
-          throw new HttpException(
-            message.CREATE_PRODUCT_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.CREATE_PRODUCT_FAIL);
         }
       },
     );
@@ -234,10 +226,7 @@ export class ProductService {
 
       return result;
     } catch (e) {
-      throw new HttpException(
-        message.FIND_PRODUCT_FAIL,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException(message.FIND_PRODUCT_FAIL);
     }
   }
 
@@ -277,12 +266,7 @@ export class ProductService {
         message: message.FIND_PRODUCT_SUCCESS,
       };
     } catch (e) {
-      console.log(e);
-
-      throw new HttpException(
-        message.FIND_PRODUCT_FAIL,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException(e.message);
     }
   }
 
@@ -317,10 +301,7 @@ export class ProductService {
 
       return result;
     } catch (e) {
-      throw new HttpException(
-        message.FIND_PRODUCT_FAIL,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException(message.FIND_PRODUCT_FAIL);
     }
   }
 
@@ -385,10 +366,7 @@ export class ProductService {
             message: message.UPDATE_PRODUCT_SUCCESS,
           };
         } catch (e) {
-          throw new HttpException(
-            message.UPDATE_PRODUCT_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new BadRequestException(message.UPDATE_PRODUCT_FAIL);
         }
       },
     );

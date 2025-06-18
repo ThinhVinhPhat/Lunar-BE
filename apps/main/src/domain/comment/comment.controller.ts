@@ -20,6 +20,7 @@ import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
 import { Public } from '@app/decorator/public.decorator';
 import { FindCommentDTO } from './dto/find-comment.dto';
+import { UuidValidatePipe } from '@app/pipe';
 
 @Controller('comment')
 @ApiTags('Comment')
@@ -35,7 +36,7 @@ export class CommentController {
   @ApiBearerAuth()
   @Post('/:id')
   create(
-    @Param('id') productId: string,
+    @Param('id', UuidValidatePipe) productId: string,
     @UploadedFiles() images: Express.Multer.File[],
     @Body() createCommentDto: CreateCommentDto,
     @UserReq() currentUser: User,
@@ -58,7 +59,7 @@ export class CommentController {
   @Public()
   @Get('/get-by-product/:id')
   findAllByProductId(
-    @Param('id') productId: string,
+    @Param('id', UuidValidatePipe) productId: string,
     @Query() query: FindCommentDTO,
   ) {
     return this.commentService.findAllByProductId(productId, query);
@@ -81,7 +82,7 @@ export class CommentController {
   })
   @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', UuidValidatePipe) id: string) {
     return this.commentService.findOne(id);
   }
 
@@ -94,7 +95,7 @@ export class CommentController {
   @UseInterceptors(FilesInterceptor('images'))
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @UserReq() currentUser: User,
     @Body() updateCommentDto: UpdateCommentDto,
     @UploadedFiles() images: Express.Multer.File[],
@@ -112,7 +113,10 @@ export class CommentController {
   })
   @ApiBearerAuth()
   @Delete(':id')
-  remove(@UserReq() currentUser: User, @Param('id') id: string) {
+  remove(
+    @UserReq() currentUser: User,
+    @Param('id', UuidValidatePipe) id: string,
+  ) {
     const userId = currentUser.id;
     return this.commentService.remove(userId, id);
   }

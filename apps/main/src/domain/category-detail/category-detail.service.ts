@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCategoryDetailDto } from './dto/create-category-detail.dto';
 import { UpdateCategoryDetailDto } from './dto/update-category-detail.dto';
 import { DataSource, EntityManager, Repository } from 'typeorm';
@@ -42,19 +49,13 @@ export class CategoryDetailService {
             relations: ['categoryDetails'],
           });
           if (!category) {
-            throw new HttpException(
-              message.FIND_CATEGORY_FAIL,
-              HttpStatus.NOT_FOUND,
-            );
+            throw new NotFoundException(message.FIND_CATEGORY_FAIL);
           }
           const imageUrls = [];
 
           if (images) {
             if (images.length > 2) {
-              throw new HttpException(
-                'Only 2 images are allowed',
-                HttpStatus.BAD_REQUEST,
-              );
+              throw new NotFoundException('Only 2 images are allowed');
             }
 
             for (const image of images) {
@@ -79,10 +80,7 @@ export class CategoryDetailService {
             message: message.CREATE_CATEGORY_DETAIL_SUCCESS,
           };
         } catch (e) {
-          throw new HttpException(
-            message.CREATE_CATEGORY_DETAIL_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new BadRequestException(message.CREATE_CATEGORY_DETAIL_FAIL);
         }
       },
     );
@@ -127,7 +125,7 @@ export class CategoryDetailService {
     });
 
     if (!category) {
-      throw new HttpException(message.FIND_CATEGORY_FAIL, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.FIND_CATEGORY_FAIL);
     }
 
     return {
@@ -149,10 +147,7 @@ export class CategoryDetailService {
           const imageUrls = [];
           if (images) {
             if (images.length > 2) {
-              throw new HttpException(
-                'Only 2 images are allowed',
-                HttpStatus.BAD_REQUEST,
-              );
+              throw new ForbiddenException('Only 2 images are allowed');
             }
             for (const image of images) {
               const imageUrl = await this.uploadService.uploadS3(image);
@@ -181,10 +176,7 @@ export class CategoryDetailService {
             message: message.UPDATE_CATEGORY_DETAIL_SUCCESS,
           };
         } catch (e) {
-          throw new HttpException(
-            message.UPDATE_CATEGORY_DETAIL_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new BadRequestException(message.UPDATE_CATEGORY_DETAIL_FAIL);
         }
       },
     );
@@ -205,10 +197,7 @@ export class CategoryDetailService {
             message: message.DELETE_CATEGORY_DETAIL_SUCCESS,
           };
         } catch (e) {
-          throw new HttpException(
-            message.DELETE_CATEGORY_DETAIL_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new BadRequestException(message.DELETE_CATEGORY_DETAIL_FAIL);
         }
       },
     );

@@ -6,6 +6,8 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { Discount } from './discount.entity';
 import { UserDiscount } from './user-discount.entity';
 import { Favorite } from './favorite.entity';
+import { Conversation } from './conversation.entity';
+import { Message } from './message.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -45,6 +47,9 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', default: false, nullable: true })
   isVerified: boolean;
 
+  @Column({ type: 'boolean', default: false, nullable: true })
+  isOnline: boolean;
+
   @Column({ type: 'varchar', length: 255, nullable: true })
   code_id: string;
 
@@ -68,4 +73,13 @@ export class User extends BaseEntity {
     onDelete: 'CASCADE',
   })
   favorites: Favorite[];
+
+  @OneToMany(() => Conversation, (conversation) => conversation.sender)
+  senderConversations: Conversation[];
+
+  @OneToMany(() => Conversation, (conversation) => conversation.receiver)
+  receiverConversations: Conversation[];
+
+  @OneToMany(() => Message, (message) => message.sender)
+  messages: Message[];
 }

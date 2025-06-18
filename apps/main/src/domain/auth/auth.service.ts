@@ -1,7 +1,8 @@
 import {
-  HttpException,
-  HttpStatus,
+  ConflictException,
+  ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from '@/domain/users/users.service';
@@ -79,7 +80,7 @@ export class AuthService {
     }
 
     if (user.data.status === false) {
-      throw new HttpException(message.USER_NOT_ACTIVE, HttpStatus.BAD_REQUEST);
+      throw new ForbiddenException(message.USER_NOT_ACTIVE);
     }
 
     return {
@@ -98,13 +99,13 @@ export class AuthService {
       where: { email: email },
     });
     if (!user) {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
     if (user.code_expried < new Date()) {
-      throw new HttpException(message.CODE_EXPIRED, HttpStatus.BAD_REQUEST);
+      throw new ForbiddenException(message.CODE_EXPIRED);
     }
     if (user.code_id !== code) {
-      throw new HttpException(message.CODE_NOT_MATCH, HttpStatus.BAD_REQUEST);
+      throw new ForbiddenException(message.CODE_NOT_MATCH);
     }
     user.status = true;
     user.code_id = null;
@@ -121,7 +122,7 @@ export class AuthService {
       },
     });
     if (!user) {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
     const randomCode = Math.floor(Math.random() * 1000000) + 1;
 
@@ -158,10 +159,7 @@ export class AuthService {
       user.refreshToken,
     );
     if (!is_equal) {
-      throw new HttpException(
-        ' Refresh token is not equal',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictException(' Refresh token is not equal');
     }
     const token = await this.generateJwt(user);
     return {

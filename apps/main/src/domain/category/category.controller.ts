@@ -19,6 +19,7 @@ import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { RolesGuard } from '../guard/roles.guard';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Category')
 @Controller('category')
@@ -44,7 +45,7 @@ export class CategoryController {
     description: 'Find all categories',
   })
   @UseInterceptors(CacheInterceptor)
-  @CacheTTL(60) // Cache for 60 seconds
+  @CacheTTL(60)
   @CacheKey('categories')
   @Get('/')
   findAll() {
@@ -57,7 +58,7 @@ export class CategoryController {
     description: 'Find one categories',
   })
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', UuidValidatePipe) id: string) {
     return this.categoryService.findOne(id);
   }
 
@@ -71,7 +72,7 @@ export class CategoryController {
   })
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoryService.update(id, updateCategoryDto);
@@ -86,7 +87,7 @@ export class CategoryController {
     type: UpdateCategoryDto,
   })
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', UuidValidatePipe) id: string) {
     return this.categoryService.remove(id);
   }
 }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDetailDto } from './dto/create-order-detail.dto';
 import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
 import { FindOrderDetailDto } from './dto/find-order-detail.dto';
@@ -119,7 +119,7 @@ export class OrderDetailService {
       relations: ['orderDetails'],
     });
     if (!order) {
-      throw new HttpException(message.FIND_ORDER_FAIL, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.FIND_ORDER_FAIL);
     }
     return {
       status: HttpStatus.OK,
@@ -133,10 +133,7 @@ export class OrderDetailService {
       where: { id },
     });
     if (!orderDetail) {
-      throw new HttpException(
-        message.FIND_ORDER_DETAIL_FAIL,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new NotFoundException(message.FIND_ORDER_DETAIL_FAIL);
     }
     return {
       status: HttpStatus.OK,
@@ -160,19 +157,13 @@ export class OrderDetailService {
         });
 
         if (!order) {
-          throw new HttpException(
-            message.FIND_ORDER_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_ORDER_FAIL);
         }
         const product = await transactionManager.findOne(Product, {
           where: { id: productId },
         });
         if (!product) {
-          throw new HttpException(
-            message.FIND_PRODUCT_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_PRODUCT_FAIL);
         }
         const productPrice =
           product.discount_percentage && Number(product.discount_percentage) > 0
@@ -187,10 +178,7 @@ export class OrderDetailService {
           },
         });
         if (!orderDetail) {
-          throw new HttpException(
-            message.FIND_ORDER_DETAIL_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_ORDER_DETAIL_FAIL);
         }
         order.total_price -= orderDetail.total;
         orderDetail.quantity = quantity;
@@ -222,10 +210,7 @@ export class OrderDetailService {
           relations: ['order', 'order.orderDetails'],
         });
         if (!orderDetail) {
-          throw new HttpException(
-            message.FIND_ORDER_DETAIL_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new NotFoundException(message.FIND_ORDER_DETAIL_FAIL);
         }
         const order = orderDetail.order;
         let totalPrice = order.total_price;

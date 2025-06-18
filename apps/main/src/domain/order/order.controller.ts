@@ -26,6 +26,7 @@ import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant';
 import { UpdateOrderAddressDTO } from './dto/update-order-address.dto';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Order')
 @Controller('order')
@@ -53,7 +54,7 @@ export class OrderController {
   @Roles(Role.ADMIN)
   @Post('/shipment/:id')
   createShipment(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @Body() updateShipmentDto: CreateOrderShipmentDTO,
   ) {
     return this.orderService.createShipment(id, updateShipmentDto);
@@ -77,7 +78,10 @@ export class OrderController {
     description: 'Find one user order by id',
   })
   @Get(':id')
-  findOne(@UserReq() currentUser: User, @Param('id') id: string) {
+  findOne(
+    @UserReq() currentUser: User,
+    @Param('id', UuidValidatePipe) id: string,
+  ) {
     const userId = currentUser.id;
     return this.orderService.findOne(userId, id);
   }
@@ -91,7 +95,10 @@ export class OrderController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+  update(
+    @Param('id', UuidValidatePipe) id: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ) {
     return this.orderService.update(id, updateOrderDto);
   }
 
@@ -103,7 +110,7 @@ export class OrderController {
   })
   @Patch('/update-status/:id')
   updateStatus(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @Body() updateStatusDto: UpdateOrderStatusDTO,
   ) {
     return this.orderService.updateStatus(id, updateStatusDto);
@@ -119,7 +126,7 @@ export class OrderController {
   @Roles(Role.ADMIN)
   @Patch('/shipment/:id')
   updateShipmentStatus(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @Body() updateShipmentStatusDto: UpdateOrderShipmentDTO,
   ) {
     return this.orderService.updateShipmentStatus(id, updateShipmentStatusDto);
@@ -136,7 +143,7 @@ export class OrderController {
   @Roles(Role.ADMIN)
   @Patch('/update-address/:id')
   updateCurrentAddress(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @Body() updateShipmentStatusDto: UpdateOrderAddressDTO,
   ) {
     return this.orderService.processOrderTracking(id, updateShipmentStatusDto);
@@ -150,7 +157,7 @@ export class OrderController {
   @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', UuidValidatePipe) id: string) {
     return this.orderService.remove(id);
   }
 }

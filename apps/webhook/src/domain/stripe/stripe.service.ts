@@ -24,8 +24,6 @@ export class StripeWebhookService {
       return { error: 'Invalid signature' };
     }
 
-    console.log(event.type);
-
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const orderId = session.metadata.order_id;

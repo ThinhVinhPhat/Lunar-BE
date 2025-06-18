@@ -1,4 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../../../../../libs/entity/src/user.entity';
@@ -10,7 +18,7 @@ import { message } from '@app/constant/message';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Role } from '@app/constant/role';
 import { UpdatePasswordDTO } from './dto/update-password.dto';
 import { UploadService } from '@/domain/upload/upload.service';
@@ -24,6 +32,7 @@ import {
   Respond,
   UpdateUserResponse,
 } from '@app/type';
+import { MessageGateway } from '../message/src/message.gateway';
 @Injectable()
 export class UsersService {
   constructor(
@@ -31,6 +40,7 @@ export class UsersService {
     private readonly userEntity: Repository<User>,
     private readonly mailerService: MailerService,
     private readonly uploadService: UploadService,
+    private readonly gateway: MessageGateway,
   ) {}
 
   async findMe(user: User) {
@@ -68,34 +78,32 @@ export class UsersService {
         message: message.USER_CREATE_SUCCESS,
       };
     } else {
-      throw new HttpException(
-        message.USER_ALREADY_EXISTS,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ConflictException(message.USER_ALREADY_EXISTS);
     }
   }
 
   async findAll(query: FindDTO): Promise<GetAllUserResponse> {
-    console.log(query);
-
     const queryList = {
       limit: query.limit ? query.limit : 10,
       offset: query.offset ? query.offset : 0,
       email: query.email ? query.email : null,
-      role: query.role ? query.role : Role.CUSTOMER,
+      role: query.role ? query.role : undefined,
+      isOnline: query.isOnline ? query.isOnline : null,
     };
 
     const [users, total] = await this.userEntity.findAndCount({
       where: {
         email: queryList.email,
-        role: queryList.role,
+        role: In(queryList.role),
+        isOnline: queryList.isOnline,
+        status: true,
       },
       skip: queryList.offset,
       take: queryList.limit,
     });
 
     if (!users) {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
 
     return {
@@ -114,13 +122,13 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
 
     return {
       status: HttpStatus.ACCEPTED,
       data: user,
-      message: message.USER_CREATE_SUCCESS,
+      message: message.FIND_USER_SUCCESS,
     };
   }
 
@@ -132,12 +140,12 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
     return {
       status: HttpStatus.ACCEPTED,
       data: user,
-      message: message.USER_CREATE_SUCCESS,
+      message: message.FIND_USER_SUCCESS,
     };
   }
 
@@ -153,10 +161,7 @@ export class UsersService {
     let avartarUrl = null;
     if (avatar) {
       if (avatar.length > 1) {
-        throw new HttpException(
-          'Only one avatar is allowed',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new ForbiddenException('Only one avatar is allowed');
       }
       avartarUrl = await this.uploadService.uploadS3(avatar[0]);
     }
@@ -176,10 +181,10 @@ export class UsersService {
       return {
         status: HttpStatus.OK,
         data: user,
-        message: message.USER_CREATE_SUCCESS,
+        message: message.USER_UPDATE_SUCCESS,
       };
     } else {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
   }
 
@@ -191,7 +196,7 @@ export class UsersService {
 
     const user = await this.userEntity.findOne({ where: { id: userId } });
     if (!user) {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
     user.firstName = firstName != null ? firstName : user.firstName;
     user.lastName = lastName != null ? lastName : user.lastName;
@@ -201,7 +206,7 @@ export class UsersService {
     return {
       status: HttpStatus.OK,
       data: user,
-      message: message.USER_CREATE_SUCCESS,
+      message: message.USER_UPDATE_SUCCESS,
     };
   }
 
@@ -231,8 +236,33 @@ export class UsersService {
         message: message.USER_PASSWORD_UPDATE_SUCCESS,
       };
     } else {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
+  }
+
+  async updateOnlineStatus(userId: string) {
+    const user = await this.userEntity.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(message.USER_NOT_EXISTS);
+    }
+    const userSocket = this.gateway.getUserOnline(userId);
+
+    console.log(userSocket);
+
+    if (!userSocket) {
+      user.isOnline = false;
+      await this.userEntity.save(user);
+    } else {
+      const isOnline = userSocket.isOnline;
+      user.isOnline = isOnline;
+      await this.userEntity.save(user);
+    }
+
+    return {
+      status: HttpStatus.OK,
+      data: userSocket,
+      message: "User's online status has been updated",
+    };
   }
 
   async remove(userId: string): Promise<Respond> {
@@ -245,7 +275,7 @@ export class UsersService {
         message: message.USER_DELETE_SUCCESS,
       };
     } else {
-      throw new HttpException(message.USER_NOT_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(message.USER_NOT_EXISTS);
     }
   }
   async handleRegister(registerDTO: RegisterAuthDto): Promise<Respond> {
@@ -286,7 +316,7 @@ export class UsersService {
         message: 'Send email validation code',
       };
     } else {
-      throw new HttpException(message.RESIGTER_FAIL, HttpStatus.BAD_REQUEST);
+      throw new BadRequestException(message.RESIGTER_FAIL);
     }
   }
 }

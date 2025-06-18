@@ -14,3 +14,5 @@ export * from './monthly-statistic.entity';
 export * from './order-history.entity';
 export * from './order-tracking.entity';
 export * from './shipment.entity';
+export * from './message.entity';
+export * from './conversation.entity';

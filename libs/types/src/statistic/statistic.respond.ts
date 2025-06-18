@@ -28,7 +28,7 @@ export interface CompareLastMonthResponse extends Respond {
     changeCustomer: string;
     changeOrder: string;
     changeRevenue: string;
-    changeView: number;
+    changeView: string;
   };
 }
 
@@ -43,6 +43,3 @@ export interface GetRevenueAndCategoriesResponse extends Respond {
 export interface UpdateSummaryResponse extends Respond {
   data: MonthlyAnalytics;
 }
-
-
-

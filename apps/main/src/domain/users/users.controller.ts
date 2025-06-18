@@ -6,7 +6,6 @@ import {
   Param,
   Delete,
   Query,
-  UnprocessableEntityException,
   UseGuards,
   UseInterceptors,
   UploadedFiles,
@@ -27,6 +26,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { FindDTO } from './dto/find-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RolesGuard } from '../guard/roles.guard';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('User')
 @Controller('users')
@@ -57,7 +57,7 @@ export class UsersController {
 
   @ApiBearerAuth()
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.ENGINEER)
   @ApiOperationDecorator({
     summary: 'Find all User',
     description: 'Find all User',
@@ -69,13 +69,13 @@ export class UsersController {
 
   @ApiBearerAuth()
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.ENGINEER)
   @ApiOperationDecorator({
     summary: 'Find User by Id',
     description: 'Find User by Id',
   })
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', UuidValidatePipe) id: string) {
     return this.usersService.findOne(id);
   }
 
@@ -110,10 +110,22 @@ export class UsersController {
   })
   @Patch('update-by-admin/:id')
   updateByAdmin(
-    @Param('id') userId: string,
+    @Param('id', UuidValidatePipe) userId: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.updateByAdmin(userId, updateUserDto);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperationDecorator({
+    summary: 'Update user Online Status',
+    description: ' Update user Online Status',
+    type: UpdateUserDto,
+  })
+  @Patch('update-online-status')
+  updateOnlineStatus(@UserReq() currentUser: User) {
+    const userId = currentUser.id;
+    return this.usersService.updateOnlineStatus(userId);
   }
 
   @Public()
@@ -125,27 +137,18 @@ export class UsersController {
   })
   @Patch('update/update-password')
   updatePassword(@Body() updatePassword: UpdatePasswordDTO) {
-    if (Object.keys(updatePassword).length == 0) {
-      throw new UnprocessableEntityException(
-        'Cannot update password with empty data',
-      );
-    }
-    try {
-      return this.usersService.updatePassword(updatePassword);
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    return this.usersService.updatePassword(updatePassword);
   }
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @ApiOperationDecorator({
-    summary: 'User reset password',
-    description: 'User reset password',
+    summary: 'Disable user',
+    description: 'Disable user',
     type: UpdatePasswordDTO,
   })
   @Delete('delete/:id')
-  remove(@Param('id') userId: string) {
+  remove(@Param('id', UuidValidatePipe) userId: string) {
     return this.usersService.remove(userId);
   }
 }

@@ -27,6 +27,7 @@ import { LoggingMiddleware } from '@app/middleware';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { redisStore } from 'cache-manager-ioredis';
+import { MessageModule } from './domain/message/src/message.module';
 @Module({
   imports: [
     StripeModule.forRoot({
@@ -61,6 +62,7 @@ import { redisStore } from 'cache-manager-ioredis';
     CommentModule,
     FavoriteModule,
     StatisticModule,
+    MessageModule,
   ],
   controllers: [],
   providers: [

@@ -16,6 +16,8 @@ import {
   OrderHistory,
   OrderTracking,
   Shipment,
+  Conversation,
+  Message,
 } from '../../entity/src/index';
 
 export const connectionSource = new DataSource({
@@ -42,6 +44,8 @@ export const connectionSource = new DataSource({
     OrderHistory,
     OrderTracking,
     Shipment,
+    Conversation,
+    Message,
   ],
   migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),

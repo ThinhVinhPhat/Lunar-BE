@@ -157,6 +157,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/filter/tsconfig.lib.json"
       }
+    },
+    "message": {
+      "type": "application",
+      "root": "apps/message",
+      "entryFile": "main",
+      "sourceRoot": "apps/message/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/message/tsconfig.app.json"
+      }
+    },
+    "pipe": {
+      "type": "library",
+      "root": "libs/pipe",
+      "entryFile": "index",
+      "sourceRoot": "libs/pipe/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/pipe/tsconfig.lib.json"
+      }
     }
   }
 }

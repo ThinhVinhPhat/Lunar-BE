@@ -5,20 +5,23 @@ import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { Public } from '@app/decorator/public.decorator';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Payment')
 @Controller('payment')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Public()
   @ApiOperationDecorator({
     summary: 'Create payment',
     description: 'Create payment',
   })
   @ApiBearerAuth()
   @Get('/:id')
-  createPayment(@Param('id') orderId: string, @UserReq() currentUser: User) {
+  createPayment(
+    @Param('id', UuidValidatePipe) orderId: string,
+    @UserReq() currentUser: User,
+  ) {
     return this.paymentService.create(orderId, currentUser);
   }
 

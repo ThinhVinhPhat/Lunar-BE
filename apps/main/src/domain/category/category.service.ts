@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,10 +46,7 @@ export class CategoryService {
             },
           });
           if (existCategory) {
-            throw new HttpException(
-              ' Category already exists',
-              HttpStatus.BAD_REQUEST,
-            );
+            throw new ConflictException(' Category already exists');
           }
           const category = transactionManager.create(Category, {
             name: name,
@@ -55,11 +59,7 @@ export class CategoryService {
             message: message.CREATE_CATEGORY_SUCCESS,
           };
         } catch (e) {
-          console.log(e);
-          throw new HttpException(
-            message.CREATE_CATEGORY_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new BadRequestException(e.message);
         }
       },
     );
@@ -110,10 +110,7 @@ export class CategoryService {
             },
           });
           if (!category) {
-            throw new HttpException(
-              message.FIND_CATEGORY_FAIL,
-              HttpStatus.NOT_FOUND,
-            );
+            throw new NotFoundException(message.FIND_CATEGORY_FAIL);
           }
 
           category.name = name;
@@ -126,10 +123,7 @@ export class CategoryService {
             message: message.UPDATE_CATEGORY_SUCCESS,
           };
         } catch {
-          throw new HttpException(
-            message.UPDATE_CATEGORY_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new BadRequestException(message.UPDATE_CATEGORY_FAIL);
         }
       },
     );
@@ -150,10 +144,7 @@ export class CategoryService {
             message: message.DELETE_CATEGORY_SUCCESS,
           };
         } catch {
-          throw new HttpException(
-            message.DELETE_CATEGORY_FAIL,
-            HttpStatus.BAD_REQUEST,
-          );
+          throw new BadRequestException(message.DELETE_CATEGORY_FAIL);
         }
       },
     );

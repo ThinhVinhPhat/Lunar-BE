@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@app/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '@app/entity/order.entity';
@@ -67,7 +67,7 @@ export class PaymentService {
 
           const priceObj = await this.stripeService.createPrice(
             productId,
-            item.price * 100,
+            Math.round(item.price) * 10,
             'usd',
           );
 
@@ -116,7 +116,7 @@ export class PaymentService {
     });
 
     if (!order) {
-      throw new HttpException('Cannot find Order', HttpStatus.BAD_REQUEST);
+      throw new NotFoundException('Cannot find Order');
     }
 
     const productIds = order.orderDetails.map((item) => item.product.id);
@@ -128,7 +128,7 @@ export class PaymentService {
     });
 
     if (!products || products.length == 0) {
-      throw new HttpException('Cannot find Products', HttpStatus.BAD_REQUEST);
+      throw new NotFoundException('Cannot find Products');
     }
 
     // Update product quantities based on orderDetails

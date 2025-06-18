@@ -14,6 +14,7 @@ import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { FindOrderDetailDto } from './dto/find-order-detail.dto';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('OrderDetail')
 @Controller('order-detail')
@@ -35,28 +36,28 @@ export class OrderDetailController {
       createOrderDetailDto,
     );
   }
-  
+
   @ApiBearerAuth()
   @Get('/:id')
-  findAllByOrder(@Param('id') id: string) {
+  findAllByOrder(@Param('id', UuidValidatePipe) id: string) {
     return this.orderDetailService.findAllByOrder(id);
   }
-  
+
   @ApiBearerAuth()
   @Get('/:id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', UuidValidatePipe) id: string) {
     return this.orderDetailService.findOne(id);
   }
-  
+
   @ApiBearerAuth()
   @ApiOperationDecorator({
     summary: 'Update Order Detail',
     description: 'Update Order Detail',
-    type: UpdateOrderDetailDto
+    type: UpdateOrderDetailDto,
   })
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @Query() findOrderDetail: FindOrderDetailDto,
     @Body() updateOrderDetailDto: UpdateOrderDetailDto,
   ) {
@@ -66,10 +67,10 @@ export class OrderDetailController {
       updateOrderDetailDto,
     );
   }
-  
+
   @ApiBearerAuth()
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', UuidValidatePipe) id: string) {
     return this.orderDetailService.remove(id);
   }
 }

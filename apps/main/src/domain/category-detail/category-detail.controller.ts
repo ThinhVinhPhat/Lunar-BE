@@ -21,6 +21,7 @@ import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { RolesGuard } from '../guard/roles.guard';
 import { CacheInterceptor, CacheTTL, CacheKey } from '@nestjs/cache-manager';
+import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('CategoryDetail')
 @Controller('category-details')
@@ -39,7 +40,7 @@ export class CategoryDetailController {
   @Roles(Role.ADMIN)
   @Post('/:id')
   create(
-    @Param('id') categoryId: string,
+    @Param('id', UuidValidatePipe) categoryId: string,
     @UploadedFiles() image: Express.Multer.File[],
     @Body() createCategoryDetailDto: CreateCategoryDetailDto,
   ) {
@@ -67,7 +68,7 @@ export class CategoryDetailController {
 
   @ApiBearerAuth()
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', UuidValidatePipe) id: string) {
     return this.categoryDetailService.findOne(id);
   }
 
@@ -94,7 +95,7 @@ export class CategoryDetailController {
   @Patch('/:id')
   update(
     @UploadedFiles() image: Express.Multer.File[],
-    @Param('id') id: string,
+    @Param('id', UuidValidatePipe) id: string,
     @Body() updateCategoryDetailDto: UpdateCategoryDetailDto,
   ) {
     return this.categoryDetailService.update(id, {
@@ -112,7 +113,7 @@ export class CategoryDetailController {
     type: UpdateCategoryDetailDto,
   })
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', UuidValidatePipe) id: string) {
     return this.categoryDetailService.remove(id);
   }
 }

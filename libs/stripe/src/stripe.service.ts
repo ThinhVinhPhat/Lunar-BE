@@ -1,8 +1,7 @@
-import { PaymentStatus } from '@app/constant';
 import { Order, Payment } from '@app/entity';
 import { User } from '@app/entity/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import Stripe from 'stripe';
@@ -102,7 +101,7 @@ export class StripeService {
     try {
       return this.stripe.webhooks.constructEvent(rawBody, signature, secret);
     } catch (err) {
-      throw new HttpException('Invalid signature', HttpStatus.BAD_REQUEST);
+      throw new ForbiddenException('Invalid signature');
     }
   }
 }

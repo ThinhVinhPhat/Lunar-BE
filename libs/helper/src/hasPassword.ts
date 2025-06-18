@@ -4,10 +4,10 @@ const saltOrRounds = 10;
 
 export const hashPasswordHelper = async (plainPassword: string) => {
   try {
-    const hashedPasword = await bcrypt.hash(plainPassword, saltOrRounds);
-    return hashedPasword;
+    const hashedPassword = await bcrypt.hash(plainPassword, saltOrRounds);
+    return hashedPassword;
   } catch (error) {
-    console.log(error);
+    throw new Error(error.message);
   }
 };
 export const hashPasswordCompareHelper = async (
@@ -15,10 +15,13 @@ export const hashPasswordCompareHelper = async (
   hashedPassword: string,
 ) => {
   try {
-    const hashedPasword = await bcrypt.compare(plainPassword, hashedPassword);
-    return hashedPasword;
+    const comparedPassword = await bcrypt.compare(
+      plainPassword,
+      hashedPassword,
+    );
+    return comparedPassword;
   } catch (error) {
-    console.log(error);
+    throw new Error(error.message);
   }
 };
 
@@ -27,7 +30,7 @@ export const hashedRefreshToken = async (refreshToken: string) => {
     const hashedToken = await bcrypt.hash(refreshToken, saltOrRounds);
     return hashedToken;
   } catch (error) {
-    console.log(error);
+    throw new Error(error.message);
   }
 };
 
@@ -39,6 +42,6 @@ export const hashTokenCompareHelper = async (
     const isCompared = await bcrypt.compare(reverse(plainToken), hashedToken);
     return isCompared;
   } catch (error) {
-    console.log(error);
+    throw new Error(error.message);
   }
 };
