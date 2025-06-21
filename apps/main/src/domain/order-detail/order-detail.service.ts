@@ -19,6 +19,8 @@ import {
 import { assertValues } from '@app/helper/assert';
 import { AssertType } from '@app/helper/assert';
 import { Respond } from '@app/type';
+import { plainToInstance } from 'class-transformer';
+import { OrderDetailRespondDto } from './dto/order-detail.respond.dto';
 
 @Injectable()
 export class OrderDetailService {
@@ -31,6 +33,21 @@ export class OrderDetailService {
     private readonly orderHistoryRepository: Repository<OrderHistory>,
     private readonly dataSource: DataSource,
   ) {}
+
+  private functionOrderDetailResponse(
+    orderDetail: OrderDetail | OrderDetail[],
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(OrderDetailRespondDto, orderDetail, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
+
   create(
     findOrderDetailDto: FindOrderDetailDto,
     createOrderDetailDto: CreateOrderDetailDto,
@@ -104,11 +121,10 @@ export class OrderDetailService {
           await transactionManager.save(Order, order);
           currentOrderDetail = orderDetail;
         }
-        return {
-          status: HttpStatus.OK,
-          data: currentOrderDetail,
-          message: message.CREATE_ORDER_DETAIL_SUCCESS,
-        };
+        return this.functionOrderDetailResponse(
+          currentOrderDetail,
+          message.CREATE_ORDER_DETAIL_SUCCESS,
+        );
       },
     );
   }
@@ -121,11 +137,10 @@ export class OrderDetailService {
     if (!order) {
       throw new NotFoundException(message.FIND_ORDER_FAIL);
     }
-    return {
-      status: HttpStatus.OK,
-      data: order.orderDetails,
-      message: message.FIND_ORDER_DETAIL_SUCCESS,
-    };
+    return this.functionOrderDetailResponse(
+      order.orderDetails,
+      message.FIND_ORDER_DETAIL_SUCCESS,
+    );
   }
 
   async findOne(id: string): Promise<GetOrderDetailByIdResponse> {
@@ -135,11 +150,10 @@ export class OrderDetailService {
     if (!orderDetail) {
       throw new NotFoundException(message.FIND_ORDER_DETAIL_FAIL);
     }
-    return {
-      status: HttpStatus.OK,
-      data: orderDetail,
-      message: message.FIND_ORDER_DETAIL_SUCCESS,
-    };
+    return this.functionOrderDetailResponse(
+      orderDetail,
+      message.FIND_ORDER_DETAIL_SUCCESS,
+    );
   }
 
   update(
@@ -191,11 +205,10 @@ export class OrderDetailService {
         await transactionManager.save(OrderDetail, orderDetail);
         await transactionManager.save(Order, order);
 
-        return {
-          status: HttpStatus.OK,
-          data: orderDetail,
-          message: message.CREATE_ORDER_DETAIL_SUCCESS,
-        };
+        return this.functionOrderDetailResponse(
+          orderDetail,
+          message.CREATE_ORDER_DETAIL_SUCCESS,
+        );
       },
     );
   }
@@ -234,7 +247,6 @@ export class OrderDetailService {
           total_price: totalPrice,
         });
         return {
-          status: HttpStatus.OK,
           message: message.DELETE_ORDER_DETAIL_SUCCESS,
         };
       },

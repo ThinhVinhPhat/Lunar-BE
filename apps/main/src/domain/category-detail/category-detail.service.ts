@@ -21,7 +21,10 @@ import {
   GetCategoryDetailsResponse,
   Respond,
   UpdateCategoryDetailsResponse,
+  User,
 } from '@app/type';
+import { plainToInstance } from 'class-transformer';
+import { CategoryDetailRespondDto } from './dto/category.respond.dto';
 
 @Injectable()
 export class CategoryDetailService {
@@ -34,6 +37,20 @@ export class CategoryDetailService {
     private readonly uploadService: UploadService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
+
+  private functionCategoryDetailResponse(
+    categoryDetail: CategoryDetail | CategoryDetail[],
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(CategoryDetailRespondDto, categoryDetail, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
 
   async create(
     createCategoryDetailDto: CreateCategoryDetailDto,
@@ -74,11 +91,10 @@ export class CategoryDetailService {
           await transactionManager.save(CategoryDetail, categoryDetail);
           await transactionManager.save(Category, category);
 
-          return {
-            status: HttpStatus.OK,
-            data: categoryDetail,
-            message: message.CREATE_CATEGORY_DETAIL_SUCCESS,
-          };
+          return this.functionCategoryDetailResponse(
+            categoryDetail,
+            message.CREATE_CATEGORY_DETAIL_SUCCESS,
+          );
         } catch (e) {
           throw new BadRequestException(message.CREATE_CATEGORY_DETAIL_FAIL);
         }
@@ -95,11 +111,10 @@ export class CategoryDetailService {
     }
 
     const categories = await this.categoryDetailEntity.find();
-    const result = {
-      status: HttpStatus.OK,
-      data: categories,
-      message: message.FIND_CATEGORY_DETAIL_SUCCESS,
-    };
+    const result = this.functionCategoryDetailResponse(
+      categories,
+      message.FIND_CATEGORY_DETAIL_SUCCESS,
+    );
     await this.cacheManager.set('category-details', result);
 
     return result;
@@ -111,11 +126,10 @@ export class CategoryDetailService {
       relations: ['productCategories', 'category'],
     });
 
-    return {
-      status: HttpStatus.OK,
-      data: category,
-      message: message.FIND_CATEGORY_DETAIL_SUCCESS,
-    };
+    return this.functionCategoryDetailResponse(
+      category,
+      message.FIND_CATEGORY_DETAIL_SUCCESS,
+    );
   }
 
   async findByCategory(name: string): Promise<GetAllCategoryDetailsResponse> {
@@ -128,11 +142,10 @@ export class CategoryDetailService {
       throw new NotFoundException(message.FIND_CATEGORY_FAIL);
     }
 
-    return {
-      status: HttpStatus.OK,
-      data: category.categoryDetails,
-      message: message.FIND_CATEGORY_DETAIL_SUCCESS,
-    };
+    return this.functionCategoryDetailResponse(
+      category.categoryDetails,
+      message.FIND_CATEGORY_DETAIL_SUCCESS,
+    );
   }
 
   async update(
@@ -170,11 +183,10 @@ export class CategoryDetailService {
 
           await transactionManager.save(CategoryDetail, categoryDetail);
 
-          return {
-            status: HttpStatus.OK,
-            data: categoryDetail,
-            message: message.UPDATE_CATEGORY_DETAIL_SUCCESS,
-          };
+          return this.functionCategoryDetailResponse(
+            categoryDetail,
+            message.UPDATE_CATEGORY_DETAIL_SUCCESS,
+          );
         } catch (e) {
           throw new BadRequestException(message.UPDATE_CATEGORY_DETAIL_FAIL);
         }
@@ -193,7 +205,6 @@ export class CategoryDetailService {
           });
           await transactionManager.remove(CategoryDetail, category);
           return {
-            status: HttpStatus.OK,
             message: message.DELETE_CATEGORY_DETAIL_SUCCESS,
           };
         } catch (e) {

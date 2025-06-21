@@ -8,19 +8,13 @@ export interface MonthlyAnalytics {
   totalOrders: number;
   totalRevenue: number;
   totalNewUsers: number;
-  topProductSlugs: string[];
+  topProducts: Product[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface GetSummaryResponse extends Respond {
-  data: {
-    totalNewUsers: number;
-    totalOrders: number;
-    totalRevenue: number;
-    totalViews: number;
-    topProducts: Product[];
-  };
+  data: MonthlyAnalytics;
 }
 
 export interface CompareLastMonthResponse extends Respond {
@@ -36,7 +30,7 @@ export interface GetRevenueAndCategoriesResponse extends Respond {
   data: {
     monthlyRevenues: MonthlyAnalytics[];
     totalRevenue: string;
-    categoryCounts: { [key: string]: number };
+    categoryCounts: any;
   };
 }
 

@@ -1,5 +1,6 @@
 import { DiscountType } from '@app/constant/role';
 import { Respond } from '..';
+import { DiscountRespondDto } from '@/domain/discount/dto/discount.respond.dto';
 
 export interface Discount {
   name: string;
@@ -12,17 +13,17 @@ export interface Discount {
 }
 
 export interface CreateDiscountResponse extends Respond {
-  data: Discount;
+  data: DiscountRespondDto;
 }
 
 export interface GetAllDiscountResponse extends Respond {
-  data: Discount[];
+  data: DiscountRespondDto;
 }
 
 export interface GetDiscountByIdResponse extends Respond {
-  data: Discount;
+  data: DiscountRespondDto;
 }
 
 export interface UpdateDiscountResponse extends Respond {
-  data: Discount;
+  data: DiscountRespondDto;
 }

@@ -68,7 +68,7 @@ export class AuthService {
     const user = await this.UserService.findUser(email);
     const validPassword = await hashPasswordCompareHelper(
       password,
-      user.data.password,
+      user.password,
     );
 
     if (!user) {
@@ -79,13 +79,13 @@ export class AuthService {
       throw new UnauthorizedException(message.PASSWORD_NOT_MATCH);
     }
 
-    if (user.data.status === false) {
+    if (user.status === false) {
       throw new ForbiddenException(message.USER_NOT_ACTIVE);
     }
 
     return {
-      accessToken: (await this.generateJwt(user.data)).accessToken,
-      refreshToken: (await this.generateJwt(user.data)).refreshToken,
+      accessToken: (await this.generateJwt(user)).accessToken,
+      refreshToken: (await this.generateJwt(user)).refreshToken,
     };
   }
 

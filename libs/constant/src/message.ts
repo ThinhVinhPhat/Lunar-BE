@@ -82,4 +82,12 @@ export const message = {
   DELETE_ORDER_HISTORY_FAIL: 'Delete OrderHistory  fail',
   FIND_ORDER_HISTORY_SUCCESS: 'Find OrderHistory  successfully',
   FIND_ORDER_HISTORY_FAIL: 'Find Order fail',
+  USER_ONLINE_STATUS_UPDATE_SUCCESS: "User's online status has been updated",
+  SEND_EMAIL_VALIDATION_CODE_SUCCESS: 'Send email validation code',
+  FIND_SUMMARY_SUCCESS: 'Find Summary Successfully',
+  FIND_REVENUE_AND_CATEGORY_SUCCESS: 'Find Revenue and Category Successfully',
+  UPDATE_SUMMARY_SUCCESS: 'Update Summary Successfully',
+  DELETE_SUMMARY_SUCCESS: 'Delete Summary Successfully',
+  GET_BETWEEN_USER_SUCCESS: 'Get Messages between users successfully',
+  GET_USER_MESSAGE_SUCCESS: 'Get User Messages successfully'
 };

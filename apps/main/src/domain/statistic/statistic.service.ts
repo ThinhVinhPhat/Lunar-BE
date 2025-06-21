@@ -9,9 +9,16 @@ import { GetAllOrderResponse } from '@app/type/order/order.respond';
 import {
   CompareLastMonthResponse,
   GetRevenueAndCategoriesResponse,
+  GetSummaryResponse,
   UpdateSummaryResponse,
 } from '@app/type/statistic/statistic.respond';
 import { Respond } from '@app/type';
+import {
+  GetRevenueAndCategoriesResponseDto,
+  StatisticResponse,
+} from './dto/statistic.respond.dto';
+import { plainToInstance } from 'class-transformer';
+import { OrderRespondDto } from '../order/dto/order.respond.dto';
 
 @Injectable()
 export class StatisticService {
@@ -26,7 +33,20 @@ export class StatisticService {
     private readonly analyticRepository: Repository<MonthlyAnalytics>,
   ) {}
 
-  async getSummary() {
+  private functionStatisticResponse(
+    data: any,
+    message: string,
+  ): GetSummaryResponse {
+    return {
+      status: HttpStatus.OK,
+      data: plainToInstance(StatisticResponse, data, {
+        excludeExtraneousValues: true,
+      }),
+      message: message,
+    };
+  }
+
+  async getSummary(): Promise<GetSummaryResponse> {
     const topProducts = await this.productRepository
       .createQueryBuilder('product')
       .where('product.status = :status', { status: true })
@@ -88,24 +108,16 @@ export class StatisticService {
     }
     await this.analyticRepository.save(monthAnalytic);
 
-    return {
-      status: HttpStatus.OK,
-      data: {
-        totalNewUsers,
-        totalOrders,
-        totalRevenue,
-        totalViews: totalViews === null ? 0 : totalViews,
-        topProducts,
-        // monthAnalytic,
-      },
-      message: 'Get Summary Successfully',
-    };
+    return this.functionStatisticResponse(
+      monthAnalytic,
+      message.FIND_SUMMARY_SUCCESS,
+    );
   }
 
   async getUserOrders(
     userId: string,
     query: { offset?: number; limit?: number; filter: string },
-  ): Promise<GetAllOrderResponse> {
+  ) {
     const { offset = 0, limit = 10, filter } = query;
     const now = new Date();
     let startDate: Date | null = null;
@@ -174,9 +186,11 @@ export class StatisticService {
 
     return {
       status: HttpStatus.OK,
-      data: ordersWithTimeDiff,
+      data: plainToInstance(OrderRespondDto, ordersWithTimeDiff, {
+        excludeExtraneousValues: true,
+      }),
       total: total,
-      message: 'User orders retrieved successfully',
+      message: message.FIND_ORDER_HISTORY_SUCCESS,
     };
   }
 
@@ -259,12 +273,12 @@ export class StatisticService {
 
     return {
       status: HttpStatus.OK,
-      data: {
+      data: plainToInstance(GetRevenueAndCategoriesResponseDto, {
         monthlyRevenues,
         totalRevenue: Number(totalRevenue).toFixed(2),
         categoryCounts,
-      },
-      message: 'Revenue and category product counts retrieved successfully',
+      }),
+      message: message.FIND_REVENUE_AND_CATEGORY_SUCCESS,
     };
   }
 
@@ -281,11 +295,10 @@ export class StatisticService {
 
     analytic.month = month || analytic.month;
     await this.analyticRepository.save(analytic);
-    return {
-      status: HttpStatus.OK,
-      data: analytic,
-      message: 'Summary updated successfully',
-    };
+    return this.functionStatisticResponse(
+      analytic,
+      message.UPDATE_SUMMARY_SUCCESS,
+    );
   }
 
   async deleteSummary(id: string): Promise<Respond> {
@@ -296,9 +309,9 @@ export class StatisticService {
       throw new NotFoundException('Summary not found');
     }
     await this.analyticRepository.delete(id);
-    return {
-      status: HttpStatus.OK,
-      message: 'Summary deleted successfully',
-    };
+    return this.functionStatisticResponse(
+      summary,
+      message.DELETE_SUMMARY_SUCCESS,
+    );
   }
 }

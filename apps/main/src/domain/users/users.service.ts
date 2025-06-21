@@ -1,9 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -33,6 +30,8 @@ import {
   UpdateUserResponse,
 } from '@app/type';
 import { MessageGateway } from '../message/src/message.gateway';
+import { plainToInstance } from 'class-transformer';
+import { UserResponseDto } from './dto/user.respond';
 @Injectable()
 export class UsersService {
   constructor(
@@ -43,10 +42,25 @@ export class UsersService {
     private readonly gateway: MessageGateway,
   ) {}
 
+  private functionUserResponse(
+    user: User | User[],
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(UserResponseDto, user, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
+
   async findMe(user: User) {
     return {
-      status: HttpStatus.OK,
-      data: user,
+      data: plainToInstance(UserResponseDto, user, {
+        excludeExtraneousValues: true,
+      }),
       message: message.FIND_USER_SUCCESS,
     };
   }
@@ -72,11 +86,7 @@ export class UsersService {
       });
       await this.userEntity.save(user);
 
-      return {
-        status: HttpStatus.ACCEPTED,
-        data: user,
-        message: message.USER_CREATE_SUCCESS,
-      };
+      return this.functionUserResponse(user, message.USER_CREATE_SUCCESS);
     } else {
       throw new ConflictException(message.USER_ALREADY_EXISTS);
     }
@@ -106,14 +116,12 @@ export class UsersService {
       throw new NotFoundException(message.USER_NOT_EXISTS);
     }
 
-    return {
-      status: HttpStatus.ACCEPTED,
-      data: users,
+    return this.functionUserResponse(users, message.FIND_USER_SUCCESS, {
       total: total,
-      message: message.FIND_USER_SUCCESS,
-    };
+    });
   }
 
+  // service function only return data
   async findUser(email: string) {
     const user = await this.userEntity.findOne({
       where: {
@@ -125,11 +133,7 @@ export class UsersService {
       throw new NotFoundException(message.USER_NOT_EXISTS);
     }
 
-    return {
-      status: HttpStatus.ACCEPTED,
-      data: user,
-      message: message.FIND_USER_SUCCESS,
-    };
+    return user;
   }
 
   async findOne(id: string): Promise<GetUserByIdResponse> {
@@ -142,11 +146,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(message.USER_NOT_EXISTS);
     }
-    return {
-      status: HttpStatus.ACCEPTED,
-      data: user,
-      message: message.FIND_USER_SUCCESS,
-    };
+    return this.functionUserResponse(user, message.FIND_USER_SUCCESS);
   }
 
   async update(
@@ -161,7 +161,7 @@ export class UsersService {
     let avartarUrl = null;
     if (avatar) {
       if (avatar.length > 1) {
-        throw new ForbiddenException('Only one avatar is allowed');
+        throw new ConflictException('Only one avatar is allowed');
       }
       avartarUrl = await this.uploadService.uploadS3(avatar[0]);
     }
@@ -178,11 +178,7 @@ export class UsersService {
       }
       await this.userEntity.save(user);
 
-      return {
-        status: HttpStatus.OK,
-        data: user,
-        message: message.USER_UPDATE_SUCCESS,
-      };
+      return this.functionUserResponse(user, message.USER_UPDATE_SUCCESS);
     } else {
       throw new NotFoundException(message.USER_NOT_EXISTS);
     }
@@ -203,11 +199,7 @@ export class UsersService {
     user.role = UpdateUserDto.role != null ? role : user.role;
     user.status = UpdateUserDto.status != null ? status : user.status;
     await this.userEntity.save(user);
-    return {
-      status: HttpStatus.OK,
-      data: user,
-      message: message.USER_UPDATE_SUCCESS,
-    };
+    return this.functionUserResponse(user, message.USER_UPDATE_SUCCESS);
   }
 
   async updateRefreshToken(email: string, refreshToken: string) {
@@ -230,11 +222,10 @@ export class UsersService {
         user.password = hashPassword;
         await this.userEntity.save(user);
       }
-      return {
-        status: HttpStatus.ACCEPTED,
-        data: user,
-        message: message.USER_PASSWORD_UPDATE_SUCCESS,
-      };
+      return this.functionUserResponse(
+        user,
+        message.USER_PASSWORD_UPDATE_SUCCESS,
+      );
     } else {
       throw new NotFoundException(message.USER_NOT_EXISTS);
     }
@@ -258,11 +249,10 @@ export class UsersService {
       await this.userEntity.save(user);
     }
 
-    return {
-      status: HttpStatus.OK,
-      data: userSocket,
-      message: "User's online status has been updated",
-    };
+    return this.functionUserResponse(
+      user,
+      message.USER_ONLINE_STATUS_UPDATE_SUCCESS,
+    );
   }
 
   async remove(userId: string): Promise<Respond> {
@@ -270,14 +260,13 @@ export class UsersService {
     if (user) {
       await this.userEntity.remove(user);
 
-      return {
-        status: HttpStatus.ACCEPTED,
-        message: message.USER_DELETE_SUCCESS,
-      };
+      return this.functionUserResponse(user, message.USER_DELETE_SUCCESS);
     } else {
       throw new NotFoundException(message.USER_NOT_EXISTS);
     }
   }
+
+  // service function only return data
   async handleRegister(registerDTO: RegisterAuthDto): Promise<Respond> {
     const { firstName, lastName, email, password, role } = registerDTO;
 
@@ -298,7 +287,7 @@ export class UsersService {
         status: false,
       });
 
-      const mail = await this.mailerService.sendMail({
+      await this.mailerService.sendMail({
         to: user.email,
         subject: 'Send Email Validation Code',
         text: 'welcome',
@@ -312,8 +301,7 @@ export class UsersService {
 
       await this.userEntity.save(user);
       return {
-        status: HttpStatus.ACCEPTED,
-        message: 'Send email validation code',
+        message: message.SEND_EMAIL_VALIDATION_CODE_SUCCESS,
       };
     } else {
       throw new BadRequestException(message.RESIGTER_FAIL);

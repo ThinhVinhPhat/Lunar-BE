@@ -15,7 +15,8 @@ import {
   Respond,
   UpdateDiscountResponse,
 } from '@app/type';
-import { NotFound } from '@aws-sdk/client-s3';
+import { DiscountRespondDto } from './dto/discount.respond.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class DiscountService {
@@ -28,6 +29,21 @@ export class DiscountService {
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
   ) {}
+
+  private functionDiscountResponse(
+    discount: Discount | Discount[] | UserDiscount,
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(DiscountRespondDto, discount, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
+
   async create(
     createDiscountDto: CreateDiscountDto,
   ): Promise<CreateDiscountResponse> {
@@ -51,21 +67,20 @@ export class DiscountService {
         thresholdAmount,
       });
       await entityManager.save(Discount, discount);
-      return {
-        status: HttpStatus.CREATED,
-        data: discount,
-        message: message.CREATE_DISCOUNT_SUCCESS,
-      };
+      return this.functionDiscountResponse(
+        discount,
+        message.CREATE_DISCOUNT_SUCCESS,
+      );
     });
   }
 
   async findAll(): Promise<GetAllDiscountResponse> {
     const discounts = await this.discountRepository.find();
-    return {
-      status: HttpStatus.OK,
-      data: discounts,
-      message: message.FIND_DISCOUNT_SUCCESS,
-    };
+
+    return this.functionDiscountResponse(
+      discounts,
+      message.FIND_DISCOUNT_SUCCESS,
+    );
   }
 
   async findByUser(userId: string) {
@@ -83,12 +98,16 @@ export class DiscountService {
       relations: ['user'],
     });
 
-    return {
-      status: HttpStatus.OK,
-      data: userDiscount,
-      message: message.FIND_DISCOUNT_SUCCESS,
-    };
+    if (!userDiscount) {
+      throw new NotFoundException(message.USER_NOT_EXISTS);
+    }
+
+    return this.functionDiscountResponse(
+      userDiscount,
+      message.FIND_DISCOUNT_SUCCESS,
+    );
   }
+
   async findOne(id: string): Promise<GetDiscountByIdResponse> {
     const discount = await this.discountRepository.findOne({
       where: {
@@ -98,11 +117,10 @@ export class DiscountService {
     if (!discount) {
       throw new NotFoundException(message.FIND_DISCOUNT_FAIL);
     }
-    return {
-      status: HttpStatus.OK,
-      data: discount,
-      message: message.FIND_DISCOUNT_SUCCESS,
-    };
+    return this.functionDiscountResponse(
+      discount,
+      message.FIND_DISCOUNT_SUCCESS,
+    );
   }
 
   async update(
@@ -136,11 +154,10 @@ export class DiscountService {
       discount.thresholdAmount = thresholdAmount;
       await entityManager.save(Discount, discount);
 
-      return {
-        status: HttpStatus.OK,
-        data: discount,
-        message: message.UPDATE_DISCOUNT_SUCCESS,
-      };
+      return this.functionDiscountResponse(
+        discount,
+        message.UPDATE_DISCOUNT_SUCCESS,
+      );
     });
   }
 
@@ -156,7 +173,6 @@ export class DiscountService {
       }
       await entityManager.delete(Discount, discount);
       return {
-        status: HttpStatus.OK,
         message: message.DELETE_DISCOUNT_SUCCESS,
       };
     });

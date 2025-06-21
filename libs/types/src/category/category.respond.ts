@@ -1,4 +1,6 @@
+import { CategoryDetailRespondDto } from '@/domain/category-detail/dto/category.respond.dto';
 import { Respond } from '..';
+import { CategoryRespondDto } from '@/domain/category/dto/category.respond.dto';
 
 export interface Category {
   id: string;
@@ -21,34 +23,34 @@ export interface CategoryDetails {
 
 // Category
 export interface GetAllCategoryResponse extends Respond {
-  data: Category[];
+  data: CategoryRespondDto;
 }
 
 export interface GetCategoryResponse extends Respond {
-  data: Category;
+  data: CategoryRespondDto;
 }
 
 export interface CreateCategoryResponse extends Respond {
-  data: Category;
+  data: CategoryRespondDto;
 }
 
 export interface UpdateCategoryResponse extends Respond {
-  data: Category;
+  data: CategoryRespondDto;
 }
 
 // Category Details
 export interface GetAllCategoryDetailsResponse extends Respond {
-  data: CategoryDetails[];
+  data: CategoryDetailRespondDto;
 }
 
 export interface CreateCategoryDetailsResponse extends Respond {
-  data: CategoryDetails;
+  data: CategoryDetailRespondDto;
 }
 
 export interface GetCategoryDetailsResponse extends Respond {
-  data: CategoryDetails;
+  data: CategoryDetailRespondDto;
 }
 
 export interface UpdateCategoryDetailsResponse extends Respond {
-  data: CategoryDetails;
+  data: CategoryDetailRespondDto;
 }

@@ -1,5 +1,6 @@
 import { Role } from '@app/constant/role';
 import { Respond } from '..';
+import { UserResponseDto } from '@/domain/users/dto/user.respond';
 
 export interface User {
   id: string;
@@ -14,6 +15,9 @@ export interface User {
   role: Role;
   avatar?: string;
   status: boolean;
+  isOnline: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateUserResponse extends Respond {
@@ -25,10 +29,10 @@ export interface GetUserByIdResponse extends Respond {
 }
 
 export interface GetAllUserResponse extends Respond {
-  data: User[];
-  total: number;
+  data: UserResponseDto;
+  total?: number;
 }
 
 export interface UpdateUserResponse extends Respond {
-  data: User;
+  data: UserResponseDto;
 }

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Conversation, Message, User } from '@app/entity';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { message } from '@app/constant';
 
 @Injectable()
 export class MessageService {
@@ -92,29 +93,59 @@ export class MessageService {
   }
 
   async getMessagesBetweenUsers(senderId: string, receiverId: string) {
-    const receiver = await this.userRepo.findOne({
-      where: { id: receiverId },
-    });
-    const sender = await this.userRepo.findOne({
-      where: { id: senderId },
-    });
+    const receiver = await this.userRepo.findOne({ where: { id: receiverId } });
+    const sender = await this.userRepo.findOne({ where: { id: senderId } });
+
     if (!receiver) {
-      throw new NotFoundException(' Receiver not found');
+      throw new NotFoundException('Receiver not found');
     }
     if (!sender) {
       throw new NotFoundException('Sender not found');
     }
+
     const conversation = await this.getConversation(senderId, receiverId);
 
-    if (!conversation) {
-      return {
-        data: [],
-        message: 'Messages between users',
-      };
+    const unreadMessages = conversation.messages.filter(
+      (msg) => msg.sender.id !== sender.id && !msg.isRead,
+    );
+
+    for (const msg of unreadMessages) {
+      msg.isRead = true;
+      await this.messageRepo.save(msg);
     }
+
     return {
       data: conversation.messages,
-      message: 'Messages between users',
+      message: message.GET_BETWEEN_USER_SUCCESS,
+    };
+  }
+
+  async getUserMessage(userId: string) {
+    const userConversations = await this.conversationRepo.find({
+      where: {
+        receiver: {
+          id: userId,
+        },
+      },
+      relations: {
+        messages: true,
+        sender: true,
+        receiver: true,
+      },
+    });
+
+    const userMessage = userConversations
+      .map((item) => {
+        const messages = item.messages.map((msg) =>
+          msg.sender.id !== userId ? msg : null,
+        );
+        return messages.filter(Boolean);
+      })
+      .flat();
+
+    return {
+      data: userMessage,
+      message: message.GET_USER_MESSAGE_SUCCESS,
     };
   }
 }

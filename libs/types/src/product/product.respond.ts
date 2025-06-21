@@ -1,3 +1,4 @@
+import { ProductRespondDto } from '@/domain/product/dto/product.respond.dto';
 import { Respond } from '..';
 import { CategoryDetails } from '../category/category.respond';
 
@@ -33,18 +34,18 @@ export interface ProductCategory {
 
 // Product
 export interface GetAllProductResponse extends Respond {
-  data: Product[];
-  total: number;
+  data: ProductRespondDto;
+  total?: number;
 }
 
 export interface GetProductByIdResponse extends Respond {
-  data: Product;
+  data: ProductRespondDto;
 }
 
 export interface CreateProductResponse extends Respond {
-  data: Product;
+  data: ProductRespondDto;
 }
 
 export interface UpdateProductResponse extends Respond {
-  data: Product;
+  data: ProductRespondDto;
 }

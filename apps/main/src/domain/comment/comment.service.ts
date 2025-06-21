@@ -17,6 +17,8 @@ import {
   Respond,
   UpdateCommentResponse,
 } from '@app/type';
+import { plainToInstance } from 'class-transformer';
+import { CommentRespondDto } from './dto/comment.respond.dto';
 
 @Injectable()
 export class CommentService {
@@ -29,6 +31,21 @@ export class CommentService {
     private readonly productRepository: Repository<Product>,
     private readonly uploadService: UploadService,
   ) {}
+
+  private functionCommentResponse(
+    comment: Comment | Comment[],
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(CommentRespondDto, comment, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
+
   async create(
     userId: string,
     createCommentDto: CreateCommentDto,
@@ -66,11 +83,10 @@ export class CommentService {
     });
     await this.commentRepository.save(createdComment);
 
-    return {
-      status: HttpStatus.CREATED,
-      data: createdComment,
-      message: message.CREATE_COMMENT_SUCCESS,
-    };
+    return this.functionCommentResponse(
+      createdComment,
+      message.CREATE_COMMENT_SUCCESS,
+    );
   }
 
   async findAllByProductId(
@@ -110,11 +126,7 @@ export class CommentService {
       skip: offset,
       take: limit,
     });
-    return {
-      status: HttpStatus.OK,
-      data: comment,
-      message: message.FIND_COMMENT_SUCCESS,
-    };
+    return this.functionCommentResponse(comment, message.FIND_COMMENT_SUCCESS);
   }
 
   async findAllByUser(
@@ -157,11 +169,7 @@ export class CommentService {
       take: limit,
     });
 
-    return {
-      status: HttpStatus.OK,
-      data: comments,
-      message: message.FIND_COMMENT_SUCCESS,
-    };
+    return this.functionCommentResponse(comments, message.FIND_COMMENT_SUCCESS);
   }
 
   async findOne(id: string): Promise<GetCommentByIdResponse> {
@@ -172,11 +180,7 @@ export class CommentService {
     if (!comment) {
       throw new NotFoundException(message.FIND_COMMENT_FAIL);
     }
-    return {
-      status: HttpStatus.OK,
-      data: comment,
-      message: message.FIND_COMMENT_SUCCESS,
-    };
+    return this.functionCommentResponse(comment, message.FIND_COMMENT_SUCCESS);
   }
 
   async update(
@@ -210,11 +214,10 @@ export class CommentService {
     }
     userComment.rate = rate;
     await this.commentRepository.save(userComment);
-    return {
-      status: HttpStatus.OK,
-      data: userComment,
-      message: message.UPDATE_COMMENT_SUCCESS,
-    };
+    return this.functionCommentResponse(
+      userComment,
+      message.UPDATE_COMMENT_SUCCESS,
+    );
   }
 
   async remove(userId: string, id: string): Promise<Respond> {
@@ -230,7 +233,6 @@ export class CommentService {
     await this.commentRepository.remove(userComment);
 
     return {
-      status: HttpStatus.OK,
       message: message.DELETE_COMMENT_SUCCESS,
     };
   }

@@ -21,6 +21,8 @@ import {
   Respond,
   UpdateCategoryResponse,
 } from '@app/type';
+import { plainToInstance } from 'class-transformer';
+import { CategoryRespondDto } from './dto/category.respond.dto';
 
 @Injectable()
 export class CategoryService {
@@ -32,6 +34,19 @@ export class CategoryService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
+  private functionCategoryResponse(
+    category: Category | Category[],
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(CategoryRespondDto, category, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
   async create(
     createCategoryDto: CreateCategoryDto,
   ): Promise<CreateCategoryResponse> {
@@ -53,11 +68,10 @@ export class CategoryService {
           });
           await transactionManager.save(category);
 
-          return {
-            status: HttpStatus.OK,
-            data: category,
-            message: message.CREATE_CATEGORY_SUCCESS,
-          };
+          return this.functionCategoryResponse(
+            category,
+            message.CREATE_CATEGORY_SUCCESS,
+          );
         } catch (e) {
           throw new BadRequestException(e.message);
         }
@@ -75,11 +89,10 @@ export class CategoryService {
     const categories = await this.categoryEntity.find({
       relations: ['categoryDetails'],
     });
-    const result = {
-      status: HttpStatus.OK,
-      data: categories,
-      message: message.FIND_CATEGORY_SUCCESS,
-    };
+    const result = this.functionCategoryResponse(
+      categories,
+      message.FIND_CATEGORY_SUCCESS,
+    );
     await this.cacheManager.set('categories', result);
 
     return result;
@@ -88,11 +101,10 @@ export class CategoryService {
   async findOne(id: string): Promise<GetCategoryResponse> {
     const category = await this.categoryEntity.findOne({ where: { id: id } });
 
-    return {
-      status: HttpStatus.OK,
-      data: category,
-      message: message.FIND_CATEGORY_SUCCESS,
-    };
+    return this.functionCategoryResponse(
+      category,
+      message.FIND_CATEGORY_SUCCESS,
+    );
   }
 
   async update(
@@ -117,11 +129,10 @@ export class CategoryService {
           category.status = status;
           await transactionManager.save(Category, category);
 
-          return {
-            status: HttpStatus.OK,
-            data: category,
-            message: message.UPDATE_CATEGORY_SUCCESS,
-          };
+          return this.functionCategoryResponse(
+            category,
+            message.UPDATE_CATEGORY_SUCCESS,
+          );
         } catch {
           throw new BadRequestException(message.UPDATE_CATEGORY_FAIL);
         }
@@ -139,10 +150,10 @@ export class CategoryService {
             },
           });
           await transactionManager.delete(Category, category.id);
-          return {
-            status: HttpStatus.OK,
-            message: message.DELETE_CATEGORY_SUCCESS,
-          };
+          return this.functionCategoryResponse(
+            category,
+            message.DELETE_CATEGORY_SUCCESS,
+          );
         } catch {
           throw new BadRequestException(message.DELETE_CATEGORY_FAIL);
         }

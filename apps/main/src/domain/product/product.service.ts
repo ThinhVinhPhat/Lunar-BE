@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  HttpStatus,
   Inject,
   Injectable,
   Logger,
@@ -32,6 +31,8 @@ import {
   Respond,
   UpdateProductResponse,
 } from '@app/type';
+import { plainToInstance } from 'class-transformer';
+import { ProductRespondDto } from './dto/product.respond.dto';
 
 @Injectable()
 export class ProductService {
@@ -63,10 +64,26 @@ export class ProductService {
     const result = categories.map((item) => item.name).join(', ');
     return result;
   }
+
   private slugGenerate(name: string) {
     const slug = slugify(name + '-' + Date.now());
     return slug;
   }
+
+  private functionProductResponse(
+    product: Product | Product[],
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(ProductRespondDto, product, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
+
   async create(
     createProductDto: CreateProductDto,
   ): Promise<CreateProductResponse> {
@@ -138,11 +155,10 @@ export class ProductService {
               )
               .execute();
 
-            return {
-              status: HttpStatus.OK,
-              data: product,
-              message: message.CREATE_PRODUCT_SUCCESS,
-            };
+            return this.functionProductResponse(
+              product,
+              message.CREATE_PRODUCT_SUCCESS,
+            );
           }
         } catch (e) {
           this.logger.warn(e);
@@ -215,13 +231,11 @@ export class ProductService {
         });
       }
 
-      const result = {
-        status: HttpStatus.OK,
-        data: products,
-        total: total,
-        message: message.FIND_PRODUCT_SUCCESS,
-      };
-
+      const result = this.functionProductResponse(
+        products,
+        message.FIND_PRODUCT_SUCCESS,
+        { total: total },
+      );
       await this.cacheManager.set(cacheKey, result, 60);
 
       return result;
@@ -256,15 +270,14 @@ export class ProductService {
       product.views += 1;
       await this.productEntity.save(product);
 
-      return {
-        status: HttpStatus.OK,
-        data: {
-          ...product,
+      return this.functionProductResponse(
+        product,
+        message.FIND_PRODUCT_SUCCESS,
+        {
           categories: await this.findProductCategoryDetail(product),
           isFavorite: existFavorite !== undefined,
         },
-        message: message.FIND_PRODUCT_SUCCESS,
-      };
+      );
     } catch (e) {
       throw new NotFoundException(e.message);
     }
@@ -290,12 +303,11 @@ export class ProductService {
         take: 10,
       });
 
-      const result = {
-        status: HttpStatus.OK,
-        data: products,
-        total: total,
-        message: message.FIND_PRODUCT_SUCCESS,
-      };
+      const result = this.functionProductResponse(
+        products,
+        message.FIND_PRODUCT_SUCCESS,
+        { total: total },
+      );
 
       await this.cacheManager.set(cacheKey, result, 60);
 
@@ -360,11 +372,10 @@ export class ProductService {
           result.quantity = product.stock;
           await transactionManager.save(ProductCategory, result);
 
-          return {
-            status: HttpStatus.OK,
-            data: product,
-            message: message.UPDATE_PRODUCT_SUCCESS,
-          };
+          return this.functionProductResponse(
+            product,
+            message.UPDATE_PRODUCT_SUCCESS,
+          );
         } catch (e) {
           throw new BadRequestException(message.UPDATE_PRODUCT_FAIL);
         }
@@ -407,7 +418,6 @@ export class ProductService {
         await transactionManager.remove(ProductCategory, productCategories);
         await transactionManager.remove(Product, product);
         return {
-          status: HttpStatus.OK,
           message: message.DELETE_PRODUCT_SUCCESS,
         };
       },

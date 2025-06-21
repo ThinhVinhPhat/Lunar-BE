@@ -11,11 +11,25 @@ export class MessagesController {
 
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Find User Detail',
-    description: 'Find User Detail',
+    summary: 'Find messages by User',
+    description: 'Find messages by User',
+  })
+  @Get('/me')
+  getUserMessages(@UserReq() user: User) {
+    const id = user.id;
+    return this.messageService.getUserMessage(id);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Find messages by sender and receiver',
+    description: 'Find messages by sender and receiver',
   })
   @Get('/:senderId')
-  getMe(@UserReq() user: User, @Param('senderId') senderId: string) {
+  getConversationMessages(
+    @UserReq() user: User,
+    @Param('senderId') senderId: string,
+  ) {
     const id = user.id;
     return this.messageService.getMessagesBetweenUsers(senderId, id);
   }

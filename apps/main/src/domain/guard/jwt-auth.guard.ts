@@ -44,6 +44,11 @@ export class JwtAuthGuard implements CanActivate {
       request['jwtPayLoad'] = payload;
 
       const user = await this.userService.findOne(payload.sub);
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
       request['user'] = user.data;
     } catch (error) {
       throw new UnauthorizedException('Invalid token');

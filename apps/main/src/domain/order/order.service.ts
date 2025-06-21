@@ -41,6 +41,12 @@ import {
   UpdateOrderTrackingResponse,
 } from '@app/type/order/order.respond';
 import { AssertType, assertValues } from '@app/helper/assert';
+import { plainToInstance } from 'class-transformer';
+import { OrderRespondDto } from './dto/order.respond.dto';
+import {
+  OrderTrackRespondDto,
+  ShipmentRespondDto,
+} from '../order-detail/dto/order-detail.respond.dto';
 
 @Injectable()
 export class OrderService {
@@ -73,13 +79,26 @@ export class OrderService {
     return validTransitions[from]?.includes(to);
   }
 
+  private functionOrderResponse(
+    order: Order | Order[],
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(OrderRespondDto, order, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
+
   async create(
     createOrderDto: CreateOrderDto,
     id: string,
   ): Promise<CreateOrderResponse> {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
-
         const user = await transactionManager.findOne(User, {
           where: { id: id },
         });
@@ -98,11 +117,10 @@ export class OrderService {
         });
 
         if (existOrder) {
-          return {
-            status: HttpStatus.OK,
-            data: existOrder,
-            message: message.CREATE_ORDER_SUCCESS,
-          };
+          return this.functionOrderResponse(
+            existOrder,
+            message.CREATE_ORDER_SUCCESS,
+          );
         }
 
         const { shipPhone, shippingAddress, shippingFee, note } =
@@ -130,11 +148,7 @@ export class OrderService {
         order.histories.push(orderHistory);
         await transactionManager.save(Order, order);
 
-        return {
-          status: HttpStatus.OK,
-          data: order,
-          message: message.CREATE_ORDER_SUCCESS,
-        };
+        return this.functionOrderResponse(order, message.CREATE_ORDER_SUCCESS);
       },
     );
   }
@@ -206,11 +220,7 @@ export class OrderService {
         await transactionManager.save(Shipment, shipment);
         await transactionManager.save(OrderHistory, orderHistory);
 
-        return {
-          status: HttpStatus.OK,
-          data: order,
-          message: message.UPDATE_ORDER_SUCCESS,
-        };
+        return this.functionOrderResponse(order, message.UPDATE_ORDER_SUCCESS);
       },
     );
   }
@@ -249,12 +259,13 @@ export class OrderService {
             .slice(offset, limit)
         : user.orders.slice(offset, limit);
 
-    const result = {
-      status: HttpStatus.OK,
-      data: orders,
-      total: orders.length,
-      message: message.FIND_ORDER_SUCCESS,
-    };
+    const result = this.functionOrderResponse(
+      orders,
+      message.FIND_ORDER_SUCCESS,
+      {
+        total: orders.length,
+      },
+    );
 
     await this.cacheManager.set(cacheKey, result, 60);
 
@@ -287,11 +298,7 @@ export class OrderService {
     if (!order) {
       throw new NotFoundException(message.FIND_ORDER_FAIL);
     }
-    return {
-      status: HttpStatus.OK,
-      data: order,
-      message: message.FIND_ORDER_SUCCESS,
-    };
+    return this.functionOrderResponse(order, message.FIND_ORDER_SUCCESS);
   }
 
   async update(
@@ -320,11 +327,7 @@ export class OrderService {
 
         await transactionManager.save(Order, order);
 
-        return {
-          status: HttpStatus.OK,
-          data: order,
-          message: message.CREATE_ORDER_SUCCESS,
-        };
+        return this.functionOrderResponse(order, message.UPDATE_ORDER_SUCCESS);
       },
     );
   }
@@ -362,11 +365,7 @@ export class OrderService {
         await transactionManager.save(OrderHistory, orderHistory);
         order.histories.push(orderHistory);
         await transactionManager.save(Order, order);
-        return {
-          status: HttpStatus.OK,
-          data: order,
-          message: message.UPDATE_ORDER_SUCCESS,
-        };
+        return this.functionOrderResponse(order, message.UPDATE_ORDER_SUCCESS);
       },
     );
   }
@@ -424,7 +423,9 @@ export class OrderService {
 
         return {
           status: HttpStatus.OK,
-          data: shipment,
+          data: plainToInstance(ShipmentRespondDto, shipment, {
+            excludeExtraneousValues: true,
+          }),
           message: message.UPDATE_ORDER_SUCCESS,
         };
       },
@@ -473,7 +474,9 @@ export class OrderService {
     await this.orderTrackingRepository.save(orderTracking);
     return {
       status: HttpStatus.OK,
-      data: orderTracking,
+      data: plainToInstance(OrderTrackRespondDto, orderTracking, {
+        excludeExtraneousValues: true,
+      }),
       message: `Order tracking created for order ID: ${orderId}`,
     };
   }
@@ -493,7 +496,6 @@ export class OrderService {
         await transactionManager.remove(OrderDetail, order.orderDetails);
         await transactionManager.remove(Order, order);
         return {
-          status: HttpStatus.OK,
           message: message.DELETE_ORDER_SUCCESS,
         };
       },
