@@ -89,5 +89,17 @@ export const message = {
   UPDATE_SUMMARY_SUCCESS: 'Update Summary Successfully',
   DELETE_SUMMARY_SUCCESS: 'Delete Summary Successfully',
   GET_BETWEEN_USER_SUCCESS: 'Get Messages between users successfully',
-  GET_USER_MESSAGE_SUCCESS: 'Get User Messages successfully'
+  GET_USER_MESSAGE_SUCCESS: 'Get User Messages successfully',
+  CREATE_NOTIFICATION_SUCCESS: 'Create Notification Successfully',
+  CREATE_NOTIFICATION_FAIL: 'Create Notification Fail',
+  FIND_NOTIFICATION_SUCCESS: 'Find Notification Successfully',
+  FIND_NOTIFICATION_FAIL: 'Find Notification Fail',
+  UPDATE_NOTIFICATION_SUCCESS: 'Update Notification Successfully',
+  UPDATE_NOTIFICATION_FAIL: 'Update Notification Fail',
+  DELETE_NOTIFICATION_SUCCESS: 'Delete Notification Successfully',
+  DELETE_NOTIFICATION_FAIL: 'Delete Notification Fail',
+  COMPARISON_WITH_LAST_MONTH_SUCCESS:
+    'Comparison with last month calculated successfully',
+  COMPARISON_WITH_LAST_MONTH_FAIL: 'Comparison with last month calculated fail',
+  ALREADY_READ: 'Notification already read',
 };

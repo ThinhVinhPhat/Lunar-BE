@@ -28,6 +28,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { redisStore } from 'cache-manager-ioredis';
 import { MessageModule } from './domain/message/src/message.module';
+import { NotificationModule } from './domain/notification/notification.module';
+import { GateWayModule } from './domain/gateway/src/gateway.module';
 @Module({
   imports: [
     StripeModule.forRoot({
@@ -63,6 +65,8 @@ import { MessageModule } from './domain/message/src/message.module';
     FavoriteModule,
     StatisticModule,
     MessageModule,
+    NotificationModule,
+    GateWayModule,
   ],
   controllers: [],
   providers: [

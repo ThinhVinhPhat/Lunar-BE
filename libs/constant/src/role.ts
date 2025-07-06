@@ -36,7 +36,7 @@ export enum OrderHistoryAction {
   REMOVE_PRODUCT = 'REMOVE_PRODUCT',
   UPDATE_NOTE = 'UPDATE_NOTE',
   CHANGE_DELIVERY_ADDRESS = 'CHANGE_DELIVERY_ADDRESS',
-  SHIPMENT = 'CHANGE_SHIPMENT'
+  SHIPMENT = 'CHANGE_SHIPMENT',
 }
 
 export enum PaymentMethod {
@@ -50,4 +50,12 @@ export enum ShipmentStatus {
   PENDING = 'Pending',
   SHIPPED = 'Shipped',
   DELIVERED = 'Delivered',
+}
+
+export enum NotificationType {
+  NEW_MESSAGE = 'NEW_MESSAGE',
+  NEW_ORDER = 'NEW_ORDER',
+  NEW_REPLY = 'NEW_REPLY',
+  NEW_DEAL = 'NEW_DEAL',
+  NEW_THREAD = 'NEW_THREAD',
 }

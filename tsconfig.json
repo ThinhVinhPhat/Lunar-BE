@@ -114,6 +114,12 @@
       ],
       "@app/pipe/*": [
         "libs/pipe/src/*"
+      ],
+      "@app/gateway": [
+        "apps/main/src/domain/gateway/src"
+      ],
+      "@app/gateway/*": [
+        "apps/main/src/domain/gateway/src/*"
       ]
     }
   },

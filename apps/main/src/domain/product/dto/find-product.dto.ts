@@ -30,7 +30,7 @@ export class FindProductDTO {
   })
   @IsOptional()
   @Type(() => Number)
-  offset: number;
+  offset: number = 0;
 
   @ApiPropertyOptional({
     description: 'Limit',
@@ -38,7 +38,7 @@ export class FindProductDTO {
   })
   @IsOptional()
   @Type(() => Number)
-  limit: number;
+  limit: number = 20;
 
   @ApiPropertyOptional({
     description: 'User Id',

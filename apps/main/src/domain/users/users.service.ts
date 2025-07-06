@@ -29,9 +29,9 @@ import {
   Respond,
   UpdateUserResponse,
 } from '@app/type';
-import { MessageGateway } from '../message/src/message.gateway';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './dto/user.respond';
+import { AppGateway } from '@/domain/gateway/src/app.gateway';
 @Injectable()
 export class UsersService {
   constructor(
@@ -39,7 +39,7 @@ export class UsersService {
     private readonly userEntity: Repository<User>,
     private readonly mailerService: MailerService,
     private readonly uploadService: UploadService,
-    private readonly gateway: MessageGateway,
+    private readonly gateway: AppGateway,
   ) {}
 
   private functionUserResponse(
@@ -237,8 +237,6 @@ export class UsersService {
       throw new NotFoundException(message.USER_NOT_EXISTS);
     }
     const userSocket = this.gateway.getUserOnline(userId);
-
-    console.log(userSocket);
 
     if (!userSocket) {
       user.isOnline = false;

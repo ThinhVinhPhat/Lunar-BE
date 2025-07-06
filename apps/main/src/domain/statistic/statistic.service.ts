@@ -5,7 +5,6 @@ import { Repository, Between } from 'typeorm';
 import { MonthlyAnalytics } from '@app/entity/monthly-statistic.entity';
 import { CompareValueDTO } from './dto/compare.dto';
 import { message } from '@app/constant';
-import { GetAllOrderResponse } from '@app/type/order/order.respond';
 import {
   CompareLastMonthResponse,
   GetRevenueAndCategoriesResponse,
@@ -33,10 +32,7 @@ export class StatisticService {
     private readonly analyticRepository: Repository<MonthlyAnalytics>,
   ) {}
 
-  private functionStatisticResponse(
-    data: any,
-    message: string,
-  ): GetSummaryResponse {
+  private StatisticResponse(data: any, message: string): GetSummaryResponse {
     return {
       status: HttpStatus.OK,
       data: plainToInstance(StatisticResponse, data, {
@@ -108,8 +104,11 @@ export class StatisticService {
     }
     await this.analyticRepository.save(monthAnalytic);
 
-    return this.functionStatisticResponse(
-      monthAnalytic,
+    return this.StatisticResponse(
+      {
+        ...monthAnalytic,
+        topProducts: topProducts,
+      },
       message.FIND_SUMMARY_SUCCESS,
     );
   }
@@ -235,7 +234,7 @@ export class StatisticService {
         changeRevenue: changeRevenue.toFixed(2),
         changeView: changeView.toFixed(2),
       },
-      message: 'Comparison with last month calculated successfully',
+      message: message.COMPARISON_WITH_LAST_MONTH_SUCCESS,
     };
   }
 
@@ -295,10 +294,7 @@ export class StatisticService {
 
     analytic.month = month || analytic.month;
     await this.analyticRepository.save(analytic);
-    return this.functionStatisticResponse(
-      analytic,
-      message.UPDATE_SUMMARY_SUCCESS,
-    );
+    return this.StatisticResponse(analytic, message.UPDATE_SUMMARY_SUCCESS);
   }
 
   async deleteSummary(id: string): Promise<Respond> {
@@ -309,9 +305,6 @@ export class StatisticService {
       throw new NotFoundException('Summary not found');
     }
     await this.analyticRepository.delete(id);
-    return this.functionStatisticResponse(
-      summary,
-      message.DELETE_SUMMARY_SUCCESS,
-    );
+    return this.StatisticResponse(summary, message.DELETE_SUMMARY_SUCCESS);
   }
 }

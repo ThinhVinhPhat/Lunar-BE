@@ -1,3 +1,4 @@
+import { UploadService } from '@/domain/upload/upload.service';
 import {
   ConflictException,
   ForbiddenException,
@@ -61,4 +62,21 @@ export function assertTime(startTime: Date, endTime: Date) {
   if (startTime.getTime() < Date.now()) {
     throw new ForbiddenException('Start time cannot be in the past');
   }
+}
+
+export async function ImageTransformer(
+  images: Express.Multer.File[],
+  uploadService: UploadService,
+): Promise<string[]> {
+  const imageUrls = [];
+  if (images) {
+    if (images.length > 2) {
+      throw new ForbiddenException('Only 2 images are allowed');
+    }
+    for (const image of images) {
+      const imageUrl = await uploadService.uploadS3(image);
+      imageUrls.push(imageUrl);
+    }
+  }
+  return imageUrls;
 }

@@ -16,6 +16,7 @@ import { GoogleStrategy } from '@/domain/strategies/google.stategy';
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => {
         return {
+          global: true,
           secret: config.get<string>('JWT_SECRET_KEY'),
           signOptions: {
             expiresIn: config.get<string | number>('JWT_EXPIRATION_TIME'),
@@ -29,5 +30,6 @@ import { GoogleStrategy } from '@/domain/strategies/google.stategy';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, GoogleStrategy],
+  exports: [AuthService, JwtModule, JwtStrategy, GoogleStrategy],
 })
 export class AuthModule {}

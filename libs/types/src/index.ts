@@ -10,3 +10,4 @@ export * from './product/product.respond';
 export * from './user/user.respond';
 export * from './comment/comment.respond';
 export * from './discount/discount.respond';
+export * from './notification/notification.type';

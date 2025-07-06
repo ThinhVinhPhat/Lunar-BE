@@ -149,7 +149,8 @@
       "^@app/middleware(|/.*)$": "<rootDir>/libs/middleware/src/$1",
       "^@app/interceptors(|/.*)$": "<rootDir>/libs/interceptors/src/$1",
       "^@app/filter(|/.*)$": "<rootDir>/libs/filter/src/$1",
-      "^@app/pipe(|/.*)$": "<rootDir>/libs/pipe/src/$1"
+      "^@app/pipe(|/.*)$": "<rootDir>/libs/pipe/src/$1",
+      "^@app/gateway(|/.*)$": "<rootDir>/libs/gateway/src/$1"
     }
   }
 }

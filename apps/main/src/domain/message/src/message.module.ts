@@ -2,7 +2,6 @@ import { forwardRef, Module } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Conversation, Message, User } from '@app/entity';
-import { MessageGateway } from './message.gateway';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from '@/domain/users/users.module';
@@ -26,7 +25,7 @@ import { MessagesController } from './message.controller';
     forwardRef(() => UsersModule),
   ],
   controllers: [MessagesController],
-  providers: [MessageService, MessageGateway],
-  exports: [MessageService, MessageGateway],
+  providers: [MessageService],
+  exports: [MessageService],
 })
 export class MessageModule {}

@@ -16,3 +16,5 @@ export * from './order-tracking.entity';
 export * from './shipment.entity';
 export * from './message.entity';
 export * from './conversation.entity';
+export * from './notification.entity';
+export * from './user-notification.entity';

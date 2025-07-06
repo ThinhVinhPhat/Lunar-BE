@@ -158,7 +158,7 @@
         "tsConfigPath": "libs/filter/tsconfig.lib.json"
       }
     },
-    "message": {
+    "@app/message": {
       "type": "application",
       "root": "apps/message",
       "entryFile": "main",
@@ -167,7 +167,7 @@
         "tsConfigPath": "apps/message/tsconfig.app.json"
       }
     },
-    "pipe": {
+    "@app/pipe": {
       "type": "library",
       "root": "libs/pipe",
       "entryFile": "index",

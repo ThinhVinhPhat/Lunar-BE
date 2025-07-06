@@ -1,5 +1,5 @@
-import { Product } from '@app/entity';
 import { Respond } from '..';
+import { ProductRespondDto } from '@/domain/product/dto/product.respond.dto';
 
 export interface MonthlyAnalytics {
   id: string;
@@ -8,7 +8,7 @@ export interface MonthlyAnalytics {
   totalOrders: number;
   totalRevenue: number;
   totalNewUsers: number;
-  topProducts: Product[];
+  topProducts: ProductRespondDto[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,8 +1,9 @@
 import { Product } from '@app/entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { MonthlyAnalytics } from '@app/type/statistic/statistic.respond';
+import { ProductRespondDto } from '@/domain/product/dto/product.respond.dto';
 
 @Expose()
 export class StatisticResponse {
@@ -52,7 +53,8 @@ export class StatisticResponse {
     description: 'Top products',
   })
   @Expose()
-  topProducts: Product[];
+  @Type(() => ProductRespondDto)  
+  topProducts: ProductRespondDto[];
 
   @ApiProperty({
     description: 'Created at',

@@ -3,19 +3,25 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User } from '../../../../../libs/entity/src/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UploadModule } from '@/domain/upload/upload.module';
+import { GateWayModule } from '@/domain/gateway/src/gateway.module';
+import { AppGateway } from '@/domain/gateway/src/app.gateway';
 import { MessageModule } from '../message/src/message.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
     JwtModule,
     UploadModule,
+    GateWayModule,
     TypeOrmModule.forFeature([User]),
+    forwardRef(() => GateWayModule),
+    forwardRef(() => NotificationModule),
     forwardRef(() => MessageModule),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, JwtService, AppGateway],
   exports: [UsersService],
 })
 export class UsersModule {}

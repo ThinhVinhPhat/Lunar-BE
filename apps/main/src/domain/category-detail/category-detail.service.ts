@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
-  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -21,10 +19,10 @@ import {
   GetCategoryDetailsResponse,
   Respond,
   UpdateCategoryDetailsResponse,
-  User,
 } from '@app/type';
 import { plainToInstance } from 'class-transformer';
 import { CategoryDetailRespondDto } from './dto/category.respond.dto';
+import { ImageTransformer } from '@app/helper/assert';
 
 @Injectable()
 export class CategoryDetailService {
@@ -68,19 +66,9 @@ export class CategoryDetailService {
           if (!category) {
             throw new NotFoundException(message.FIND_CATEGORY_FAIL);
           }
-          const imageUrls = [];
-
-          if (images) {
-            if (images.length > 2) {
-              throw new NotFoundException('Only 2 images are allowed');
-            }
-
-            for (const image of images) {
-              const imageUrl = await this.uploadService.uploadS3(image);
-              imageUrls.push(imageUrl);
-            }
-          }
-
+          const imageUrls = images
+            ? await ImageTransformer(images, this.uploadService)
+            : [];
           const categoryDetail = transactionManager.create(CategoryDetail, {
             name: name,
             category: category,
@@ -157,16 +145,9 @@ export class CategoryDetailService {
         const { name, description, images, status } = updateCategoryDetailDto;
 
         try {
-          const imageUrls = [];
-          if (images) {
-            if (images.length > 2) {
-              throw new ForbiddenException('Only 2 images are allowed');
-            }
-            for (const image of images) {
-              const imageUrl = await this.uploadService.uploadS3(image);
-              imageUrls.push(imageUrl);
-            }
-          }
+          const imageUrls = images
+            ? await ImageTransformer(images, this.uploadService)
+            : [];
 
           const categoryDetail = await transactionManager.findOne(
             CategoryDetail,
@@ -178,7 +159,8 @@ export class CategoryDetailService {
           );
           categoryDetail.name = name;
           categoryDetail.description = description;
-          categoryDetail.image = imageUrls;
+          categoryDetail.image =
+            imageUrls.length > 0 ? imageUrls : categoryDetail.image;
           categoryDetail.status = status;
 
           await transactionManager.save(CategoryDetail, categoryDetail);
