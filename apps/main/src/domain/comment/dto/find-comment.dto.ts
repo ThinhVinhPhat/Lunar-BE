@@ -1,9 +1,9 @@
 import { CommentSort } from '@app/constant/role';
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { FindDTO } from '@app/shared/find-dto';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { IsEnum, IsOptional } from 'class-validator';
 
-export class FindCommentDTO {
+export class FindCommentDTO extends PartialType(FindDTO) {
   @ApiPropertyOptional({
     description: 'Comment Sort',
     enum: CommentSort,
@@ -13,24 +13,4 @@ export class FindCommentDTO {
   @IsOptional()
   @IsEnum(CommentSort)
   sort: CommentSort;
-
-  @ApiPropertyOptional({
-    description: 'Comment offset',
-    nullable: false,
-    example: 0,
-  })
-  @IsOptional()
-  @Transform((num) => Number(num.value))
-  @IsNumber()
-  offset: number;
-
-  @ApiPropertyOptional({
-    description: 'Comment limit',
-    nullable: false,
-    example: 10,
-  })
-  @IsOptional()
-  @Transform((num) => Number(num.value))
-  @IsNumber()
-  limit: number;
 }

@@ -171,4 +171,3 @@ export class ShipmentRespondDto {
   @IsString()
   status: string;
 }
-

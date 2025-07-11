@@ -20,7 +20,7 @@ import { Role } from '@app/constant/role';
 import { UpdatePasswordDTO } from './dto/update-password.dto';
 import { UploadService } from '@/domain/upload/upload.service';
 import { reverse } from '@app/helper/reverse';
-import { FindDTO } from './dto/find-user.dto';
+import { FindUserDTO } from './dto/find-user.dto';
 import { RegisterAuthDto } from '../auth/dto/register-atuth.dto';
 import {
   CreateUserResponse,
@@ -32,6 +32,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './dto/user.respond';
 import { AppGateway } from '@/domain/gateway/src/app.gateway';
+import { CommonService } from '@app/common';
 @Injectable()
 export class UsersService {
   constructor(
@@ -40,6 +41,7 @@ export class UsersService {
     private readonly mailerService: MailerService,
     private readonly uploadService: UploadService,
     private readonly gateway: AppGateway,
+    private readonly commonService: CommonService,
   ) {}
 
   private functionUserResponse(
@@ -92,14 +94,18 @@ export class UsersService {
     }
   }
 
-  async findAll(query: FindDTO): Promise<GetAllUserResponse> {
+  async findAll(query: FindUserDTO): Promise<GetAllUserResponse> {
     const queryList = {
-      limit: query.limit ? query.limit : 10,
-      offset: query.offset ? query.offset : 0,
+      limit: query.limit,
       email: query.email ? query.email : null,
       role: query.role ? query.role : undefined,
       isOnline: query.isOnline ? query.isOnline : null,
     };
+
+    const { skip } = this.commonService.getPaginationMeta(
+      query.page,
+      queryList.limit,
+    );
 
     const [users, total] = await this.userEntity.findAndCount({
       where: {
@@ -108,7 +114,7 @@ export class UsersService {
         isOnline: queryList.isOnline,
         status: true,
       },
-      skip: queryList.offset,
+      skip: skip,
       take: queryList.limit,
     });
 
@@ -117,7 +123,10 @@ export class UsersService {
     }
 
     return this.functionUserResponse(users, message.FIND_USER_SUCCESS, {
-      total: total,
+      meta: {
+        total: total,
+        totalPage: Math.ceil(total / queryList.limit),
+      },
     });
   }
 

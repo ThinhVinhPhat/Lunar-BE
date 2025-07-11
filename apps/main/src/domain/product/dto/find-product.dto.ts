@@ -1,8 +1,9 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { FindDTO } from '@app/shared/find-dto';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class FindProductDTO {
+export class FindProductDTO extends PartialType(FindDTO) {
   @ApiPropertyOptional({
     description: 'Product name',
     example: 'Product 1',
@@ -23,22 +24,6 @@ export class FindProductDTO {
   @IsArray()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   category: string[];
-
-  @ApiPropertyOptional({
-    description: 'Offset',
-    example: 0,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  offset: number = 0;
-
-  @ApiPropertyOptional({
-    description: 'Limit',
-    example: 20,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  limit: number = 20;
 
   @ApiPropertyOptional({
     description: 'User Id',

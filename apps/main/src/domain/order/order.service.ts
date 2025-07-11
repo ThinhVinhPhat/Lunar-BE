@@ -47,6 +47,7 @@ import {
   OrderTrackRespondDto,
   ShipmentRespondDto,
 } from '../order-detail/dto/order-detail.respond.dto';
+import { CommonService } from '@app/common';
 
 @Injectable()
 export class OrderService {
@@ -61,6 +62,7 @@ export class OrderService {
     @InjectRepository(OrderTracking)
     private readonly orderTrackingRepository: Repository<OrderTracking>,
     private readonly dataSource: DataSource,
+    private readonly commonService: CommonService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
     this.logger = new Logger(OrderService.name);
@@ -239,31 +241,41 @@ export class OrderService {
 
     const user = await this.userRepository.findOne({
       where: { id: id },
-      relations: [
-        'orders',
-        'orders.orderDetails',
-        'orders.histories',
-        'orders.shipments',
-        'orders.orderTracks',
-      ],
     });
     if (!user) {
       throw new NotFoundException(message.FIND_USER_FAIL);
     }
-    const { status, offset, limit } = findByOrderDTO;
+    const { status, page, limit } = findByOrderDTO;
+    const { skip } = this.commonService.getPaginationMeta(page, limit);
 
-    const orders =
-      status !== OrderStatus.ALL_ORDER
-        ? user.orders
-            .filter((item) => item.status === status)
-            .slice(offset, limit)
-        : user.orders.slice(offset, limit);
+    const [orders, total] = await this.orderRepository.findAndCount({
+      where: {
+        user: { id: user.id },
+        ...(status !== OrderStatus.ALL_ORDER ? { status } : {}),
+      },
+      relations: [
+        'orderDetails',
+        'user',
+        'orderDetails.product',
+        'histories',
+        'shipments',
+        'orderTracks',
+      ],
+      order: {
+        createdAt: 'DESC',
+      },
+      skip,
+      take: limit,
+    });
 
     const result = this.functionOrderResponse(
       orders,
       message.FIND_ORDER_SUCCESS,
       {
-        total: orders.length,
+        meta: {
+          total: total,
+          totalPages: Math.ceil(orders.length / limit),
+        },
       },
     );
 

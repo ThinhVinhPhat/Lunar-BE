@@ -6,8 +6,8 @@ import { NotificationTemplate, User, UserNotification } from '@app/entity';
 import { UploadModule } from '../upload/upload.module';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
-import { AppGateway } from '../gateway/src/app.gateway';
 import { GateWayModule } from '../gateway/src/gateway.module';
+import { CommonModule } from '@app/common';
 
 @Module({
   imports: [
@@ -16,6 +16,7 @@ import { GateWayModule } from '../gateway/src/gateway.module';
     JwtModule,
     forwardRef(() => GateWayModule),
     forwardRef(() => UsersModule),
+    forwardRef(() => CommonModule), // Assuming CommonModule is defined elsewhere
   ],
   controllers: [NotificationController],
   providers: [NotificationService],

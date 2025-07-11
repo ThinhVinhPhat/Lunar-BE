@@ -2,6 +2,13 @@ import { ProductRespondDto } from '@/domain/product/dto/product.respond.dto';
 import { Respond } from '..';
 import { CategoryDetails } from '../category/category.respond';
 
+export interface ColorVariant {
+  id: string;
+  slug: string;
+  color: string;
+  image: string;
+}
+
 export interface Product {
   id: string;
   createdAt: Date;
@@ -22,6 +29,8 @@ export interface Product {
   productCategories: ProductCategory[];
   categories?: string;
   isFavorite?: boolean;
+  color?: string;
+  allColors?: ColorVariant[];
 }
 
 export interface ProductCategory {

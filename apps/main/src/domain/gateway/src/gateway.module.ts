@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@app/entity/user.entity';
 import { GoogleStrategy } from '@/domain/strategies/google.stategy';
@@ -21,6 +20,7 @@ import { NotificationModule } from '@/domain/notification/notification.module';
 import { MessageModule } from '@/domain/message/src/message.module';
 import { UsersModule } from '@/domain/users/users.module';
 import { AuthModule } from '@/domain/auth/auth.module';
+import { CommonModule } from '@app/common';
 
 @Module({
   imports: [
@@ -36,6 +36,7 @@ import { AuthModule } from '@/domain/auth/auth.module';
     forwardRef(() => UsersModule),
     forwardRef(() => NotificationModule),
     forwardRef(() => MessageModule),
+    forwardRef(() => CommonModule),
   ],
   providers: [
     AppGateway,

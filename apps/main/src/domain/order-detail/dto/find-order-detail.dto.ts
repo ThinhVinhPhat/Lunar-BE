@@ -4,7 +4,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class FindOrderDetailDto {
   @ApiProperty({
     description: 'Order detail product id',
-    nullable: false
+    nullable: false,
   })
   @IsNotEmpty()
   @IsString()
@@ -12,7 +12,7 @@ export class FindOrderDetailDto {
 
   @ApiProperty({
     description: 'Order detail order id',
-    nullable: false
+    nullable: false,
   })
   @IsNotEmpty()
   @IsString()

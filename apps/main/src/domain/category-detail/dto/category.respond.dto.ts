@@ -1,5 +1,6 @@
+import { CategoryRespondDto } from '@/domain/category/dto/category.respond.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsDate, IsString } from 'class-validator';
 
 @Exclude()
@@ -52,4 +53,11 @@ export class CategoryDetailRespondDto {
   @Expose()
   @IsBoolean()
   status: boolean;
+
+  @ApiProperty({
+    description: 'Category of the category detail',
+  })
+  @Expose()
+  @Type(() => CategoryRespondDto)
+  category: CategoryRespondDto;
 }

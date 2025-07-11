@@ -23,7 +23,7 @@ import { JwtAuthGuard } from '@/domain/guard/jwt-auth.guard';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { FindDTO } from './dto/find-user.dto';
+import { FindUserDTO } from './dto/find-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RolesGuard } from '../guard/roles.guard';
 import { UuidValidatePipe } from '@app/pipe';
@@ -63,7 +63,7 @@ export class UsersController {
     description: 'Find all User',
   })
   @Get('/find-all')
-  findAll(@Query() query: FindDTO) {
+  findAll(@Query() query: FindUserDTO) {
     return this.usersService.findAll(query);
   }
 

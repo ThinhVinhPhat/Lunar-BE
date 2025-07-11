@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,6 +19,7 @@ import {
 } from '@app/type';
 import { plainToInstance } from 'class-transformer';
 import { CommentRespondDto } from './dto/comment.respond.dto';
+import { CommonService } from '@app/common';
 
 @Injectable()
 export class CommentService {
@@ -30,6 +31,7 @@ export class CommentService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private readonly uploadService: UploadService,
+    private readonly commonService: CommonService,
   ) {}
 
   private functionCommentResponse(
@@ -100,9 +102,9 @@ export class CommentService {
     if (!product) {
       throw new NotFoundException(message.FIND_PRODUCT_FAIL);
     }
-    const { sort, limit, offset } = query;
-
     let sortSection: any = {};
+    const { sort, limit, page } = query;
+    const { skip } = this.commonService.getPaginationMeta(page, limit);
 
     switch (sort) {
       case CommentSort.NEWEST:
@@ -123,10 +125,15 @@ export class CommentService {
         },
       },
       order: sortSection as { [key: string]: 'ASC' | 'DESC' },
-      skip: offset,
+      skip: skip,
       take: limit,
     });
-    return this.functionCommentResponse(comment, message.FIND_COMMENT_SUCCESS);
+    return this.functionCommentResponse(comment, message.FIND_COMMENT_SUCCESS, {
+      meta: {
+        total: product.comments.length,
+        totalPage: Math.ceil(product.comments.length / limit),
+      },
+    });
   }
 
   async findAllByUser(
@@ -140,8 +147,8 @@ export class CommentService {
     if (!user) {
       throw new NotFoundException(message.FIND_USER_FAIL);
     }
-
-    const { sort, limit, offset } = query;
+    const { sort, limit, page } = query;
+    const { skip } = this.commonService.getPaginationMeta(page, limit);
 
     let sortSection: any = {};
 
@@ -157,7 +164,7 @@ export class CommentService {
         break;
     }
 
-    const comments = await this.commentRepository.find({
+    const [comments, total] = await this.commentRepository.findAndCount({
       where: {
         user: {
           id: userId,
@@ -165,11 +172,20 @@ export class CommentService {
       },
       relations: ['user'],
       order: sortSection as { [key: string]: 'ASC' | 'DESC' },
-      skip: offset,
+      skip: skip,
       take: limit,
     });
 
-    return this.functionCommentResponse(comments, message.FIND_COMMENT_SUCCESS);
+    return this.functionCommentResponse(
+      comments,
+      message.FIND_COMMENT_SUCCESS,
+      {
+        meta: {
+          total: total,
+          totalPage: Math.ceil(user.comments.length / limit),
+        },
+      },
+    );
   }
 
   async findOne(id: string): Promise<GetCommentByIdResponse> {

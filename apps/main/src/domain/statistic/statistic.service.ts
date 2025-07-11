@@ -18,6 +18,8 @@ import {
 } from './dto/statistic.respond.dto';
 import { plainToInstance } from 'class-transformer';
 import { OrderRespondDto } from '../order/dto/order.respond.dto';
+import { GetUserOrdersDTO } from './dto/get-user-orders.dto';
+import { CommonService } from '@app/common';
 
 @Injectable()
 export class StatisticService {
@@ -30,6 +32,7 @@ export class StatisticService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(MonthlyAnalytics)
     private readonly analyticRepository: Repository<MonthlyAnalytics>,
+    private readonly commonService: CommonService,
   ) {}
 
   private StatisticResponse(data: any, message: string): GetSummaryResponse {
@@ -113,13 +116,11 @@ export class StatisticService {
     );
   }
 
-  async getUserOrders(
-    userId: string,
-    query: { offset?: number; limit?: number; filter: string },
-  ) {
-    const { offset = 0, limit = 10, filter } = query;
+  async getUserOrders(userId: string, query: GetUserOrdersDTO) {
+    const { page = 0, limit = 10, filter } = query;
     const now = new Date();
     let startDate: Date | null = null;
+    const { skip } = this.commonService.getPaginationMeta(page, limit);
 
     switch (filter) {
       case 'last 24 hour':
@@ -150,7 +151,7 @@ export class StatisticService {
     const queryBuilder = this.orderRepository
       .createQueryBuilder('order')
       .orderBy('order.createdAt', 'DESC')
-      .skip(offset)
+      .skip(skip)
       .take(limit);
 
     if (startDate) {
@@ -188,7 +189,10 @@ export class StatisticService {
       data: plainToInstance(OrderRespondDto, ordersWithTimeDiff, {
         excludeExtraneousValues: true,
       }),
-      total: total,
+      meta: {
+        totalItems: total,
+        totalPages: Math.ceil(total / limit),
+      },
       message: message.FIND_ORDER_HISTORY_SUCCESS,
     };
   }

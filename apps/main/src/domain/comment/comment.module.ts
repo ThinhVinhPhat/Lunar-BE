@@ -6,9 +6,14 @@ import { Product } from '@app/entity/product.entity';
 import { User } from '@app/entity/user.entity';
 import { UploadModule } from '@/domain/upload/upload.module';
 import { Comment } from '../../../../../libs/entity/src/comment.entity';
+import { CommonModule } from '@app/common';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Comment, User, Product]), UploadModule],
+  imports: [
+    TypeOrmModule.forFeature([Comment, User, Product]),
+    UploadModule,
+    CommonModule,
+  ],
   controllers: [CommentController],
   providers: [CommentService],
   exports: [CommentService],

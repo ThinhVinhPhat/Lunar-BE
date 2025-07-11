@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@app/entity/user.entity';
 import { Order } from '../../../../../libs/entity/src/order.entity';
 import { OrderHistory, OrderTracking, Shipment } from '@app/entity';
+import { CommonModule } from '@app/common';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { OrderHistory, OrderTracking, Shipment } from '@app/entity';
       Shipment,
       OrderTracking,
     ]),
+    CommonModule,
   ],
   controllers: [OrderController],
   providers: [OrderService],

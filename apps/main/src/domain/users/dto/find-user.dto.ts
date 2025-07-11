@@ -1,16 +1,16 @@
 import { Role } from '@app/constant/role';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { FindDTO } from '@app/shared/find-dto';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
   IsEnum,
-  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 
-export class FindDTO {
+export class FindUserDTO extends PartialType(FindDTO) {
   @ApiPropertyOptional({
     description: 'user email',
     nullable: true,
@@ -41,22 +41,4 @@ export class FindDTO {
   @Transform(({ value }) => (value === 'true' || value === true ? true : false))
   @IsBoolean()
   isOnline: boolean;
-
-  @ApiPropertyOptional({
-    description: 'limit',
-    example: 10,
-  })
-  @IsOptional()
-  @Transform((num) => Number(num.value))
-  @IsNumber()
-  limit: number;
-
-  @ApiPropertyOptional({
-    description: 'offset',
-    example: 0,
-  })
-  @IsOptional()
-  @Transform((num) => Number(num.value))
-  @IsNumber()
-  offset: number;
 }

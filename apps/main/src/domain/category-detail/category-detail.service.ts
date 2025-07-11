@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCategoryDetailDto } from './dto/create-category-detail.dto';
@@ -26,6 +27,7 @@ import { ImageTransformer } from '@app/helper/assert';
 
 @Injectable()
 export class CategoryDetailService {
+  private readonly logger: Logger;
   constructor(
     @InjectRepository(Category)
     private readonly categoryEntity: Repository<Category>,
@@ -34,7 +36,9 @@ export class CategoryDetailService {
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-  ) {}
+  ) {
+    this.logger = new Logger(CategoryDetailService.name);
+  }
 
   private functionCategoryDetailResponse(
     categoryDetail: CategoryDetail | CategoryDetail[],
@@ -83,7 +87,8 @@ export class CategoryDetailService {
             categoryDetail,
             message.CREATE_CATEGORY_DETAIL_SUCCESS,
           );
-        } catch (e) {
+        } catch (e: any) {
+          console.log(e);
           throw new BadRequestException(message.CREATE_CATEGORY_DETAIL_FAIL);
         }
       },
@@ -98,7 +103,9 @@ export class CategoryDetailService {
       return cachedCategoryDetails as GetAllCategoryDetailsResponse;
     }
 
-    const categories = await this.categoryDetailEntity.find();
+    const categories = await this.categoryDetailEntity.find({
+      relations: ['category'],
+    });
     const result = this.functionCategoryDetailResponse(
       categories,
       message.FIND_CATEGORY_DETAIL_SUCCESS,
@@ -170,6 +177,7 @@ export class CategoryDetailService {
             message.UPDATE_CATEGORY_DETAIL_SUCCESS,
           );
         } catch (e) {
+          this.logger.error(e);
           throw new BadRequestException(message.UPDATE_CATEGORY_DETAIL_FAIL);
         }
       },
@@ -190,6 +198,7 @@ export class CategoryDetailService {
             message: message.DELETE_CATEGORY_DETAIL_SUCCESS,
           };
         } catch (e) {
+          this.logger.error(e);
           throw new BadRequestException(message.DELETE_CATEGORY_DETAIL_FAIL);
         }
       },

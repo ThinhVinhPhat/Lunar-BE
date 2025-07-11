@@ -18,7 +18,7 @@ export class JwtSocketAdapter extends IoAdapter {
 
       try {
         const user = jwt.verify(token, process.env.JWT_SECRET);
-        socket.data.user = user; 
+        socket.data.user = user;
         next();
       } catch (error) {
         next(new BadGatewayException(error.message));

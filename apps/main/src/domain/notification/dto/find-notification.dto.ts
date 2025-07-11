@@ -1,8 +1,8 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { FindDTO } from '@app/shared/find-dto';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { IsArray, IsOptional, IsString } from 'class-validator';
 
-export class FindNotificationDTO {
+export class FindNotificationDTO extends PartialType(FindDTO) {
   @ApiPropertyOptional({
     description: 'Notification name',
     example: 'Product 1',
@@ -10,22 +10,6 @@ export class FindNotificationDTO {
   @IsOptional()
   @IsString()
   name: string;
-
-  @ApiPropertyOptional({
-    description: 'Offset',
-    example: 0,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  offset: number = 0;
-
-  @ApiPropertyOptional({
-    description: 'Limit',
-    example: 20,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  limit: number = 0;
 
   @ApiPropertyOptional({
     description: 'Target roles for the notification',

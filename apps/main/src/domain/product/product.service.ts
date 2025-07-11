@@ -13,6 +13,7 @@ import { DataSource, EntityManager, In, Like, Repository } from 'typeorm';
 import { message } from '@app/constant/message';
 import { CategoryDetail } from '@app/entity/category-detail.entity';
 import { Product } from '../../../../../libs/entity/src/product.entity';
+import { Product as ProductType } from '../../../../../libs/types/src';
 import { ProductCategory } from '@app/entity/product-category.entity';
 import { UploadService } from '@/domain/upload/upload.service';
 import {
@@ -33,6 +34,7 @@ import {
 } from '@app/type';
 import { plainToInstance } from 'class-transformer';
 import { ProductRespondDto } from './dto/product.respond.dto';
+import { CommonService } from '@app/common';
 
 @Injectable()
 export class ProductService {
@@ -46,6 +48,7 @@ export class ProductService {
     private readonly favoriteEntity: Repository<Favorite>,
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
+    private readonly commonService: CommonService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.logger = new Logger('ProductService');
@@ -71,7 +74,7 @@ export class ProductService {
   }
 
   private functionProductResponse(
-    product: Product | Product[],
+    product: ProductType | ProductType[],
     message: string,
     args?: Record<string, any>,
   ) {
@@ -102,68 +105,75 @@ export class ProductService {
           categoryId,
         } = createProductDto;
 
-        try {
-          const category = await transactionManager.find(CategoryDetail, {
-            where: { id: In(categoryId) },
-          });
-          if (!category || category.length === 0) {
-            throw new NotFoundException(message.FIND_CATEGORY_FAIL);
-          }
+        const categories = await transactionManager.find(CategoryDetail, {
+          where: { id: In(categoryId) },
+        });
 
-          const existingProduct = await transactionManager.findOne(Product, {
-            where: {
-              name: name,
-            },
-          });
-
-          if (existingProduct) {
-            throw new ConflictException('Product already exist');
-          } else {
-            const imageUrls = [];
-            for (const image of images) {
-              const imageUrl = await this.uploadService.uploadS3(image);
-              imageUrls.push(imageUrl);
-            }
-            const slug = this.slugGenerate(name);
-            const product = transactionManager.create(Product, {
-              name: name,
-              slug: slug,
-              category: category,
-              description: description,
-              images: imageUrls,
-              price: price,
-              stock: stock,
-              isFeatured: isFeatured,
-              isFreeShip: isFreeShip,
-              isNew: isNew,
-              discount_percentage: discount,
-            });
-            await transactionManager.save(Product, product);
-
-            await transactionManager
-              .createQueryBuilder()
-              .insert()
-              .into(ProductCategory)
-              .values(
-                category.map((item) => {
-                  return {
-                    product: product,
-                    categoryDetails: item,
-                    quantity: stock,
-                  };
-                }),
-              )
-              .execute();
-
-            return this.functionProductResponse(
-              product,
-              message.CREATE_PRODUCT_SUCCESS,
-            );
-          }
-        } catch (e) {
-          this.logger.warn(e);
-          throw new NotFoundException(message.CREATE_PRODUCT_FAIL);
+        if (categories.length !== categoryId.length) {
+          throw new NotFoundException(message.FIND_CATEGORY_FAIL);
         }
+
+        const productsWithSameName = await transactionManager
+          .createQueryBuilder(Product, 'product')
+          .leftJoinAndSelect('product.productCategories', 'productCategory')
+          .leftJoinAndSelect(
+            'productCategory.categoryDetails',
+            'categoryDetail',
+          )
+          .where('product.name = :name', { name })
+          .getMany();
+
+        const matchedProduct = productsWithSameName.find((product) => {
+          const ids = product.productCategories.map(
+            (category) => category.categoryDetails.id,
+          );
+          return (
+            ids.length === categoryId.length &&
+            ids.every((id) => categoryId.includes(id))
+          );
+        });
+
+        if (matchedProduct) {
+          throw new ConflictException(
+            'Product with same name and categories already exists',
+          );
+        }
+
+        const imageUrls = await Promise.all(
+          images.map((image) => this.uploadService.uploadS3(image)),
+        );
+
+        const slug = this.slugGenerate(name);
+        const product = transactionManager.create(Product, {
+          name,
+          slug,
+          description,
+          images: imageUrls,
+          price,
+          stock,
+          isFeatured,
+          isFreeShip,
+          isNew,
+          discount_percentage: discount,
+        });
+        await transactionManager.save(Product, product);
+
+        const productCategories = categories.map((cat) => ({
+          product,
+          categoryDetails: cat,
+          quantity: stock,
+        }));
+        await transactionManager
+          .createQueryBuilder()
+          .insert()
+          .into(ProductCategory)
+          .values(productCategories)
+          .execute();
+
+        return this.functionProductResponse(
+          product,
+          message.CREATE_PRODUCT_SUCCESS,
+        );
       },
     );
   }
@@ -171,75 +181,139 @@ export class ProductService {
   async findAll(findDTO: FindProductDTO): Promise<GetAllProductResponse> {
     try {
       const cacheKey = `products:${JSON.stringify(findDTO)}`;
-      const { category, limit, offset, name, userId } = findDTO;
+      const { category, limit, page, name, userId } = findDTO;
       const cached = await this.cacheManager.get(cacheKey);
+      const { skip } = this.commonService.getPaginationMeta(page, limit);
 
       if (cached) {
         this.logger.log('Cache hit for findAll products');
         return cached as GetAllProductResponse;
       }
 
-      const whereCondition = {
-        productCategories: category
-          ? {
-              categoryDetails: {
-                name: In(category),
-              },
-            }
-          : undefined,
-        name: name ? name : undefined,
-      };
+      // Query lấy sản phẩm (distinct theo name)
+      const qb = this.productEntity
+        .createQueryBuilder('product')
+        .distinctOn(['product.name'])
+        .leftJoinAndSelect('product.productCategories', 'productCategories')
+        .leftJoinAndSelect(
+          'productCategories.categoryDetails',
+          'categoryDetails',
+        )
+        .orderBy('product.name', 'ASC')
+        .addOrderBy('product.id', 'ASC')
+        .skip(skip)
+        .take(limit);
 
-      const [products, total] = await Promise.all([
-        this.productEntity.find({
-          where: {
-            productCategories: whereCondition.productCategories,
-            name: whereCondition.name,
-          },
-          skip: offset,
-          take: limit,
-          relations: ['productCategories', 'productCategories.categoryDetails'],
-        }),
-        this.productEntity.count({
-          where: whereCondition,
-        }),
-      ]);
+      if (name) {
+        qb.andWhere('product.name ILIKE :name', { name: `%${name}%` });
+      }
 
+      if (category && category.length > 0) {
+        qb.andWhere('categoryDetails.name IN (:...category)', { category });
+      }
+
+      const products = await qb.getMany();
+
+      // Đếm thủ công: tổng số tên sản phẩm khác nhau
+      const countQb = this.productEntity
+        .createQueryBuilder('product')
+        .select('COUNT(DISTINCT product.name)', 'count')
+        .leftJoin('product.productCategories', 'productCategories')
+        .leftJoin('productCategories.categoryDetails', 'categoryDetails');
+
+      if (name) {
+        countQb.andWhere('product.name ILIKE :name', { name: `%${name}%` });
+      }
+
+      if (category && category.length > 0) {
+        countQb.andWhere('categoryDetails.name IN (:...category)', {
+          category,
+        });
+      }
+
+      const { count } = await countQb.getRawOne();
+      const total = Number(count);
+
+      // Lấy tất cả sản phẩm cùng tên để gom màu
+      const productNames = [...new Set(products.map((p) => p.name))];
+      const allSameNameProducts = await this.productEntity.find({
+        where: { name: In(productNames) },
+        relations: [
+          'productCategories',
+          'productCategories.categoryDetails',
+          'productCategories.categoryDetails.category',
+        ],
+      });
+
+      const colorMapByName = new Map<
+        string,
+        {
+          id: string;
+          color: string | null;
+          image: string | null;
+          slug: string;
+        }[]
+      >();
+
+      for (const p of allSameNameProducts) {
+        const color = p.productCategories
+          .flatMap((pc) => pc.categoryDetails)
+          .find((cd) => cd.category?.name === 'Color Family')?.name;
+
+        if (!colorMapByName.has(p.name)) {
+          colorMapByName.set(p.name, []);
+        }
+
+        colorMapByName.get(p.name)?.push({
+          id: p.id,
+          slug: p.slug,
+          color: color || null,
+          image: p.images?.[0] || null,
+        });
+      }
+
+      for (const p of products) {
+        const colorVariants = colorMapByName.get(p.name) || [];
+        const currentColor = colorVariants.find((v) => v.id === p.id)?.color;
+
+        (p as any).color = currentColor;
+        (p as any).allColors = colorVariants;
+      }
+
+      // Gắn isFavorite nếu có user
       if (userId) {
-        const productId = products.map((item) => item.id);
+        const productIds = products.map((p) => p.id);
         const favorites = await this.favoriteEntity.find({
           where: {
-            user: {
-              id: userId,
-            },
-            product: {
-              id: In(productId),
-            },
+            user: { id: userId },
+            product: { id: In(productIds) },
           },
           relations: ['product'],
         });
 
-        const favoriteProductIds = new Set(
-          favorites.map((fav) => fav.product.id),
-        );
-        products.forEach((product: any) => {
-          product.isFavorite = favoriteProductIds.has(product.id);
+        const favoriteProductIds = new Set(favorites.map((f) => f.product.id));
+        products.forEach((p: any) => {
+          p.isFavorite = favoriteProductIds.has(p.id);
         });
       } else {
-        products.forEach((product: any) => {
-          product.isFavorite = false;
-        });
+        products.forEach((p: any) => (p.isFavorite = false));
       }
 
       const result = this.functionProductResponse(
         products,
         message.FIND_PRODUCT_SUCCESS,
-        { total: total },
+        {
+          meta: {
+            total: total,
+            totalPages: Math.ceil(total / limit),
+          },
+        },
       );
-      await this.cacheManager.set(cacheKey, result, 60);
 
+      await this.cacheManager.set(cacheKey, result, 60);
       return result;
     } catch (e) {
+      this.logger.error(e);
       throw new NotFoundException(message.FIND_PRODUCT_FAIL);
     }
   }
@@ -248,34 +322,67 @@ export class ProductService {
     try {
       const { slug, userId } = findDto;
 
-      const whereCondition = {
-        slug: slug,
-        favorites: null,
-      };
-
       const product = await this.productEntity.findOne({
-        where: whereCondition,
+        where: { slug },
         relations: [
           'productCategories',
           'productCategories.categoryDetails',
+          'productCategories.categoryDetails.category',
           'comments',
           'favorites',
           'favorites.user',
         ],
       });
 
-      const existFavorite = product.favorites.find(
-        (item) => item.user.id == userId,
-      );
+      if (!product) throw new NotFoundException('Product not found');
+
+      // Tăng view
       product.views += 1;
       await this.productEntity.save(product);
 
+      // Kiểm tra sản phẩm yêu thích
+      const existFavorite = product.favorites.find(
+        (item) => item.user.id == userId,
+      );
+
+      // Lấy màu hiện tại
+      const currentColor = product.productCategories
+        .flatMap((pc) => pc.categoryDetails)
+        .find((cd) => cd.category?.name === 'Color Family')?.name;
+
+      // Lấy tất cả các product cùng tên
+      const allVariants = await this.productEntity.find({
+        where: { name: product.name },
+        relations: [
+          'productCategories',
+          'productCategories.categoryDetails',
+          'productCategories.categoryDetails.category',
+        ],
+      });
+
+      const allColors = allVariants.map((variant) => {
+        const variantColor = variant.productCategories
+          .flatMap((pc) => pc.categoryDetails)
+          .find((cd) => cd.category?.name === 'Color Family')?.name;
+
+        return {
+          id: variant.id,
+          slug: variant.slug,
+          color: variantColor,
+          image: variant.images?.[0] || null,
+        };
+      });
+
       return this.functionProductResponse(
-        product,
+        {
+          ...product,
+          color: currentColor,
+          allColors,
+        },
         message.FIND_PRODUCT_SUCCESS,
         {
           categories: await this.findProductCategoryDetail(product),
-          isFavorite: existFavorite !== undefined,
+          isFavorite: !!existFavorite,
         },
       );
     } catch (e) {
@@ -313,6 +420,7 @@ export class ProductService {
 
       return result;
     } catch (e) {
+      this.logger.error(e);
       throw new NotFoundException(message.FIND_PRODUCT_FAIL);
     }
   }
@@ -377,6 +485,7 @@ export class ProductService {
             message.UPDATE_PRODUCT_SUCCESS,
           );
         } catch (e) {
+          this.logger.error(e);
           throw new BadRequestException(message.UPDATE_PRODUCT_FAIL);
         }
       },

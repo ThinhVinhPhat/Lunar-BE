@@ -1,3 +1,4 @@
+import { CommonModule } from '@app/common/common.module';
 import { Module } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
@@ -17,6 +18,7 @@ import { Favorite } from '@app/entity';
       Favorite,
     ]),
     UploadModule,
+    CommonModule,
   ],
   controllers: [ProductController],
   providers: [ProductService],

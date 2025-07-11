@@ -120,6 +120,12 @@
       ],
       "@app/gateway/*": [
         "apps/main/src/domain/gateway/src/*"
+      ],
+      "@app/common": [
+        "libs/common/src"
+      ],
+      "@app/common/*": [
+        "libs/common/src/*"
       ]
     }
   },

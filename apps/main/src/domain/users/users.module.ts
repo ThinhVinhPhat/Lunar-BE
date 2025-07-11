@@ -9,6 +9,7 @@ import { GateWayModule } from '@/domain/gateway/src/gateway.module';
 import { AppGateway } from '@/domain/gateway/src/app.gateway';
 import { MessageModule } from '../message/src/message.module';
 import { NotificationModule } from '../notification/notification.module';
+import { CommonModule } from '@app/common';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { NotificationModule } from '../notification/notification.module';
     forwardRef(() => GateWayModule),
     forwardRef(() => NotificationModule),
     forwardRef(() => MessageModule),
+    CommonModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, JwtService, AppGateway],

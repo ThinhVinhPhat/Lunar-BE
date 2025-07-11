@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -20,6 +21,7 @@ import { Role } from '@app/constant/role';
 import { RolesGuard } from '../guard/roles.guard';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { UuidValidatePipe } from '@app/pipe';
+import { FindCategoryDto } from './dto/find-category.dto';
 
 @ApiTags('Category')
 @Controller('category')
@@ -48,8 +50,8 @@ export class CategoryController {
   @CacheTTL(60)
   @CacheKey('categories')
   @Get('/')
-  findAll() {
-    return this.categoryService.findAll();
+  findAll(@Query() query: FindCategoryDto) {
+    return this.categoryService.findAll(query);
   }
 
   @Public()

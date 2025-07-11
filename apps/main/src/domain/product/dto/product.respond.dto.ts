@@ -10,6 +10,32 @@ import {
 } from 'class-validator';
 
 @Exclude()
+export class ColorVariantDto {
+  @ApiProperty({ description: 'ID of the color variant product' })
+  @Expose()
+  @IsString()
+  id: string;
+
+  @ApiProperty({ description: 'Slug of the color variant product' })
+  @Expose()
+  @IsString()
+  slug: string;
+
+  @ApiProperty({ description: 'Color name of the variant' })
+  @Expose()
+  @IsString()
+  color: string;
+
+  @ApiProperty({
+    description: 'Image URL of the variant',
+    example: 'https://...',
+  })
+  @Expose()
+  @IsString()
+  image: string;
+}
+
+@Exclude()
 export class ProductCategoryRespondDto {
   @ApiProperty({
     description: 'Id of the product category',
@@ -161,6 +187,22 @@ export class ProductRespondDto {
   @Expose()
   @IsNumber()
   views: number;
+
+  @ApiProperty({
+    description: 'Current color of the product',
+    example: 'Red',
+  })
+  @Expose()
+  @IsString()
+  color?: string;
+
+  @ApiProperty({
+    description: 'All color variants of the product',
+    type: [ColorVariantDto],
+  })
+  @Expose()
+  @Type(() => ColorVariantDto)
+  allColors?: ColorVariantDto[];
 
   @ApiProperty({
     description: 'Product categories of the product',

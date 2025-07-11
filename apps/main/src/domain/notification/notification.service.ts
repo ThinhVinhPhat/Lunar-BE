@@ -20,6 +20,7 @@ import {
 } from '@app/type/notification/notification.type';
 import { message as messageConstant } from '@app/constant';
 import { Respond } from '@app/type';
+import { CommonService } from '@app/common';
 @Injectable()
 export class NotificationService {
   constructor(
@@ -30,6 +31,7 @@ export class NotificationService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly uploadService: UploadService,
+    private readonly commonService: CommonService,
   ) {}
 
   private functionNotificationResponse(
@@ -71,22 +73,28 @@ export class NotificationService {
   async findAll(
     query: FindNotificationDTO,
   ): Promise<GetAllNotificationResponse> {
-    const { limit, offset, name, targetRoles } = query;
+    const { limit, page, name, targetRoles } = query;
     const where = {
       name: name ? Like(`%${name}%`) : undefined,
       targetRoles: targetRoles ? In(targetRoles) : undefined,
     };
+    const { skip } = this.commonService.getPaginationMeta(page, limit);
 
     const [notifications, total] =
       await this.notificationRepository.findAndCount({
         where,
         take: limit,
-        skip: offset,
+        skip: skip,
       });
     return this.functionNotificationResponse(
       notifications,
       messageConstant.FIND_NOTIFICATION_SUCCESS,
-      { total: total },
+      {
+        meta: {
+          total: total,
+          totalPage: Math.ceil(total / limit),
+        },
+      },
     );
   }
 
@@ -94,7 +102,7 @@ export class NotificationService {
     userId: string,
     query: FindNotificationDTO,
   ): Promise<GetAllNotificationResponse> {
-    const { limit, offset } = query;
+    const { limit, page } = query;
     const currentUser = await this.userRepository.findOne({
       where: { id: userId },
       select: ['id', 'role'],
@@ -102,6 +110,7 @@ export class NotificationService {
     if (!currentUser) {
       throw new NotFoundException(messageConstant.USER_NOT_EXISTS);
     }
+    const { skip } = this.commonService.getPaginationMeta(page, limit);
 
     const [notifications, total] = await this.notificationRepository
       .createQueryBuilder('notification')
@@ -110,7 +119,7 @@ export class NotificationService {
         role: `%${currentUser.role}%`,
       })
       .orderBy('notification.createdAt', 'DESC')
-      .skip(offset)
+      .skip(skip)
       .take(limit)
       .getManyAndCount();
 
@@ -126,7 +135,13 @@ export class NotificationService {
     return this.functionNotificationResponse(
       notifications,
       messageConstant.FIND_NOTIFICATION_SUCCESS,
-      { total: total, userNotification: userNotification },
+      {
+        meta: {
+          total: total,
+          totalPage: Math.ceil(total / limit),
+        },
+        userNotification: userNotification,
+      },
     );
   }
 

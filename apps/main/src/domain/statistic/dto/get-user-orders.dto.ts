@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { FindDTO } from '@app/shared/find-dto';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { IsEnum } from 'class-validator';
 
 export enum OrderFilterEnum {
   RECENT = 'Recent',
@@ -10,29 +10,7 @@ export enum OrderFilterEnum {
   LAST_MONTH = 'last month',
 }
 
-export class GetUserOrdersDTO {
-  @ApiProperty({
-    required: false,
-    default: 0,
-    description: 'Offset for pagination',
-  })
-  @IsOptional()
-  @IsInt()
-  @Transform((params) => parseInt(params.value, 10))
-  @Min(0)
-  offset?: number = 0;
-
-  @ApiProperty({
-    required: false,
-    default: 10,
-    description: 'Limit for pagination',
-  })
-  @IsOptional()
-  @IsInt()
-  @Transform((params) => parseInt(params.value, 10))
-  @Min(1)
-  limit?: number = 10;
-
+export class GetUserOrdersDTO extends PartialType(FindDTO) {
   @ApiProperty({
     enum: OrderFilterEnum,
     description: 'Filter orders by time range',

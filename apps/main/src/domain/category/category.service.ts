@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -23,6 +22,8 @@ import {
 } from '@app/type';
 import { plainToInstance } from 'class-transformer';
 import { CategoryRespondDto } from './dto/category.respond.dto';
+import { FindCategoryDto } from './dto/find-category.dto';
+import { CommonService } from '@app/common';
 
 @Injectable()
 export class CategoryService {
@@ -31,6 +32,7 @@ export class CategoryService {
     private readonly categoryEntity: Repository<Category>,
     private readonly dataSource: DataSource,
     private readonly uploadService: UploadService,
+    private readonly commonService: CommonService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -79,19 +81,31 @@ export class CategoryService {
     );
   }
 
-  async findAll(): Promise<GetAllCategoryResponse> {
+  async findAll(query: FindCategoryDto): Promise<GetAllCategoryResponse> {
     const cachedCategories = await this.cacheManager.get('categories');
-
+    const { limit, page, name } = query;
+    const { skip } = this.commonService.getPaginationMeta(page, limit);
     if (cachedCategories) {
       return cachedCategories as GetAllCategoryResponse;
     }
 
-    const categories = await this.categoryEntity.find({
+    const [categories, total] = await this.categoryEntity.findAndCount({
       relations: ['categoryDetails'],
+      where: {
+        name: name ? `%${name}%` : undefined,
+      },
+      take: limit,
+      skip: skip,
     });
     const result = this.functionCategoryResponse(
       categories,
       message.FIND_CATEGORY_SUCCESS,
+      {
+        meta: {
+          total: total,
+          totalPage: Math.ceil(total / limit),
+        },
+      },
     );
     await this.cacheManager.set('categories', result);
 

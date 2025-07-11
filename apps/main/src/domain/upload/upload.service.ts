@@ -46,5 +46,4 @@ export class UploadService {
       console.error(error);
     }
   }
-
 }
