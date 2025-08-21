@@ -4,6 +4,7 @@ import { ProductCategory } from './product-category.entity';
 import { BaseEntity } from '../../shared/src/index';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Favorite } from './favorite.entity';
+import { DiscountProduct } from './product-discount.entity';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -64,4 +65,10 @@ export class Product extends BaseEntity {
     onDelete: 'CASCADE',
   })
   favorites: Favorite[];
+
+  @OneToMany(
+    () => DiscountProduct,
+    (productDiscount) => productDiscount.product,
+  )
+  discountProduct: DiscountProduct[];
 }

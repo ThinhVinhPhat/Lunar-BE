@@ -14,6 +14,7 @@ import { Payment } from './payment.entity';
 import { OrderHistory } from './order-history.entity';
 import { OrderTracking } from './order-tracking.entity';
 import { Shipment } from './shipment.entity';
+import { Discount } from './discount.entity';
 
 @Entity('order')
 export class Order extends BaseEntity {
@@ -47,6 +48,19 @@ export class Order extends BaseEntity {
   })
   total_price: number;
 
+  @Column({
+    type: 'decimal',
+    name: 'final_price',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
+  finalPrice: number;
+
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order)
   orderDetails: OrderDetail[];
 
@@ -73,4 +87,7 @@ export class Order extends BaseEntity {
 
   @OneToMany(() => Shipment, (shipment) => shipment.order)
   shipments: Shipment[];
+
+  @OneToMany(() => Discount, (discount) => discount.order)
+  discounts: Discount[];
 }

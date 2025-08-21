@@ -1,3 +1,4 @@
+import { DiscountRespondDto } from '@/domain/discount/dto/discount.respond.dto';
 import {
   OrderDetailRespondDto,
   OrderHistoryRespondDto,
@@ -5,6 +6,7 @@ import {
   OrderTrackRespondDto,
   OrderPaymentRespondDto,
 } from '@/domain/order-detail/dto/order-detail.respond.dto';
+import { UserResponseDto } from '@/domain/users/dto/user.respond';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import {
@@ -67,11 +69,27 @@ export class OrderRespondDto {
   total_price: number;
 
   @ApiProperty({
+    description: 'final price of the order',
+  })
+  @Expose()
+  @IsNumber()
+  finalPrice: number;
+
+  @ApiProperty({
     description: 'Time since order of the order',
   })
   @Expose()
   @IsString()
   timeSinceOrder?: string;
+
+  @ApiProperty({
+    description: 'User of the order',
+    type: [UserResponseDto],
+  })
+  @Expose()
+  @Type(() => UserResponseDto)
+  @IsArray()
+  user: UserResponseDto[];
 
   @ApiProperty({
     description: 'Order details of the order',
@@ -111,6 +129,16 @@ export class OrderRespondDto {
   @Type(() => OrderTrackRespondDto)
   @IsArray()
   orderTracks?: OrderTrackRespondDto[];
+
+  @ApiProperty({
+    description: 'Discounts of the order',
+    type: [DiscountRespondDto],
+    required: false,
+  })
+  @Expose()
+  @Type(() => DiscountRespondDto)
+  @IsArray()
+  discounts?: DiscountRespondDto[];
 
   @ApiProperty({
     description: 'Payment of the order',

@@ -16,7 +16,7 @@ import { UsersService } from '@/domain/users/users.service';
 import { NotificationHandler } from './handler/notification.handler';
 import { MessageHandler } from './handler/message.handler';
 import { NotificationService } from '@/domain/notification/notification.service';
-import { MessageService } from '@/domain/message/src/message.service';
+import { MessageService } from '@/domain/message/message.service';
 import { FindNotificationDTO } from '@/domain/notification/dto/find-notification.dto';
 
 export type UserProp = {

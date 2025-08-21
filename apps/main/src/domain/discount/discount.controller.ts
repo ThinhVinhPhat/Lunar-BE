@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { DiscountService } from './discount.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
@@ -19,6 +20,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@app/constant';
 import { RolesGuard } from '../guard/roles.guard';
 import { UuidValidatePipe } from '@app/pipe';
+import { ApplyDiscountDto } from './dto/apply-discount.dto';
+import { FindDiscountDTO } from './dto/find-discount.dto';
 
 @ApiTags('Discount')
 @Controller('discount')
@@ -34,8 +37,22 @@ export class DiscountController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Post()
-  create(@Body() createDiscountDto: CreateDiscountDto) {
+  createForProduct(@Body() createDiscountDto: CreateDiscountDto) {
     return this.discountService.create(createDiscountDto);
+  }
+
+  @ApiOperationDecorator({
+    summary: 'Apply a new discount for user',
+    description: 'Apply a new discount for user',
+    type: CreateDiscountDto,
+  })
+  @ApiBearerAuth()
+  @Patch('/user')
+  createForUser(
+    @UserReq() currentUser: User,
+    @Body() applyDiscountDto: ApplyDiscountDto,
+  ) {
+    return this.discountService.applyForUser(currentUser, applyDiscountDto);
   }
 
   @ApiOperationDecorator({
@@ -46,8 +63,8 @@ export class DiscountController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Get()
-  findAll() {
-    return this.discountService.findAll();
+  findAll(@Query() query: FindDiscountDTO) {
+    return this.discountService.findAll(query);
   }
 
   @ApiOperationDecorator({
@@ -91,6 +108,21 @@ export class DiscountController {
   }
 
   @ApiOperationDecorator({
+    summary: 'Update a discount to Order',
+    description: 'Update a discount to Order',
+    type: CreateDiscountDto,
+  })
+  @ApiBearerAuth()
+  @Patch('/:discountId/order/:orderId')
+  updateDiscountToOrder(
+    @UserReq() currentUser: User,
+    @Param('orderId', UuidValidatePipe) orderId: string,
+    @Param('discountId', UuidValidatePipe) discountId: string,
+  ) {
+    return this.discountService.updateToOrder(currentUser, orderId, discountId);
+  }
+
+  @ApiOperationDecorator({
     summary: 'Delete a discount by Id',
     description: 'Delete a discount by Id',
     type: CreateDiscountDto,
@@ -101,5 +133,24 @@ export class DiscountController {
   @Delete(':id')
   remove(@Param('id', UuidValidatePipe) id: string) {
     return this.discountService.remove(id);
+  }
+
+  @ApiOperationDecorator({
+    summary: 'Delete a discount to Order',
+    description: 'Delete a discount to Order',
+    type: CreateDiscountDto,
+  })
+  @ApiBearerAuth()
+  @Delete('/:discountId/order/:orderId')
+  deleteDiscountFromOrder(
+    @UserReq() currentUser: User,
+    @Param('orderId', UuidValidatePipe) orderId: string,
+    @Param('discountId', UuidValidatePipe) discountId: string,
+  ) {
+    return this.discountService.removeDiscountFromOrder(
+      currentUser,
+      orderId,
+      discountId,
+    );
   }
 }

@@ -14,6 +14,12 @@ import {
   MonthlyAnalytics,
   OrderHistory,
   UserDiscount,
+  DiscountProduct,
+  Conversation,
+  Message,
+  NotificationTemplate,
+  Shipment,
+  UserNotification,
 } from '@app/entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -29,6 +35,7 @@ import { BullModule } from '@nestjs/bull';
       Category,
       CategoryDetail,
       Comment,
+      UserDiscount,
       Discount,
       OrderDetail,
       Order,
@@ -37,10 +44,15 @@ import { BullModule } from '@nestjs/bull';
       Product,
       User,
       Favorite,
-      UserDiscount,
       MonthlyAnalytics,
       OrderHistory,
       OrderTracking,
+      Shipment,
+      Conversation,
+      Message,
+      UserNotification,
+      NotificationTemplate,
+      DiscountProduct,
     ]),
     OrderModule,
     BullModule.registerQueue({

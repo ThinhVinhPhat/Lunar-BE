@@ -7,7 +7,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UploadModule } from '@/domain/upload/upload.module';
 import { GateWayModule } from '@/domain/gateway/src/gateway.module';
 import { AppGateway } from '@/domain/gateway/src/app.gateway';
-import { MessageModule } from '../message/src/message.module';
+import { MessageModule } from '../message/message.module';
 import { NotificationModule } from '../notification/notification.module';
 import { CommonModule } from '@app/common';
 

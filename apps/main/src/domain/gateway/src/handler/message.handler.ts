@@ -1,4 +1,4 @@
-import { MessageService } from '@/domain/message/src/message.service';
+import { MessageService } from '@/domain/message/message.service';
 import { Server } from 'socket.io';
 
 export class MessageHandler {

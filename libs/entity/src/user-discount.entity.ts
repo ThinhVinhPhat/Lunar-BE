@@ -5,7 +5,7 @@ import { Discount } from './discount.entity';
 
 @Entity()
 export class UserDiscount extends BaseEntity {
-  @Column({ type: 'integer', name: 'user_id' })
+  @Column({ type: 'integer', name: 'quantity' })
   quantity: number;
 
   @ManyToOne(() => User, (user) => user.userDiscounts)

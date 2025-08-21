@@ -168,7 +168,7 @@ export class CategoryDetailService {
           categoryDetail.description = description;
           categoryDetail.image =
             imageUrls.length > 0 ? imageUrls : categoryDetail.image;
-          categoryDetail.status = status;
+          categoryDetail.status = status ? status : categoryDetail.status;
 
           await transactionManager.save(CategoryDetail, categoryDetail);
 

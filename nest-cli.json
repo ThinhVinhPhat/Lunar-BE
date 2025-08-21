@@ -14,6 +14,15 @@
   "monorepo": true,
   "root": "apps/main",
   "projects": {
+    "@apps/hono": {
+      "type": "application",
+      "root": "apps/hono",
+      "entryFile": "main",
+      "sourceRoot": "apps/hono/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/hono/tsconfig.app.json"
+      }
+    },
     "@apps/main-service": {
       "type": "application",
       "root": "apps/main",

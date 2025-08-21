@@ -1,16 +1,20 @@
+import { ProductDescription, ProductName } from '@app/pipe';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsOptional,
   IsString,
   IsArray,
-  IsDecimal,
+  Validate,
+  IsPositive,
+  IsNumber,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({
-    description: 'Product category id',
+    description: 'Product category name',
     type: 'array',
     nullable: false,
     items: {
@@ -26,7 +30,7 @@ export class CreateProductDto {
       return value.split(',').map((id) => id.trim());
     return [value];
   })
-  categoryId: string[];
+  category: string[];
 
   @ApiProperty({
     description: 'The name of the product',
@@ -35,6 +39,7 @@ export class CreateProductDto {
   })
   @IsNotEmpty()
   @IsString()
+  @Validate(ProductName)
   name: string;
 
   @ApiProperty({
@@ -43,7 +48,9 @@ export class CreateProductDto {
     nullable: false,
   })
   @IsNotEmpty()
-  @IsDecimal()
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
   price: number;
 
   @ApiProperty({
@@ -53,6 +60,7 @@ export class CreateProductDto {
   })
   @IsOptional()
   @IsString()
+  @Validate(ProductDescription)
   description?: string;
 
   @ApiProperty({
@@ -61,6 +69,9 @@ export class CreateProductDto {
     nullable: false,
   })
   @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
   stock: number;
 
   @ApiProperty({
@@ -69,6 +80,9 @@ export class CreateProductDto {
     nullable: false,
   })
   @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
   discount: number;
 
   @ApiProperty({
@@ -97,6 +111,8 @@ export class CreateProductDto {
     type: 'boolean',
   })
   @IsNotEmpty()
+  @Type(() => Boolean)
+  @IsBoolean()
   isFreeShip: boolean;
 
   @ApiProperty({
@@ -106,6 +122,8 @@ export class CreateProductDto {
     type: 'boolean',
   })
   @IsNotEmpty()
+  @Type(() => Boolean)
+  @IsBoolean()
   isNew: boolean;
 
   @ApiProperty({
@@ -115,5 +133,7 @@ export class CreateProductDto {
     type: 'boolean',
   })
   @IsNotEmpty()
+  @Type(() => Boolean)
+  @IsBoolean()
   isFeatured: boolean;
 }

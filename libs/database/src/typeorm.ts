@@ -19,6 +19,7 @@ import {
   Message,
   NotificationTemplate,
   UserNotification,
+  DiscountProduct,
 } from '../../entity/src/index';
 import { registerAs } from '@nestjs/config';
 import { config as dotenvConfig } from 'dotenv';
@@ -55,6 +56,7 @@ export const config = {
     Message,
     NotificationTemplate,
     UserNotification,
+    DiscountProduct,
   ],
   migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),

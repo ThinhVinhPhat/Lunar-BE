@@ -21,6 +21,7 @@ import { AssertType } from '@app/helper/assert';
 import { Respond } from '@app/type';
 import { plainToInstance } from 'class-transformer';
 import { OrderDetailRespondDto } from './dto/order-detail.respond.dto';
+import { calculateFinalAmount } from '@app/helper/calculateFinalAmount';
 
 @Injectable()
 export class OrderDetailService {
@@ -56,10 +57,9 @@ export class OrderDetailService {
       async (transactionManager: EntityManager) => {
         const { orderId, productId } = findOrderDetailDto;
         const { quantity } = createOrderDetailDto;
-        let currentOrderDetail: OrderDetail = null;
         const order = await transactionManager.findOne(Order, {
           where: { id: orderId },
-          relations: ['orderDetails', 'user', 'histories'],
+          relations: ['orderDetails', 'user', 'histories', 'discounts'],
         });
         const product = await transactionManager.findOne(Product, {
           where: { id: productId },
@@ -90,13 +90,11 @@ export class OrderDetailService {
 
         if (existOrderDetail) {
           const oldQuantity = existOrderDetail.quantity;
-          existOrderDetail.quantity = existOrderDetail.quantity + quantity;
+          existOrderDetail.quantity += quantity;
           existOrderDetail.total = productPrice * existOrderDetail.quantity;
           order.total_price +=
             productPrice * (existOrderDetail.quantity - oldQuantity);
           await transactionManager.save(OrderDetail, existOrderDetail);
-          await transactionManager.save(Order, order);
-          currentOrderDetail = existOrderDetail;
         } else {
           const orderDetail = transactionManager.create(OrderDetail, {
             order: order,
@@ -116,13 +114,15 @@ export class OrderDetailService {
           await transactionManager.save(OrderHistory, orderHistory);
           await transactionManager.save(OrderDetail, orderDetail);
           order.orderDetails.push(orderDetail);
-          order.total_price += productPrice * quantity;
           order.histories.push(orderHistory);
-          await transactionManager.save(Order, order);
-          currentOrderDetail = orderDetail;
+          order.total_price += productPrice * quantity;
         }
+
+        order.finalPrice = calculateFinalAmount(order);
+        await transactionManager.save(Order, order);
+
         return this.functionOrderDetailResponse(
-          currentOrderDetail,
+          existOrderDetail ?? order.orderDetails[order.orderDetails.length - 1],
           message.CREATE_ORDER_DETAIL_SUCCESS,
         );
       },
@@ -137,6 +137,7 @@ export class OrderDetailService {
     if (!order) {
       throw new NotFoundException(message.FIND_ORDER_FAIL);
     }
+
     return this.functionOrderDetailResponse(
       order.orderDetails,
       message.FIND_ORDER_DETAIL_SUCCESS,
@@ -164,43 +165,43 @@ export class OrderDetailService {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const { orderId, productId } = findOrderDetailDto;
+        const { quantity } = updateOrderDetailDto;
 
         const order = await transactionManager.findOne(Order, {
           where: { id: orderId },
-          relations: ['orderDetails'],
+          relations: ['orderDetails', 'discounts'],
         });
-
-        if (!order) {
-          throw new NotFoundException(message.FIND_ORDER_FAIL);
-        }
         const product = await transactionManager.findOne(Product, {
           where: { id: productId },
         });
-        if (!product) {
-          throw new NotFoundException(message.FIND_PRODUCT_FAIL);
+
+        if (!order || !product) {
+          throw new NotFoundException(message.FIND_ORDER_FAIL);
         }
+
         const productPrice =
           product.discount_percentage && Number(product.discount_percentage) > 0
             ? Number(product.price) *
               (1 - Number(product.discount_percentage) / 100)
             : product.price;
-        const { quantity } = updateOrderDetailDto;
 
         const orderDetail = await transactionManager.findOne(OrderDetail, {
-          where: {
-            id: id,
-          },
+          where: { id },
         });
+
         if (!orderDetail) {
           throw new NotFoundException(message.FIND_ORDER_DETAIL_FAIL);
         }
+
         order.total_price -= orderDetail.total;
         orderDetail.quantity = quantity;
         orderDetail.price = productPrice;
-        orderDetail.total = orderDetail.quantity * orderDetail.price;
+        orderDetail.total = quantity * productPrice;
         orderDetail.product_name = product.name;
         orderDetail.product = product;
         order.total_price += orderDetail.total;
+
+        order.finalPrice = calculateFinalAmount(order);
 
         await transactionManager.save(OrderDetail, orderDetail);
         await transactionManager.save(Order, order);
@@ -217,35 +218,30 @@ export class OrderDetailService {
     return this.dataSource.transaction(
       async (transactionManager: EntityManager) => {
         const orderDetail = await transactionManager.findOne(OrderDetail, {
-          where: {
-            id: id,
-          },
-          relations: ['order', 'order.orderDetails'],
+          where: { id },
+          relations: ['order', 'order.orderDetails', 'order.discounts'],
         });
+
         if (!orderDetail) {
           throw new NotFoundException(message.FIND_ORDER_DETAIL_FAIL);
         }
+
         const order = orderDetail.order;
-        let totalPrice = order.total_price;
-
-        if (order.orderDetails.length === 1) {
-          totalPrice = 0;
-        } else {
-          totalPrice -= Number(orderDetail.total);
-        }
-
-        await transactionManager.delete(OrderDetail, { id: orderDetail.id });
+        order.total_price -= Number(orderDetail.total);
 
         const orderHistory = transactionManager.create(OrderHistory, {
           order: order,
           action: OrderHistoryAction.REMOVE_PRODUCT,
-          description: `Remove product ${orderDetail.product_name} from order ${order.id} `,
+          description: `Remove product ${orderDetail.product_name} from order ${order.id}`,
         });
 
+        await transactionManager.delete(OrderDetail, { id });
         await transactionManager.save(OrderHistory, orderHistory);
-        await transactionManager.update(Order, order.id, {
-          total_price: totalPrice,
-        });
+
+        order.finalPrice = calculateFinalAmount(order);
+
+        await transactionManager.save(Order);
+
         return {
           message: message.DELETE_ORDER_DETAIL_SUCCESS,
         };

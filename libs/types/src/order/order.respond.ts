@@ -63,6 +63,7 @@ export interface Order {
   note: string;
   status: string;
   total_price: number;
+  finalPrice: number;
   orderDetails: OrderDetail[];
   histories?: OrderHistory[];
   shipments?: Shipment[];

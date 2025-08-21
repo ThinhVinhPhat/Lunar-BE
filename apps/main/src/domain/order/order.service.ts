@@ -115,7 +115,12 @@ export class OrderService {
             },
             status: OrderStatus.PENDING,
           },
-          relations: ['user', 'orderDetails', 'orderDetails.product'],
+          relations: [
+            'user',
+            'orderDetails',
+            'orderDetails.product',
+            'discounts',
+          ],
         });
 
         if (existOrder) {
@@ -139,6 +144,7 @@ export class OrderService {
           shipPhone,
           note,
           user: user,
+          finalPrice: 0,
         });
         const orderHistory = transactionManager.create(OrderHistory, {
           order: order,
@@ -260,6 +266,7 @@ export class OrderService {
         'histories',
         'shipments',
         'orderTracks',
+        'discounts',
       ],
       order: {
         createdAt: 'DESC',

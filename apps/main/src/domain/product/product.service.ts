@@ -102,14 +102,14 @@ export class ProductService {
           isFreeShip,
           isNew,
           discount,
-          categoryId,
+          category,
         } = createProductDto;
 
         const categories = await transactionManager.find(CategoryDetail, {
-          where: { id: In(categoryId) },
+          where: { name: In(category) },
         });
 
-        if (categories.length !== categoryId.length) {
+        if (categories.length !== category.length) {
           throw new NotFoundException(message.FIND_CATEGORY_FAIL);
         }
 
@@ -128,8 +128,8 @@ export class ProductService {
             (category) => category.categoryDetails.id,
           );
           return (
-            ids.length === categoryId.length &&
-            ids.every((id) => categoryId.includes(id))
+            ids.length === category.length &&
+            ids.every((id) => category.includes(id))
           );
         });
 
@@ -189,6 +189,15 @@ export class ProductService {
         this.logger.log('Cache hit for findAll products');
         return cached as GetAllProductResponse;
       }
+
+      const raw = await this.productEntity
+        .createQueryBuilder('product')
+        .leftJoin('product.productCategories', 'productCategories')
+        .leftJoin('productCategories.categoryDetails', 'categoryDetails')
+        .select('DISTINCT categoryDetails.name', 'name')
+        .getRawMany();
+
+      console.log(raw);
 
       // Query lấy sản phẩm (distinct theo name)
       const qb = this.productEntity

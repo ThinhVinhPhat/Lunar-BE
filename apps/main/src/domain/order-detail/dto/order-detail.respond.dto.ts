@@ -1,6 +1,7 @@
+import { ProductRespondDto } from '@/domain/product/dto/product.respond.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { IsArray, IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsNumber, IsString } from 'class-validator';
 
 @Exclude()
 export class OrderDetailRespondDto {
@@ -38,6 +39,14 @@ export class OrderDetailRespondDto {
   @Expose()
   @IsNumber()
   total: number;
+
+  @ApiProperty({
+    description: 'Product of the order',
+    type: [ProductRespondDto],
+  })
+  @Expose()
+  @Type(() => ProductRespondDto)
+  product: ProductRespondDto;
 }
 
 @Exclude()

@@ -1,0 +1,7 @@
+name = "hono-nestjs-demo"
+compatibility_date = "2025-08-13"
+main = "dist/worker.js"  
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+DATABASE_URL = "jdbc:mysql://mysql-13ef729-locdo-e453.d.aivencloud.com:15819/defaultdb"

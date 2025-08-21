@@ -1,15 +1,34 @@
-import { DiscountType } from '@app/constant/role';
-import { Respond } from '..';
+import { DiscountType, DiscountValueType } from '@app/constant/role';
+import { Product, Respond, User } from '..';
 import { DiscountRespondDto } from '@/domain/discount/dto/discount.respond.dto';
+import { DiscountProduct, UserDiscount } from '@app/entity';
 
-export interface Discount {
+export interface DiscountInterface {
   name: string;
   description: string;
   value: number;
-  type: DiscountType;
+  valueType: DiscountValueType;
+  discountType: DiscountType;
   thresholdAmount: number;
-  status: boolean;
+  usageLimit: number;
+  startAt: Date;
   expireAt: Date;
+  isActive: boolean;
+  userDiscounts: UserDiscount[];
+  discountProduct: DiscountProduct[];
+}
+
+export interface DiscountProductInterface {
+  discount: DiscountInterface;
+  product: Product;
+  appliedAt?: Date;
+  customDiscountRate?: number;
+}
+
+export interface UserDiscountInterface {
+  quantity: number;
+  user: User;
+  discount: DiscountInterface;
 }
 
 export interface CreateDiscountResponse extends Respond {

@@ -18,9 +18,16 @@ export enum CommentSort {
   LOW_RATE = 'LOW_RATE',
   HIGH_RATE = 'HIGH_RATE',
 }
-export enum DiscountType {
+export enum DiscountValueType {
   PERCENTAGE = 'Percentage',
   FIXED = 'Fixed',
+}
+
+export enum DiscountType {
+  ALL_DISCOUNT = 'All Discount',
+  ALL_PRODUCTS = 'All Products',
+  FREE_SHIP = 'Free Ship',
+  DISCOUNT = 'Discount',
 }
 
 export enum PaymentStatus {
