@@ -90,7 +90,7 @@ export class ProductController {
   @ApiConsumes('multipart/form-data')
   @ApiOperationDecorator({
     summary: 'Update a product',
-    description: 'Create a product',
+    description: 'Update a product',
     type: CreateProductDto,
   })
   @UseInterceptors(FilesInterceptor('images'))

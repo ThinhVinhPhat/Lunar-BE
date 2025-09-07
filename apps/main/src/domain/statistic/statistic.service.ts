@@ -193,7 +193,7 @@ export class StatisticService {
         totalItems: total,
         totalPages: Math.ceil(total / limit),
       },
-      message: message.FIND_ORDER_HISTORY_SUCCESS,
+      message: message.FIND_ORDER_SUCCESS,
     };
   }
 

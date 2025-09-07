@@ -1,4 +1,3 @@
-import { ProductDescription, ProductName } from '@app/pipe';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
@@ -6,7 +5,6 @@ import {
   IsOptional,
   IsString,
   IsArray,
-  Validate,
   IsPositive,
   IsNumber,
   IsBoolean,
@@ -39,7 +37,7 @@ export class CreateProductDto {
   })
   @IsNotEmpty()
   @IsString()
-  @Validate(ProductName)
+  // @Validate(ProductName)
   name: string;
 
   @ApiProperty({
@@ -60,7 +58,7 @@ export class CreateProductDto {
   })
   @IsOptional()
   @IsString()
-  @Validate(ProductDescription)
+  // @Validate(ProductDescription)
   description?: string;
 
   @ApiProperty({

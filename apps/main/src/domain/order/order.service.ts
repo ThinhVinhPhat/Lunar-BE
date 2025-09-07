@@ -312,6 +312,7 @@ export class OrderService {
         'histories',
         'shipments',
         'orderTracks',
+        'discounts',
       ],
     });
     if (!order) {

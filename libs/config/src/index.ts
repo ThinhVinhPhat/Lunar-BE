@@ -83,8 +83,10 @@ export function validate(config: Record<string, unknown>) {
 }
 
 export const config = {
-  APP_PORT: process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 4000,
-  APP_NAME: process.env.APP_NAME ?? 'main-service',
+  app: {
+    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3100,
+    name: process.env.APP_NAME ?? 'main-service',
+  },
   DB_HOST: process.env.DATABASE_HOST ?? 'localhost',
   DB_USERNAME: process.env.DATABASE_USERNAME ?? 'user',
   DB_PASSWORD: process.env.DATABASE_PASSWORD ?? 'password',

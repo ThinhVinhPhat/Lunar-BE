@@ -197,8 +197,6 @@ export class ProductService {
         .select('DISTINCT categoryDetails.name', 'name')
         .getRawMany();
 
-      console.log(raw);
-
       // Query lấy sản phẩm (distinct theo name)
       const qb = this.productEntity
         .createQueryBuilder('product')
@@ -318,6 +316,7 @@ export class ProductService {
           },
         },
       );
+
 
       await this.cacheManager.set(cacheKey, result, 60);
       return result;

@@ -30,6 +30,9 @@ import { redisStore } from 'cache-manager-ioredis';
 import { MessageModule } from './domain/message/message.module';
 import { NotificationModule } from './domain/notification/notification.module';
 import { GateWayModule } from './domain/gateway/src/gateway.module';
+import { IpFilterMiddleware } from '@app/middleware/ip-filter.middleware';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { ApiKeyMiddleware } from '@app/middleware/api-key.middleware';
 @Module({
   imports: [
     StripeModule.forRoot({
@@ -81,10 +84,19 @@ import { GateWayModule } from './domain/gateway/src/gateway.module';
       provide: APP_INTERCEPTOR,
       useClass: LoggingMiddleware,
     },
+    {
+      provide: APP_GUARD,
+      useClass: IpFilterMiddleware,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggingMiddleware).forRoutes('*');
+    consumer.apply(LoggingMiddleware, IpFilterMiddleware).forRoutes('*');
+    consumer.apply(ApiKeyMiddleware).forRoutes('products');
   }
 }
