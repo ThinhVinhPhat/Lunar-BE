@@ -9,6 +9,10 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
     "sourceMap": true,
+    "rootDirs": [
+      "apps/main/src",
+      "app/decorator/src"
+    ],
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
@@ -24,9 +28,115 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "apps/main/src/*"
+      ],
+      "@app/decorator": [
+        "libs/decorator/src"
+      ],
+      "@app/decorator/*": [
+        "libs/decorator/src/*"
+      ],
+      "@app/database": [
+        "libs/database/src"
+      ],
+      "@app/database/*": [
+        "libs/database/src/*"
+      ],
+      "@app/helper": [
+        "libs/helper/src"
+      ],
+      "@app/helper/*": [
+        "libs/helper/src/*"
+      ],
+      "@app/shared": [
+        "libs/shared/src"
+      ],
+      "@app/shared/*": [
+        "libs/shared/src/*"
+      ],
+      "@app/type": [
+        "libs/types/src"
+      ],
+      "@app/type/*": [
+        "libs/types/src/*"
+      ],
+      "@app/stripe": [
+        "libs/stripe/src"
+      ],
+      "@app/stripe/*": [
+        "libs/stripe/src/*"
+      ],
+      "@app/entity": [
+        "libs/entity/src"
+      ],
+      "@app/entity/*": [
+        "libs/entity/src/*"
+      ],
+      "@app/config": [
+        "libs/config/src"
+      ],
+      "@app/config/*": [
+        "libs/config/src/*"
+      ],
+      "@app/constant": [
+        "libs/constant/src"
+      ],
+      "@app/constant/*": [
+        "libs/constant/src/*"
+      ],
+      "@app/mail": [
+        "libs/mail/src"
+      ],
+      "@app/mail/*": [
+        "libs/mail/src/*"
+      ],
+      "@app/middleware": [
+        "libs/middleware/src"
+      ],
+      "@app/middleware/*": [
+        "libs/middleware/src/*"
+      ],
+      "@app/interceptors": [
+        "libs/interceptors/src"
+      ],
+      "@app/interceptors/*": [
+        "libs/interceptors/src/*"
+      ],
+      "@app/filter": [
+        "libs/filter/src"
+      ],
+      "@app/filter/*": [
+        "libs/filter/src/*"
+      ],
+      "@app/pipe": [
+        "libs/pipe/src"
+      ],
+      "@app/pipe/*": [
+        "libs/pipe/src/*"
+      ],
+      "@app/gateway": [
+        "apps/main/src/domain/gateway/src"
+      ],
+      "@app/gateway/*": [
+        "apps/main/src/domain/gateway/src/*"
+      ],
+      "@app/common": [
+        "libs/common/src"
+      ],
+      "@app/common/*": [
+        "libs/common/src/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "migrations"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

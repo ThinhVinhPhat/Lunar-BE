@@ -1,0 +1,70 @@
+import {
+  Category,
+  CategoryDetail,
+  Discount,
+  Favorite,
+  Order,
+  OrderDetail,
+  Comment,
+  Payment,
+  Product,
+  ProductCategory,
+  User,
+  OrderTracking,
+  MonthlyAnalytics,
+  OrderHistory,
+  UserDiscount,
+  DiscountProduct,
+  Conversation,
+  Message,
+  NotificationTemplate,
+  Shipment,
+  UserNotification,
+} from '@app/entity';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { OrderTrackingConsumer } from './order-tracking.consumer';
+import { OrderTrackingProcessor } from './order-tracking.proccessor';
+import { OrderModule } from '@/domain/order/order.module';
+import { OrderTrackingService } from './order-tracking.service';
+import { BullModule } from '@nestjs/bull';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([
+      Category,
+      CategoryDetail,
+      Comment,
+      UserDiscount,
+      Discount,
+      OrderDetail,
+      Order,
+      Payment,
+      ProductCategory,
+      Product,
+      User,
+      Favorite,
+      MonthlyAnalytics,
+      OrderHistory,
+      OrderTracking,
+      Shipment,
+      Conversation,
+      Message,
+      UserNotification,
+      NotificationTemplate,
+      DiscountProduct,
+    ]),
+    OrderModule,
+    BullModule.registerQueue({
+      name: 'order_tracking',
+    }),
+  ],
+  controllers: [],
+  providers: [
+    OrderTrackingConsumer,
+    OrderTrackingProcessor,
+    OrderTrackingService,
+  ],
+  exports: [OrderTrackingService, OrderTrackingProcessor],
+})
+export class OrderTrackingModule {}

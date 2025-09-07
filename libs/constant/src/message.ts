@@ -1,0 +1,135 @@
+export const message = {
+  // ----------- Auth -----------
+  RESIGTER_SUCCESS: 'Resigter Successfully',
+  RESIGTER_FAIL: 'Resigter Fail',
+  SIGN_IN_SUCCESS: 'Login Successfully',
+  SIGN_IN_FAIL: 'Login Fail',
+  SIGN_UP_SUCCESS: 'Register Successfully',
+  PASSWORD_NOT_MATCH: 'Password does not match',
+  USER_NOT_ACTIVE: 'This user account is not active',
+  CODE_EXPIRED: 'Code expired',
+  CODE_NOT_MATCH: 'Code invalid',
+  VERIFY_SUCCESS: 'Verify successfully',
+  SEND_EMAIL_VALIDATION_CODE_SUCCESS: 'Send email validation code',
+
+  // ----------- User -----------
+  USER_NOT_EXISTS: 'User does not exist',
+  USER_ALREADY_EXISTS: 'User already exists',
+  USER_DELETE_SUCCESS: 'User deleted successfully',
+  USER_CREATE_SUCCESS: 'User created successfully',
+  USER_UPDATE_SUCCESS: 'User updated successfully',
+  USER_UPDATE_Fail: 'User updated fail',
+  USER_PASSWORD_UPDATE_SUCCESS: 'User password updated successfully',
+  FIND_USER_SUCCESS: 'Find users successfully',
+  FIND_USER_FAIL: 'Find users fail',
+  USER_ONLINE_STATUS_UPDATE_SUCCESS: "User's online status has been updated",
+
+  // ----------- Category -----------
+  CREATE_CATEGORY_SUCCESS: 'Create Category successfully',
+  CREATE_CATEGORY_FAIL: 'Create Category fail',
+  UPDATE_CATEGORY_SUCCESS: 'Update Category successfully',
+  UPDATE_CATEGORY_FAIL: 'Update Category fail',
+  DELETE_CATEGORY_SUCCESS: 'Delete Category successfully',
+  DELETE_CATEGORY_FAIL: 'Delete Category fail',
+  FIND_CATEGORY_SUCCESS: 'Find Category successfully',
+  FIND_CATEGORY_FAIL: 'Find Category fail',
+
+  // ----------- Category Detail -----------
+  CREATE_CATEGORY_DETAIL_SUCCESS: 'Create Category detail successfully',
+  CREATE_CATEGORY_DETAIL_FAIL: 'Create Category detail fail',
+  UPDATE_CATEGORY_DETAIL_SUCCESS: 'Update Category detail successfully',
+  UPDATE_CATEGORY_DETAIL_FAIL: 'Update Category detail fail',
+  DELETE_CATEGORY_DETAIL_SUCCESS: 'Delete Category detail successfully',
+  DELETE_CATEGORY_DETAIL_FAIL: 'Delete Category detail fail',
+  FIND_CATEGORY_DETAIL_SUCCESS: 'Find Category detail successfully',
+  FIND_CATEGORY_DETAIL_FAIL: 'Find Category detail fail',
+
+  // ----------- Product -----------
+  CREATE_PRODUCT_SUCCESS: 'Create Product successfully',
+  CREATE_PRODUCT_FAIL: 'Create Product fail',
+  UPDATE_PRODUCT_SUCCESS: 'Update Product successfully',
+  UPDATE_PRODUCT_FAIL: 'Update Product fail',
+  DELETE_PRODUCT_SUCCESS: 'Delete Product successfully',
+  DELETE_PRODUCT_FAIL: 'Delete Product fail',
+  FIND_PRODUCT_SUCCESS: 'Find Product successfully',
+  FIND_PRODUCT_FAIL: 'Find Product fail',
+
+  // ----------- Order -----------
+  CREATE_ORDER_SUCCESS: 'Create Order successfully',
+  CREATE_ORDER_FAIL: 'Create Order fail',
+  UPDATE_ORDER_SUCCESS: 'Update Order successfully',
+  UPDATE_ORDER_FAIL: 'Update Order fail',
+  DELETE_ORDER_SUCCESS: 'Delete Order successfully',
+  DELETE_ORDER_FAIL: 'Delete Order fail',
+  FIND_ORDER_SUCCESS: 'Find Order successfully',
+  FIND_ORDER_FAIL: 'Find Order fail',
+
+  // ----------- Order Detail -----------
+  CREATE_ORDER_DETAIL_SUCCESS: 'Create Order detail successfully',
+  CREATE_ORDER_DETAIL_FAIL: 'Create Order detail  fail',
+  UPDATE_ORDER_DETAIL_SUCCESS: 'Update Order detail  successfully',
+  UPDATE_ORDER_DETAIL_FAIL: 'Update Order detail  fail',
+  DELETE_ORDER_DETAIL_SUCCESS: 'Delete Order detail  successfully',
+  DELETE_ORDER_DETAIL_FAIL: 'Delete Order detail  fail',
+  FIND_ORDER_DETAIL_SUCCESS: 'Find Order detail  successfully',
+  FIND_ORDER_DETAIL_FAIL: 'Find Order detail fail',
+
+  // ----------- Order History -----------
+  CREATE_ORDER_HISTORY_SUCCESS: 'Create OrderHistory successfully',
+  CREATE_ORDER_HISTORY_FAIL: 'Create OrderHistory  fail',
+  UPDATE_ORDER_HISTORY_SUCCESS: 'Update OrderHistory  successfully',
+  UPDATE_ORDER_HISTORY_FAIL: 'Update OrderHistory  fail',
+  DELETE_ORDER_HISTORY_SUCCESS: 'Delete OrderHistory  successfully',
+  DELETE_ORDER_HISTORY_FAIL: 'Delete OrderHistory  fail',
+  FIND_ORDER_HISTORY_SUCCESS: 'Find OrderHistory  successfully',
+  FIND_ORDER_HISTORY_FAIL: 'Find Order fail',
+
+  // ----------- Discount -----------
+  CREATE_DISCOUNT_SUCCESS: 'Create Discount successfully',
+  CREATE_DISCOUNT_FAIL: 'Create Discount  fail',
+  UPDATE_DISCOUNT_SUCCESS: 'Update Discount  successfully',
+  UPDATE_DISCOUNT_FAIL: 'Update Discount  fail',
+  DELETE_DISCOUNT_SUCCESS: 'Delete Discount  successfully',
+  DELETE_DISCOUNT_FAIL: 'Delete Discount  fail',
+  FIND_DISCOUNT_SUCCESS: 'Find Discount  successfully',
+  FIND_DISCOUNT_FAIL: 'Find Discount fail',
+  APPLY_DISCOUNT_FAIL: " Can't apply discount",
+  APPLY_DISCOUNT_SUCCESS: 'Apply discount successfully',
+  REMOVE_DISCOUNT_SUCCESS: 'Remove discount successfully',
+  DISCOUNT_ALREADY_EXISTS: 'Discount with this name already exists',
+  DISCOUNT_EXPIRE_BEFORE_START: 'Discount expire before start',
+
+  // ----------- Comment -----------
+  CREATE_COMMENT_SUCCESS: 'Create Comment successfully',
+  CREATE_COMMENT_FAIL: 'Create Comment  fail',
+  UPDATE_COMMENT_SUCCESS: 'Update Comment  successfully',
+  UPDATE_COMMENT_FAIL: 'Update Comment  fail',
+  DELETE_COMMENT_SUCCESS: 'Delete Comment  successfully',
+  DELETE_COMMENT_FAIL: 'Delete Comment  fail',
+  FIND_COMMENT_SUCCESS: 'Find Comment  successfully',
+  FIND_COMMENT_FAIL: 'Find Comment fail',
+
+  // ----------- Summary / Dashboard -----------
+  FIND_SUMMARY_SUCCESS: 'Find Summary Successfully',
+  FIND_REVENUE_AND_CATEGORY_SUCCESS: 'Find Revenue and Category Successfully',
+  UPDATE_SUMMARY_SUCCESS: 'Update Summary Successfully',
+  DELETE_SUMMARY_SUCCESS: 'Delete Summary Successfully',
+  COMPARISON_WITH_LAST_MONTH_SUCCESS:
+    'Comparison with last month calculated successfully',
+  COMPARISON_WITH_LAST_MONTH_FAIL: 'Comparison with last month calculated fail',
+
+  // ----------- Chat / Message -----------
+  GET_BETWEEN_USER_SUCCESS: 'Get Messages between users successfully',
+  GET_USER_MESSAGE_SUCCESS: 'Get User Messages successfully',
+
+  // ----------- Notification -----------
+  CREATE_NOTIFICATION_SUCCESS: 'Create Notification Successfully',
+  CREATE_NOTIFICATION_FAIL: 'Create Notification Fail',
+  FIND_NOTIFICATION_SUCCESS: 'Find Notification Successfully',
+  FIND_NOTIFICATION_FAIL: 'Find Notification Fail',
+  UPDATE_NOTIFICATION_SUCCESS: 'Update Notification Successfully',
+  UPDATE_NOTIFICATION_FAIL: 'Update Notification Fail',
+  DELETE_NOTIFICATION_SUCCESS: 'Delete Notification Successfully',
+  DELETE_NOTIFICATION_FAIL: 'Delete Notification Fail',
+  ALREADY_READ: 'Notification already read',
+};

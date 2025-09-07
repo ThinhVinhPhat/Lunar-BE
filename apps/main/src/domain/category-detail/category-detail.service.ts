@@ -1,0 +1,207 @@
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateCategoryDetailDto } from './dto/create-category-detail.dto';
+import { UpdateCategoryDetailDto } from './dto/update-category-detail.dto';
+import { DataSource, EntityManager, Repository } from 'typeorm';
+import { Category } from '@app/entity/category.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CategoryDetail } from '../../../../../libs/entity/src/category-detail.entity';
+import { message } from '@app/constant/message';
+import { UploadService } from '@/domain/upload/upload.service';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import {
+  CreateCategoryDetailsResponse,
+  GetAllCategoryDetailsResponse,
+  GetCategoryDetailsResponse,
+  Respond,
+  UpdateCategoryDetailsResponse,
+} from '@app/type';
+import { plainToInstance } from 'class-transformer';
+import { CategoryDetailRespondDto } from './dto/category.respond.dto';
+import { ImageTransformer } from '@app/helper/assert';
+
+@Injectable()
+export class CategoryDetailService {
+  private readonly logger: Logger;
+  constructor(
+    @InjectRepository(Category)
+    private readonly categoryEntity: Repository<Category>,
+    @InjectRepository(CategoryDetail)
+    private readonly categoryDetailEntity: Repository<CategoryDetail>,
+    private readonly dataSource: DataSource,
+    private readonly uploadService: UploadService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) {
+    this.logger = new Logger(CategoryDetailService.name);
+  }
+
+  private functionCategoryDetailResponse(
+    categoryDetail: CategoryDetail | CategoryDetail[],
+    message: string,
+    args?: Record<string, any>,
+  ) {
+    return {
+      data: plainToInstance(CategoryDetailRespondDto, categoryDetail, {
+        excludeExtraneousValues: true,
+      }),
+      message,
+      ...(args ?? {}),
+    };
+  }
+
+  async create(
+    createCategoryDetailDto: CreateCategoryDetailDto,
+    categoryId: string,
+  ): Promise<CreateCategoryDetailsResponse> {
+    return this.dataSource.transaction(
+      async (transactionManager: EntityManager) => {
+        const { name, description, images } = createCategoryDetailDto;
+
+        try {
+          const category = await transactionManager.findOne(Category, {
+            where: { id: categoryId },
+            relations: ['categoryDetails'],
+          });
+          if (!category) {
+            throw new NotFoundException(message.FIND_CATEGORY_FAIL);
+          }
+          const imageUrls = images
+            ? await ImageTransformer(images, this.uploadService)
+            : [];
+          const categoryDetail = transactionManager.create(CategoryDetail, {
+            name: name,
+            category: category,
+            description: description,
+            image: imageUrls,
+          });
+          category.categoryDetails.push(categoryDetail);
+          await transactionManager.save(CategoryDetail, categoryDetail);
+          await transactionManager.save(Category, category);
+
+          return this.functionCategoryDetailResponse(
+            categoryDetail,
+            message.CREATE_CATEGORY_DETAIL_SUCCESS,
+          );
+        } catch (e: any) {
+          console.log(e);
+          throw new BadRequestException(message.CREATE_CATEGORY_DETAIL_FAIL);
+        }
+      },
+    );
+  }
+
+  async findAll(): Promise<GetAllCategoryDetailsResponse> {
+    const cachedCategoryDetails =
+      await this.cacheManager.get('category-details');
+
+    if (cachedCategoryDetails) {
+      return cachedCategoryDetails as GetAllCategoryDetailsResponse;
+    }
+
+    const categories = await this.categoryDetailEntity.find({
+      relations: ['category'],
+    });
+    const result = this.functionCategoryDetailResponse(
+      categories,
+      message.FIND_CATEGORY_DETAIL_SUCCESS,
+    );
+    await this.cacheManager.set('category-details', result);
+
+    return result;
+  }
+
+  async findOne(id: string): Promise<GetCategoryDetailsResponse> {
+    const category = await this.categoryDetailEntity.findOne({
+      where: { id: id },
+      relations: ['productCategories', 'category'],
+    });
+
+    return this.functionCategoryDetailResponse(
+      category,
+      message.FIND_CATEGORY_DETAIL_SUCCESS,
+    );
+  }
+
+  async findByCategory(name: string): Promise<GetAllCategoryDetailsResponse> {
+    const category = await this.categoryEntity.findOne({
+      where: { name: name },
+      relations: ['categoryDetails'],
+    });
+
+    if (!category) {
+      throw new NotFoundException(message.FIND_CATEGORY_FAIL);
+    }
+
+    return this.functionCategoryDetailResponse(
+      category.categoryDetails,
+      message.FIND_CATEGORY_DETAIL_SUCCESS,
+    );
+  }
+
+  async update(
+    id: string,
+    updateCategoryDetailDto: UpdateCategoryDetailDto,
+  ): Promise<UpdateCategoryDetailsResponse> {
+    return this.dataSource.transaction(
+      async (transactionManager: EntityManager) => {
+        const { name, description, images, status } = updateCategoryDetailDto;
+
+        try {
+          const imageUrls = images
+            ? await ImageTransformer(images, this.uploadService)
+            : [];
+
+          const categoryDetail = await transactionManager.findOne(
+            CategoryDetail,
+            {
+              where: {
+                id: id,
+              },
+            },
+          );
+          categoryDetail.name = name;
+          categoryDetail.description = description;
+          categoryDetail.image =
+            imageUrls.length > 0 ? imageUrls : categoryDetail.image;
+          categoryDetail.status = status ? status : categoryDetail.status;
+
+          await transactionManager.save(CategoryDetail, categoryDetail);
+
+          return this.functionCategoryDetailResponse(
+            categoryDetail,
+            message.UPDATE_CATEGORY_DETAIL_SUCCESS,
+          );
+        } catch (e) {
+          this.logger.error(e);
+          throw new BadRequestException(message.UPDATE_CATEGORY_DETAIL_FAIL);
+        }
+      },
+    );
+  }
+
+  async remove(id: string): Promise<Respond> {
+    return this.dataSource.transaction(
+      async (transactionManager: EntityManager) => {
+        try {
+          const category = await transactionManager.findOne(CategoryDetail, {
+            where: {
+              id: id,
+            },
+          });
+          await transactionManager.remove(CategoryDetail, category);
+          return {
+            message: message.DELETE_CATEGORY_DETAIL_SUCCESS,
+          };
+        } catch (e) {
+          this.logger.error(e);
+          throw new BadRequestException(message.DELETE_CATEGORY_DETAIL_FAIL);
+        }
+      },
+    );
+  }
+}
