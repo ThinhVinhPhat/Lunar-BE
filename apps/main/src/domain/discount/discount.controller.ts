@@ -16,7 +16,7 @@ import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { Roles } from '@app/decorator/role.decorator';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { Role } from '@app/constant';
 import { RolesGuard } from '../guard/roles.guard';
 import { UuidValidatePipe } from '@app/pipe';
@@ -24,6 +24,7 @@ import { ApplyDiscountDto } from './dto/apply-discount.dto';
 import { FindDiscountDTO } from './dto/find-discount.dto';
 
 @ApiTags('Discount')
+@ApiSecurity('X-API-KEY')
 @Controller('discount')
 export class DiscountController {
   constructor(private readonly discountService: DiscountService) {}

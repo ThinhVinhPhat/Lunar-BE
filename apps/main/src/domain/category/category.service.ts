@@ -115,7 +115,7 @@ export class CategoryService {
   async findOne(id: string): Promise<GetCategoryResponse> {
     const category = await this.categoryEntity.findOne({ where: { id: id } });
 
-    if(!category) {
+    if (!category) {
       throw new NotFoundException(message.FIND_CATEGORY_FAIL);
     }
 

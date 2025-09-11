@@ -14,7 +14,7 @@ import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
 import { FindOrderDTO } from './dto/find-order.dto';
@@ -29,6 +29,7 @@ import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Order')
+@ApiSecurity('X-API-KEY')
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}

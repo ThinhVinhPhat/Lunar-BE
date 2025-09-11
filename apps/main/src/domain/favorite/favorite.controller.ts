@@ -1,12 +1,13 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity';
 import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Favorite')
+@ApiSecurity('X-API-KEY')
 @Controller('favorite')
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}

@@ -1,4 +1,3 @@
-import { DataSource } from 'typeorm';
 import {
   Category,
   CategoryDetail,
@@ -18,15 +17,21 @@ import {
   Shipment,
   Conversation,
   Message,
-  UserNotification,
   NotificationTemplate,
+  UserNotification,
   DiscountProduct,
-} from '../../entity/src/index';
+} from '../../../entity/src/index';
+import { registerAs } from '@nestjs/config';
+import { config as dotenvConfig } from 'dotenv';
+import * as process from 'process';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
-export const connectionSource = new DataSource({
-  type: 'postgres',
+dotenvConfig({ path: '.env' });
+
+export const config = {
+  type: process.env?.DB_TYPE || 'postgres',
   host: process.env?.DATABASE_HOST || 'localhost',
-  port: parseInt(process.env?.DATABASE_PORT) || 5432,
+  port: process.env?.DATABASE_PORT || 5432,
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
@@ -34,7 +39,6 @@ export const connectionSource = new DataSource({
     Category,
     CategoryDetail,
     Comment,
-    UserDiscount,
     Discount,
     OrderDetail,
     Order,
@@ -43,21 +47,28 @@ export const connectionSource = new DataSource({
     Product,
     User,
     Favorite,
+    UserDiscount,
     MonthlyAnalytics,
     OrderHistory,
     OrderTracking,
     Shipment,
     Conversation,
     Message,
-    UserNotification,
     NotificationTemplate,
+    UserNotification,
     DiscountProduct,
   ],
   migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),
+  autoLoadEntities: true,
   synchronize: false,
   logging: process.env?.DATABASE_DEBUG_MODE === 'true' || false,
   ssl: {
     rejectUnauthorized: false,
   },
-});
+};
+if (config.logging) {
+  console.log('Connect DB Successfully');
+}
+export default registerAs('typeorm', () => config);
+export const connectionSource = new DataSource(config as DataSourceOptions);

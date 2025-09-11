@@ -193,6 +193,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
+    },
+    "@app/swagger": {
+      "type": "library",
+      "root": "libs/swagger",
+      "entryFile": "index",
+      "sourceRoot": "libs/swagger/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/swagger/tsconfig.lib.json"
+      }
     }
   }
 }

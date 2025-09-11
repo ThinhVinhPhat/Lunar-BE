@@ -13,7 +13,12 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiTags,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '../../../../../libs/entity/src/user.entity';
 import { Public } from '@app/decorator/public.decorator';
@@ -29,6 +34,7 @@ import { RolesGuard } from '../guard/roles.guard';
 import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('User')
+@ApiSecurity('X-API-KEY')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

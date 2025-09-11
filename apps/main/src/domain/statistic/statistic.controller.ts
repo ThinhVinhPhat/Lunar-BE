@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { StatisticService } from './statistic.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { CompareValueDTO } from './dto/compare.dto';
 import { Roles } from '@app/decorator/role.decorator';
@@ -20,6 +20,7 @@ import { RolesGuard } from '../guard/roles.guard';
 import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Statistic')
+@ApiSecurity('X-API-KEY')
 @Controller('statistic')
 export class StatisticController {
   constructor(private readonly statisticService: StatisticService) {}

@@ -37,10 +37,12 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/main/test/jest-e2e.json",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
+    "typeorm:cli": "ts-node -r ./node_modules/typeorm/cli ./libs/database/src/typeorm.cli.ts",
     "migration:up": "npm run build && npm run typeorm migration:run -- -d ./libs/database/src/typeorm.cli.ts",
     "migration:generate": "npm run typeorm -- -d ./libs/database/src/typeorm.cli.ts migration:generate ./migrations/$npm_config_name",
     "migration:create": "npm run typeorm -- migration:create ./migrations/$npm_config_name",
-    "migration:down": "npm run typeorm -- -d ./libs/database/src/typeorm.ts migration:revert"
+    "migration:down": "npm run typeorm -- -d ./libs/database/src/typeorm.ts migration:revert",
+    "migration:revert": "npm run typeorm -- -d ./libs/database/src/typeorm.cli.ts migration:revert"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.726.1",
@@ -158,7 +160,8 @@
       "^@app/filter(|/.*)$": "<rootDir>/libs/filter/src/$1",
       "^@app/pipe(|/.*)$": "<rootDir>/libs/pipe/src/$1",
       "^@app/gateway(|/.*)$": "<rootDir>/libs/gateway/src/$1",
-      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
+      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
+      "^@app/swagger(|/.*)$": "<rootDir>/libs/swagger/src/$1"
     }
   }
 }

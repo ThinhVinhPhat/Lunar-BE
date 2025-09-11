@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginAuthDto } from './dto/login-auth.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guard/jwt-auth.guard';
 import { RegisterAuthDto } from './dto/register-atuth.dto';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
@@ -19,6 +19,7 @@ import { GoogleAuthGuard } from '../guard/google-auth.guard';
 import { VerifyAuthDto } from './dto/verify-auth.dto';
 import { Public } from '@app/decorator/public.decorator';
 @ApiTags('Auth')
+@ApiSecurity('X-API-KEY')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

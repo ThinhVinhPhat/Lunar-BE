@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
-import { Inject, forwardRef } from '@nestjs/common';
+import { Inject, Logger, forwardRef } from '@nestjs/common';
 import { config } from '@app/config';
 
 import { UsersService } from '@/domain/users/users.service';
@@ -28,7 +28,7 @@ export type UserProp = {
 @WebSocketGateway({ cors: { origin: '*' } })
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-
+  private logger: Logger;
   private onlineUsers = new Map<string, UserProp>();
   private notificationHandler: NotificationHandler;
   private messageHandler: MessageHandler;
@@ -41,7 +41,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly notificationService: NotificationService,
     @Inject(forwardRef(() => MessageService))
     private readonly messageService: MessageService,
-  ) {}
+  ) {
+    this.logger = new Logger(AppGateway.name);
+  }
 
   afterInit() {
     this.notificationHandler = new NotificationHandler(
@@ -74,6 +76,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.server.emit('user_status_online', { userId, isOnline: true });
     } catch (err) {
+      console.log('Connection error:', err.message);
       client.disconnect();
     }
   }
