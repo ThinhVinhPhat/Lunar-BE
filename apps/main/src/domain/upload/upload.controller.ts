@@ -6,9 +6,10 @@ import {
 } from '@nestjs/common';
 import { UploadService } from './upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiSecurity } from '@nestjs/swagger';
 
 @ApiTags('Upload')
+@ApiSecurity('X-API-KEY')
 @Controller('image')
 export class UploadController {
   constructor(private readonly cloudinaryService: UploadService) {}

@@ -190,12 +190,12 @@ export class ProductService {
         return cached as GetAllProductResponse;
       }
 
-      const raw = await this.productEntity
-        .createQueryBuilder('product')
-        .leftJoin('product.productCategories', 'productCategories')
-        .leftJoin('productCategories.categoryDetails', 'categoryDetails')
-        .select('DISTINCT categoryDetails.name', 'name')
-        .getRawMany();
+      // const raw = await this.productEntity
+      //   .createQueryBuilder('product')
+      //   .leftJoin('product.productCategories', 'productCategories')
+      //   .leftJoin('productCategories.categoryDetails', 'categoryDetails')
+      //   .select('DISTINCT categoryDetails.name', 'name')
+      //   .getRawMany();
 
       // Query lấy sản phẩm (distinct theo name)
       const qb = this.productEntity
@@ -316,7 +316,6 @@ export class ProductService {
           },
         },
       );
-
 
       await this.cacheManager.set(cacheKey, result, 60);
       return result;

@@ -100,7 +100,7 @@ export class StripeService {
   ): Stripe.Event {
     try {
       return this.stripe.webhooks.constructEvent(rawBody, signature, secret);
-    } catch (err) {
+    } catch {
       throw new ForbiddenException('Invalid signature');
     }
   }

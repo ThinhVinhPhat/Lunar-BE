@@ -1,7 +1,8 @@
 import { GlobalExceptionFilter } from '@app/filter';
+import { createSwaggerDocument } from '@app/swagger/swagger';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 
 export const setupApiServer = async ({
   app,
@@ -51,16 +52,11 @@ export const setupApiServer = async ({
       }
     },
     credentials: true,
+    allowedHeaders: 'Content-Type, Authorization, x-api-key',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   });
-  const configSwagger = new DocumentBuilder()
-    .setTitle('JWT API')
-    .setDescription('JWT API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, configSwagger);
-  SwaggerModule.setup('docs', app, document);
+
+  SwaggerModule.setup('docs', app, createSwaggerDocument(app));
   await app.listen(port || 3100);
 
   console.table({

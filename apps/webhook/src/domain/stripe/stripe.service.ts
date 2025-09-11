@@ -20,7 +20,7 @@ export class StripeWebhookService {
         signature,
         'whsec_jtBPbYIhdKskzJlSjyYKpMNcpjriM2d7',
       );
-    } catch (err) {
+    } catch {
       return { error: 'Invalid signature' };
     }
 

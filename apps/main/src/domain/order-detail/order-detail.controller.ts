@@ -11,12 +11,13 @@ import {
 import { OrderDetailService } from './order-detail.service';
 import { CreateOrderDetailDto } from './dto/create-order-detail.dto';
 import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { FindOrderDetailDto } from './dto/find-order-detail.dto';
 import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('OrderDetail')
+@ApiSecurity('X-API-KEY')
 @Controller('order-detail')
 export class OrderDetailController {
   constructor(private readonly orderDetailService: OrderDetailService) {}

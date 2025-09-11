@@ -1,11 +1,17 @@
-import { Module } from '@nestjs/common';
+import { Module, Type } from '@nestjs/common';
 import { validate } from '../../config/src/index';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import typeorm from '../../database/src/typeorm';
+import typeorm from '../../database/src/typeorm/typeorm';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { DatabaseModule } from '@app/database/database.module';
+import * as Entities from '@app/entity';
+
+export const ALL_ENTITIES: Type<any>[] = Object.values(Entities).filter(
+  (e) => typeof e === 'function', // giữ lại class
+);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -57,12 +63,13 @@ import { ThrottlerModule } from '@nestjs/throttler';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) =>
-        configService.getOrThrow('typeorm'),
-    }),
+    // TypeOrmModule.forRootAsync({
+    //   inject: [ConfigService],
+    //   useFactory: async (configService: ConfigService) =>
+    //     configService.getOrThrow('typeorm'),
+    // }),
+    DatabaseModule.forRoot({ entities: [...ALL_ENTITIES] }),
   ],
-  exports: [MailerModule, ConfigModule, TypeOrmModule],
+  exports: [MailerModule, ConfigModule, ThrottlerModule, DatabaseModule],
 })
 export class SharedModule {}

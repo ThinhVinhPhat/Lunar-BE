@@ -14,7 +14,12 @@ import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiTags,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
@@ -24,6 +29,7 @@ import { UuidValidatePipe } from '@app/pipe';
 
 @Controller('comment')
 @ApiTags('Comment')
+@ApiSecurity('X-API-KEY')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 

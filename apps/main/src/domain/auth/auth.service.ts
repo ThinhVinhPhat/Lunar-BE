@@ -126,7 +126,7 @@ export class AuthService {
     }
     const randomCode = Math.floor(Math.random() * 1000000) + 1;
 
-    const mail = await this.mailService.sendMail({
+    await this.mailService.sendMail({
       to: user.email,
       subject: 'Có cái mật khẩu cũng quên 😡',
       text: 'forgot password',

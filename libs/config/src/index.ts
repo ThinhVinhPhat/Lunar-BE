@@ -92,6 +92,7 @@ export const config = {
   DB_PASSWORD: process.env.DATABASE_PASSWORD ?? 'password',
   DB_PORT: parseInt(process.env.DATABASE_PORT, 10) ?? 5433,
   DB_NAME: process.env.DATABASE_NAME ?? 'glasses-store',
+  DB_URL: process.env.DATABASE_URL ?? '',
   JWT: {
     SECRET: process.env.JWT_SECRET_KEY ?? 'secret',
     EXPIRES_IN: process.env.JWT_EXPIRATION_TIME ?? 2592000,

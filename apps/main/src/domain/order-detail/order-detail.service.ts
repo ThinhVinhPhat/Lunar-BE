@@ -240,7 +240,7 @@ export class OrderDetailService {
 
         order.finalPrice = calculateFinalAmount(order);
 
-        await transactionManager.save(Order);
+        await transactionManager.save(Order, order);
 
         return {
           message: message.DELETE_ORDER_DETAIL_SUCCESS,

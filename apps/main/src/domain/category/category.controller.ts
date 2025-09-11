@@ -14,7 +14,7 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { Public } from '@app/decorator/public.decorator';
 import { Roles } from '@app/decorator/role.decorator';
 import { Role } from '@app/constant/role';
@@ -24,6 +24,7 @@ import { UuidValidatePipe } from '@app/pipe';
 import { FindCategoryDto } from './dto/find-category.dto';
 
 @ApiTags('Category')
+@ApiSecurity('X-API-KEY')
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}

@@ -13,7 +13,12 @@ import {
 import { CategoryDetailService } from './category-detail.service';
 import { CreateCategoryDetailDto } from './dto/create-category-detail.dto';
 import { UpdateCategoryDetailDto } from './dto/update-category-detail.dto';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiTags,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '@app/decorator/public.decorator';
@@ -24,6 +29,7 @@ import { CacheInterceptor, CacheTTL, CacheKey } from '@nestjs/cache-manager';
 import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('CategoryDetail')
+@ApiSecurity('X-API-KEY')
 @Controller('category-details')
 export class CategoryDetailController {
   constructor(private readonly categoryDetailService: CategoryDetailService) {}

@@ -16,6 +16,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
+import { ApiSecurity } from '@nestjs/swagger';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Public } from '@app/decorator/public.decorator';
@@ -31,6 +32,7 @@ import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Product')
+@ApiSecurity('X-API-KEY')
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}

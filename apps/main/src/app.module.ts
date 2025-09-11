@@ -97,6 +97,6 @@ import { ApiKeyMiddleware } from '@app/middleware/api-key.middleware';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggingMiddleware, IpFilterMiddleware).forRoutes('*');
-    consumer.apply(ApiKeyMiddleware).forRoutes('products');
+    consumer.apply(ApiKeyMiddleware).forRoutes('*');
   }
 }

@@ -20,13 +20,19 @@ import { Role } from '@app/constant';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
 import { Roles } from '@app/decorator/role.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiTags,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { FindNotificationDTO } from './dto/find-notification.dto';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity';
 import { AppGateway } from '../gateway/src/app.gateway';
 
 @ApiTags('Notification')
+@ApiSecurity('X-API-KEY')
 @Controller('notifications')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class NotificationController {

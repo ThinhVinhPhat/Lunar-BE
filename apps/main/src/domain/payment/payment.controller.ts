@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiSecurity } from '@nestjs/swagger';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity/user.entity';
 import { ApiOperationDecorator } from '@app/decorator/api-operation.decorator';
@@ -8,6 +8,7 @@ import { Public } from '@app/decorator/public.decorator';
 import { UuidValidatePipe } from '@app/pipe';
 
 @ApiTags('Payment')
+@ApiSecurity('X-API-KEY')
 @Controller('payment')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}

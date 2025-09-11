@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -13,12 +14,15 @@ import { IS_PUBLIC_KEY } from '@app/decorator/public.decorator';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  private logger: Logger;
   constructor(
     private reflector: Reflector,
     private readonly jwtService: JwtService,
     private readonly userService: UsersService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.logger = new Logger(JwtAuthGuard.name);
+  }
   async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -51,6 +55,7 @@ export class JwtAuthGuard implements CanActivate {
 
       request['user'] = user.data;
     } catch (error) {
+      this.logger.error(`Error verifying token: ${error.message}`);
       throw new UnauthorizedException('Invalid token');
     }
 

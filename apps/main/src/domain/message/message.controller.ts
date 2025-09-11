@@ -1,10 +1,16 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { MessageService } from './message.service';
 import { UserReq } from '@app/decorator/user.decorator';
 import { User } from '@app/entity';
 
 @ApiTags('Messages')
+@ApiSecurity('X-API-KEY')
 @Controller('messages')
 export class MessagesController {
   constructor(private readonly messageService: MessageService) {}
