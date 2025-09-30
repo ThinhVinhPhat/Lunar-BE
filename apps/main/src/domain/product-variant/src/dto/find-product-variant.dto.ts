@@ -3,14 +3,27 @@ import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class FindProductDTO extends PartialType(FindDTO) {
+export class FindProductVariantDTO extends PartialType(FindDTO) {
   @ApiPropertyOptional({
-    description: 'Product name',
+    description: 'Product variant color name',
     example: 'Product 1',
   })
   @IsOptional()
   @IsString()
-  name: string;
+  color: string;
+
+  @ApiPropertyOptional({
+    description: 'Product category',
+    example: 'Electronics',
+    type: 'array',
+    items: {
+      type: 'string',
+    },
+  })
+  @IsOptional()
+  @IsArray()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
+  category: string[];
 
   @ApiPropertyOptional({
     description: 'User Id',

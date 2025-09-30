@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OrderDetail } from '../../../../../libs/entity/src/order-detail.entity';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Order } from '@app/entity/order.entity';
-import { Product } from '@app/entity/product.entity';
 import { message } from '@app/constant/message';
 import { OrderHistory } from '@app/entity';
 import { OrderHistoryAction } from '@app/constant';
@@ -22,6 +21,7 @@ import { Respond } from '@app/type';
 import { plainToInstance } from 'class-transformer';
 import { OrderDetailRespondDto } from './dto/order-detail.respond.dto';
 import { calculateFinalAmount } from '@app/helper/calculateFinalAmount';
+import { ProductVariant } from '@app/entity/product-variant.entity';
 
 @Injectable()
 export class OrderDetailService {
@@ -61,8 +61,11 @@ export class OrderDetailService {
           where: { id: orderId },
           relations: ['orderDetails', 'user', 'histories', 'discounts'],
         });
-        const product = await transactionManager.findOne(Product, {
+        const product = await transactionManager.findOne(ProductVariant, {
           where: { id: productId },
+          relations: {
+            product: true,
+          },
         });
 
         assertValues([
@@ -79,7 +82,7 @@ export class OrderDetailService {
         ]);
 
         const existOrderDetail = order.orderDetails.find(
-          (ol) => ol.product_name == product.name,
+          (ol) => ol.product_name == product.product.name,
         );
 
         const productPrice =
@@ -94,25 +97,29 @@ export class OrderDetailService {
           existOrderDetail.total = productPrice * existOrderDetail.quantity;
           order.total_price +=
             productPrice * (existOrderDetail.quantity - oldQuantity);
+          product.stock = existOrderDetail.quantity - oldQuantity;
           await transactionManager.save(OrderDetail, existOrderDetail);
+          await transactionManager.save(ProductVariant, product);
         } else {
           const orderDetail = transactionManager.create(OrderDetail, {
             order: order,
-            product: product,
+            variant: product,
             quantity: quantity,
             price: productPrice,
             total: productPrice * quantity,
-            product_name: product.name,
+            product_name: product.color,
           });
 
           const orderHistory = transactionManager.create(OrderHistory, {
             order: order,
             action: OrderHistoryAction.ADD_PRODUCT,
-            description: `Add product ${product.name} to order ${order.id}`,
+            description: `Add product ${product.product.name} to order ${order.id}`,
           });
 
           await transactionManager.save(OrderHistory, orderHistory);
           await transactionManager.save(OrderDetail, orderDetail);
+          product.stock -= quantity;
+          await transactionManager.save(ProductVariant, product);
           order.orderDetails.push(orderDetail);
           order.histories.push(orderHistory);
           order.total_price += productPrice * quantity;
@@ -171,12 +178,19 @@ export class OrderDetailService {
           where: { id: orderId },
           relations: ['orderDetails', 'discounts'],
         });
-        const product = await transactionManager.findOne(Product, {
+
+        if (!order) {
+          throw new NotFoundException(message.FIND_ORDER_FAIL);
+        }
+        const product = await transactionManager.findOne(ProductVariant, {
           where: { id: productId },
+          relations: {
+            product: true,
+          },
         });
 
-        if (!order || !product) {
-          throw new NotFoundException(message.FIND_ORDER_FAIL);
+        if (!product) {
+          throw new NotFoundException(message.FIND_PRODUCT_FAIL);
         }
 
         const productPrice =
@@ -197,8 +211,8 @@ export class OrderDetailService {
         orderDetail.quantity = quantity;
         orderDetail.price = productPrice;
         orderDetail.total = quantity * productPrice;
-        orderDetail.product_name = product.name;
-        orderDetail.product = product;
+        orderDetail.product_name = product.product.name;
+        orderDetail.variant = product;
         order.total_price += orderDetail.total;
 
         order.finalPrice = calculateFinalAmount(order);

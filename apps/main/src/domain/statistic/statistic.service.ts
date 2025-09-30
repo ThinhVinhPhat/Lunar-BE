@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { Order, Product, User } from '@app/entity';
+import { Order, User } from '@app/entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { MonthlyAnalytics } from '@app/entity/monthly-statistic.entity';
@@ -20,14 +20,15 @@ import { plainToInstance } from 'class-transformer';
 import { OrderRespondDto } from '../order/dto/order.respond.dto';
 import { GetUserOrdersDTO } from './dto/get-user-orders.dto';
 import { CommonService } from '@app/common';
+import { ProductVariant } from '@app/entity/product-variant.entity';
 
 @Injectable()
 export class StatisticService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
-    @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
+    @InjectRepository(ProductVariant)
+    private readonly productRepository: Repository<ProductVariant>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(MonthlyAnalytics)
@@ -47,15 +48,18 @@ export class StatisticService {
 
   async getSummary(): Promise<GetSummaryResponse> {
     const topProducts = await this.productRepository
-      .createQueryBuilder('product')
-      .where('product.status = :status', { status: true })
-      .orderBy('product.views', 'DESC')
+      .createQueryBuilder('variant')
+      .where('variant.status = :status', { status: true })
+      .orderBy('variant.views', 'DESC')
       .limit(3)
       .getMany();
+
+    console.log(topProducts);
+
     const validSlugs = topProducts.map((product) => product.slug);
 
     const now = new Date();
-    const month = now.toISOString().split('T')[0].split('-')[1];
+    const month = Number(now.toISOString().split('T')[0].split('-')[1]);
 
     const totalNewUsers = await this.userRepository.count({
       where: {
@@ -204,9 +208,9 @@ export class StatisticService {
       compareValueDto;
     const now = new Date();
     const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1);
-    const lastMonth = (prevMonthDate.getMonth() + 1)
-      .toString()
-      .padStart(2, '0');
+    const lastMonth = Number(
+      (prevMonthDate.getMonth() + 1).toString().padStart(2, '0'),
+    );
 
     const value = await this.analyticRepository.findOne({
       where: {
@@ -267,7 +271,7 @@ export class StatisticService {
       const count = await this.productRepository
         .createQueryBuilder('product')
         .innerJoin('product.productCategories', 'productCategory')
-        .innerJoin('productCategory.categoryDetails', 'categoryDetail')
+        .innerJoin('productCategory.categoryDetail', 'categoryDetail')
         .where('categoryDetail.name = :categoryName', { categoryName })
         .getCount();
 
@@ -287,7 +291,7 @@ export class StatisticService {
 
   async updateSummary(
     id: string,
-    month: string,
+    month: number,
   ): Promise<UpdateSummaryResponse> {
     const analytic = await this.analyticRepository.findOne({
       where: { id: id },

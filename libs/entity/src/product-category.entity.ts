@@ -1,7 +1,7 @@
 import { CategoryDetail } from './category-detail.entity';
 import { BaseEntity } from '../../shared/src/index';
-import { Product } from './product.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { ProductVariant } from './product-variant.entity';
 
 @Entity()
 export class ProductCategory extends BaseEntity {
@@ -12,8 +12,9 @@ export class ProductCategory extends BaseEntity {
     () => CategoryDetail,
     (categoryDetail) => categoryDetail.productCategories,
   )
-  categoryDetails: CategoryDetail;
+  categoryDetail: CategoryDetail;
 
-  @ManyToOne(() => Product, (product) => product.productCategories)
-  product: Product;
+  @ManyToOne(() => ProductVariant, (product) => product.productCategories)
+  @JoinColumn({ name: 'variant_id' })
+  variant: ProductVariant;
 }

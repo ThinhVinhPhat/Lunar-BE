@@ -6,6 +6,7 @@ import {
   Query,
   Delete,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { StatisticService } from './statistic.service';
 import { ApiBearerAuth, ApiTags, ApiSecurity } from '@nestjs/swagger';
@@ -71,7 +72,7 @@ export class StatisticController {
   @Patch('/delete-summary/:id')
   updateSummary(
     @Param('id', UuidValidatePipe) id: string,
-    @Query('month') month: string,
+    @Query('month', ParseIntPipe) month: number,
   ) {
     return this.statisticService.updateSummary(id, month);
   }

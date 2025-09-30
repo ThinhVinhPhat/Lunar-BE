@@ -1,0 +1,56 @@
+# Khi vào được server của EC2, dùng GPT để tải Nodejs, Github và các thư viện cần thiết
+
+#Upload code NestJS
+git clone https://github.com/username/project.git /var/www/lunar-be
+cd /var/www/lunar-be
+npm install
+npm run build
+
+# Chạy ứng dụng bằng PM2
+
+pm2 start dist/main.js --name lunar-be
+pm2 startup
+pm2 save
+
+pm2 logs lunar-be
+
+
+# Cập nhật hệ thống
+sudo yum update -y
+
+# Cài nginx
+sudo dnf install nginx -y
+
+# Start nginx
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+# Kiểm tra status
+sudo systemctl status nginx
+
+Mở file cấu hình (Amazon Linux dùng /etc/nginx/conf.d/)
+sudo nano /etc/nginx/conf.d/lunar.conf
+
+
+# Thêm cấu hình proxy của domain vào nginx
+server {
+    server_name lunar.id.vn;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+
+sudo nginx -t
+sudo systemctl restart nginx
+
+# Nếu muốn HTTPS (SSL miễn phí), thì cài certbot:
+sudo amazon-linux-extras enable epel
+sudo yum install certbot python2-certbot-nginx -y
+sudo certbot --nginx -d lunar.id.vn

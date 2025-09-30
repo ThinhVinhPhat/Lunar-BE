@@ -3,8 +3,8 @@ import { Entity, Column } from 'typeorm';
 
 @Entity({ name: 'monthly_analytics' })
 export class MonthlyAnalytics extends BaseEntity {
-  @Column({ type: 'date' })
-  month: string;
+  @Column({ type: 'int', nullable: true })
+  month: number;
 
   @Column({ type: 'int', default: 0 })
   totalViews: number;

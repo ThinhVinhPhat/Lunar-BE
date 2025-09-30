@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@app/entity/user.entity';
 import { Repository } from 'typeorm';
 import { message } from '@app/constant/message';
-import { Product } from '@app/entity/product.entity';
 import { UploadService } from '@/domain/upload/upload.service';
 import { Comment } from '../../../../../libs/entity/src/comment.entity';
 import { FindCommentDTO } from './dto/find-comment.dto';
@@ -20,6 +19,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { CommentRespondDto } from './dto/comment.respond.dto';
 import { CommonService } from '@app/common';
+import { ProductVariant } from '@app/entity';
 
 @Injectable()
 export class CommentService {
@@ -28,8 +28,8 @@ export class CommentService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
-    @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
+    @InjectRepository(ProductVariant)
+    private readonly productRepository: Repository<ProductVariant>,
     private readonly uploadService: UploadService,
     private readonly commonService: CommonService,
   ) {}
@@ -80,7 +80,7 @@ export class CommentService {
       content: comment,
       rate: rate,
       user: user,
-      product: product,
+      variant: product,
       images: imageUrl,
     });
     await this.commentRepository.save(createdComment);
@@ -120,7 +120,7 @@ export class CommentService {
 
     const comment = await this.commentRepository.find({
       where: {
-        product: {
+        variant: {
           id: productId,
         },
       },

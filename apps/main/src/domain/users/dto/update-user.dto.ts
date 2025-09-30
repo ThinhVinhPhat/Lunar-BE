@@ -1,5 +1,6 @@
 import { Role } from '@app/constant/role';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
@@ -71,6 +72,7 @@ export class UpdateUserDto {
     example: true,
   })
   @IsOptional()
+  @Type(() => Boolean)
   @IsBoolean()
   status: boolean;
 

@@ -7,10 +7,11 @@ import { User } from '@app/entity/user.entity';
 import { UploadModule } from '@/domain/upload/upload.module';
 import { Comment } from '../../../../../libs/entity/src/comment.entity';
 import { CommonModule } from '@app/common';
+import { ProductVariant } from '@app/entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Comment, User, Product]),
+    TypeOrmModule.forFeature([Comment, User, Product, ProductVariant]),
     UploadModule,
     CommonModule,
   ],

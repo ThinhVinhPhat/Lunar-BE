@@ -9,6 +9,7 @@ import { StripeService } from '@app/stripe';
 import { Payment, Product } from '@app/entity';
 import { Respond } from '@app/type';
 import { CreatePaymentResponse } from '@app/type/order/order.respond';
+import { ProductVariant } from '@app/entity/product-variant.entity';
 
 @Injectable()
 export class PaymentService {
@@ -19,6 +20,8 @@ export class PaymentService {
     private readonly stripeService: StripeService,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(ProductVariant)
+    private readonly productVariantRepository: Repository<ProductVariant>,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
   ) {}
@@ -34,7 +37,11 @@ export class PaymentService {
         where: {
           id: orderId,
         },
-        relations: ['orderDetails', 'orderDetails.product'],
+        relations: [
+          'orderDetails',
+          'orderDetails.variant',
+          'orderDetails.variant.product',
+        ],
       });
 
       if (!order || !order.orderDetails.length) {
@@ -49,7 +56,7 @@ export class PaymentService {
           );
 
           const existingProduct = existingProducts.data.find(
-            (product) => product.name === item.product.name,
+            (product) => product.name === item.variant.color,
           );
 
           let productId;
@@ -58,9 +65,9 @@ export class PaymentService {
             productId = existingProduct.id;
           } else {
             const product = await this.stripeService.createProduct(
-              item.product.name,
-              item.product.description,
-              item.product.status,
+              item.variant.color,
+              item.variant.images,
+              item.variant.status,
             );
             productId = product.id;
           }
@@ -112,18 +119,21 @@ export class PaymentService {
       where: {
         id: payment_id.order_id,
       },
-      relations: ['user', 'orderDetails', 'orderDetails.product'],
+      relations: ['user', 'orderDetails', 'orderDetails.variant'],
     });
 
     if (!order) {
       throw new NotFoundException('Cannot find Order');
     }
 
-    const productIds = order.orderDetails.map((item) => item.product.id);
+    const productIds = order.orderDetails.map((item) => item.variant.id);
 
-    const products = await this.productRepository.find({
+    const products = await this.productVariantRepository.find({
       where: {
         id: In(productIds),
+      },
+      relations: {
+        product: true,
       },
     });
 
@@ -134,7 +144,7 @@ export class PaymentService {
     // Update product quantities based on orderDetails
     for (const product of products) {
       const orderDetail = order.orderDetails.find(
-        (item) => item.product.id === product.id,
+        (item) => item.variant.id === product.id,
       );
       if (orderDetail) {
         product.stock = (product.stock ?? 0) - orderDetail.quantity;
@@ -143,7 +153,7 @@ export class PaymentService {
         }
       }
     }
-    await this.productRepository.save(products);
+    await this.productVariantRepository.save(products);
 
     const payment = this.paymentRepository.create({
       method: PaymentMethod.CREDIT_CARD,

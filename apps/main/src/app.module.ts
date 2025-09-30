@@ -33,6 +33,7 @@ import { GateWayModule } from './domain/gateway/src/gateway.module';
 import { IpFilterMiddleware } from '@app/middleware/ip-filter.middleware';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { ApiKeyMiddleware } from '@app/middleware/api-key.middleware';
+import { ProductVariantModule } from './domain/product-variant/src/product-variant.module';
 @Module({
   imports: [
     StripeModule.forRoot({
@@ -70,6 +71,7 @@ import { ApiKeyMiddleware } from '@app/middleware/api-key.middleware';
     MessageModule,
     NotificationModule,
     GateWayModule,
+    ProductVariantModule,
   ],
   controllers: [],
   providers: [

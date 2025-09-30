@@ -3,8 +3,8 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DbConfigError } from './database.error';
 import { DbConfig } from './database.interface';
 import { DBConfig } from '@app/config/config.interface';
-import { ConfigService } from '@app/config/config.service';
-import { AppConfigModule } from '@app/config/config.module';
+import { ConfigService } from '../../config/src/config.service';
+import { AppConfigModule } from '../../config/src/config.module';
 
 @Module({})
 export class DatabaseModule {

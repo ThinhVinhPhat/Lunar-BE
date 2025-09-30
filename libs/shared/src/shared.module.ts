@@ -5,8 +5,8 @@ import typeorm from '../../database/src/typeorm/typeorm';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { DatabaseModule } from '@app/database/database.module';
-import * as Entities from '@app/entity';
+import { DatabaseModule } from '../../database/src/database.module';
+import * as Entities from '../../entity/src/index';
 
 export const ALL_ENTITIES: Type<any>[] = Object.values(Entities).filter(
   (e) => typeof e === 'function', // giữ lại class

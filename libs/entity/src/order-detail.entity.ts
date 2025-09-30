@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Order } from './order.entity';
-import { Product } from './index';
 import { BaseEntity } from '../../shared/src/index';
+import { ProductVariant } from './product-variant.entity';
 
 @Entity('order_detail')
 export class OrderDetail extends BaseEntity {
@@ -21,7 +21,7 @@ export class OrderDetail extends BaseEntity {
   @JoinColumn({ name: 'orderId' })
   order: Order;
 
-  @ManyToOne(() => Product, (product) => product.orderDetails)
-  @JoinColumn({ name: 'productId' })
-  product: Product;
+  @ManyToOne(() => ProductVariant, (variant) => variant.orderDetails)
+  @JoinColumn({ name: 'variantId' })
+  variant: ProductVariant;
 }

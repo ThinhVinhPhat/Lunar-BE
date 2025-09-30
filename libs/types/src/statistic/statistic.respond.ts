@@ -1,5 +1,5 @@
+import { ProductVariantRespondDto } from '@/domain/product-variant/src/dto/product-variant.respond.dto';
 import { Respond } from '..';
-import { ProductRespondDto } from '@/domain/product/dto/product.respond.dto';
 
 export interface MonthlyAnalytics {
   id: string;
@@ -8,7 +8,7 @@ export interface MonthlyAnalytics {
   totalOrders: number;
   totalRevenue: number;
   totalNewUsers: number;
-  topProducts: ProductRespondDto[];
+  topProducts: ProductVariantRespondDto[];
   createdAt: Date;
   updatedAt: Date;
 }

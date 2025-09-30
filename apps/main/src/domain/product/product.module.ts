@@ -7,7 +7,8 @@ import { ProductCategory } from '@app/entity/product-category.entity';
 import { CategoryDetail } from '@app/entity/category-detail.entity';
 import { UploadModule } from '@/domain/upload/upload.module';
 import { Product } from '../../../../../libs/entity/src/product.entity';
-import { Favorite } from '@app/entity';
+import { Favorite, ProductVariant } from '@app/entity';
+import { SearchService } from '../search/search.service';
 
 @Module({
   imports: [
@@ -16,12 +17,14 @@ import { Favorite } from '@app/entity';
       Product,
       CategoryDetail,
       Favorite,
+      ProductVariant,
     ]),
+    Object,
     UploadModule,
     CommonModule,
   ],
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [ProductService, SearchService],
   exports: [ProductService],
 })
 export class ProductModule {}

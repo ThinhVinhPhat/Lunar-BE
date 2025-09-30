@@ -1,6 +1,6 @@
-import { CategoryDetailRespondDto } from '@/domain/category-detail/dto/category.respond.dto';
+import { ProductVariantRespondDto } from '@/domain/product-variant/src/dto/product-variant.respond.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -8,72 +8,6 @@ import {
   IsNumber,
   IsString,
 } from 'class-validator';
-
-@Exclude()
-export class ColorVariantDto {
-  @ApiProperty({ description: 'ID of the color variant product' })
-  @Expose()
-  @IsString()
-  id: string;
-
-  @ApiProperty({ description: 'Slug of the color variant product' })
-  @Expose()
-  @IsString()
-  slug: string;
-
-  @ApiProperty({ description: 'Color name of the variant' })
-  @Expose()
-  @IsString()
-  color: string;
-
-  @ApiProperty({
-    description: 'Image URL of the variant',
-    example: 'https://...',
-  })
-  @Expose()
-  @IsString()
-  image: string;
-}
-
-@Exclude()
-export class ProductCategoryRespondDto {
-  @ApiProperty({
-    description: 'Id of the product category',
-  })
-  @Expose()
-  @IsString()
-  id: string;
-
-  @ApiProperty({
-    description: 'Created at of the product category',
-  })
-  @Expose()
-  @IsDate()
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'Updated at of the product category',
-  })
-  @Expose()
-  @IsDate()
-  updatedAt: Date;
-
-  @ApiProperty({
-    description: 'Quantity of the product category',
-    example: 10,
-  })
-  @Expose()
-  @IsNumber()
-  quantity: number;
-
-  @ApiProperty({
-    description: 'Category details of the product category',
-    type: CategoryDetailRespondDto,
-  })
-  @Expose()
-  @Type(() => CategoryDetailRespondDto)
-  categoryDetails: CategoryDetailRespondDto;
-}
 
 export class ProductRespondDto {
   @ApiProperty({
@@ -112,20 +46,6 @@ export class ProductRespondDto {
   slug: string;
 
   @ApiProperty({
-    description: 'Price of the product',
-  })
-  @Expose()
-  @IsNumber()
-  price: number;
-
-  @ApiProperty({
-    description: 'Discount percentage of the product',
-  })
-  @Expose()
-  @IsNumber()
-  discount_percentage: number;
-
-  @ApiProperty({
     description: 'Description of the product',
   })
   @Expose()
@@ -138,13 +58,6 @@ export class ProductRespondDto {
   @Expose()
   @IsBoolean()
   status: boolean;
-
-  @ApiProperty({
-    description: 'Stock of the product',
-  })
-  @Expose()
-  @IsNumber()
-  stock: number;
 
   @ApiProperty({
     description: 'Video of the product',
@@ -189,28 +102,12 @@ export class ProductRespondDto {
   views: number;
 
   @ApiProperty({
-    description: 'Current color of the product',
-    example: 'Red',
-  })
-  @Expose()
-  @IsString()
-  color?: string;
-
-  @ApiProperty({
     description: 'All color variants of the product',
-    type: [ColorVariantDto],
+    type: [ProductVariantRespondDto],
   })
   @Expose()
-  @Type(() => ColorVariantDto)
-  allColors?: ColorVariantDto[];
-
-  @ApiProperty({
-    description: 'Product categories of the product',
-    type: [ProductCategoryRespondDto],
-  })
-  @Expose()
-  @Type(() => ProductCategoryRespondDto)
-  productCategories: ProductCategoryRespondDto[];
+  @Type(() => ProductVariantRespondDto)
+  variants?: ProductVariantRespondDto[];
 
   @ApiProperty({
     description: 'Categories of the product',

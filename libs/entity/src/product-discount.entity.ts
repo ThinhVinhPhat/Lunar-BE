@@ -2,12 +2,17 @@ import { Entity, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { Discount } from './discount.entity';
 import { Product } from './product.entity';
 import { BaseEntity } from '../../shared/src/base.entity';
+import { ProductVariant } from './product-variant.entity';
 
 @Entity('discount_products')
 export class DiscountProduct extends BaseEntity {
   @ManyToOne(() => Discount, (discount) => discount.discountProduct)
   @JoinColumn({ name: 'discount_id' })
   discount: Discount;
+
+  @ManyToOne(() => ProductVariant, (variant) => variant.discountProduct)
+  @JoinColumn({ name: 'variant_id' })
+  variant: ProductVariant;
 
   @ManyToOne(() => Product, (product) => product.discountProduct)
   @JoinColumn({ name: 'product_id' })

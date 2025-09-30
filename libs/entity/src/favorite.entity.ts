@@ -1,6 +1,7 @@
 import { Product, User } from '.';
 import { BaseEntity } from '../../shared/src/index';
 import { Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { ProductVariant } from './product-variant.entity';
 
 @Entity()
 export class Favorite extends BaseEntity {
@@ -13,4 +14,10 @@ export class Favorite extends BaseEntity {
   })
   @JoinColumn({ name: 'product_id' })
   product: Product;
+
+  @ManyToOne(() => ProductVariant, (variant) => variant.favorites, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'variant_id' })
+  variant: ProductVariant;
 }

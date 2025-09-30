@@ -4,6 +4,10 @@ import { validate as isUuid } from 'uuid';
 @Injectable()
 export class UuidValidatePipe implements PipeTransform {
   transform(value: string): string {
+    if (!value) {
+      return undefined;
+    }
+
     const isValidUuid = isUuid(value);
 
     if (!isValidUuid) {

@@ -1,6 +1,7 @@
 import {
   BeforeUpdate,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -16,6 +17,9 @@ export class BaseEntity {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt: Date | null;
 
   @BeforeUpdate()
   updateTimestamp() {

@@ -19,3 +19,4 @@ export * from './conversation.entity';
 export * from './notification.entity';
 export * from './user-notification.entity';
 export * from './product-discount.entity';
+export * from './product-variant.entity';

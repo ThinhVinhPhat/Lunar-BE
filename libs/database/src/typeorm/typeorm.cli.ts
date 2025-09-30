@@ -21,6 +21,7 @@ import {
   UserNotification,
   NotificationTemplate,
   DiscountProduct,
+  ProductVariant,
 } from '../../../entity/src/index';
 
 export const connectionSource = new DataSource({
@@ -52,6 +53,7 @@ export const connectionSource = new DataSource({
     UserNotification,
     NotificationTemplate,
     DiscountProduct,
+    ProductVariant,
   ],
   migrations: ['migrations/*{.ts,.js}'],
   migrationsRun: Boolean(process.env?.DATABASE_RUN_MIGRATIONS || false),

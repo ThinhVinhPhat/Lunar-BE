@@ -118,7 +118,7 @@ export class OrderService {
           relations: [
             'user',
             'orderDetails',
-            'orderDetails.product',
+            'orderDetails.variant',
             'discounts',
           ],
         });
@@ -262,7 +262,7 @@ export class OrderService {
       relations: [
         'orderDetails',
         'user',
-        'orderDetails.product',
+        'orderDetails.variant',
         'histories',
         'shipments',
         'orderTracks',
@@ -308,7 +308,7 @@ export class OrderService {
       relations: [
         'orderDetails',
         'user',
-        'orderDetails.product',
+        'orderDetails.variant',
         'histories',
         'shipments',
         'orderTracks',
@@ -525,7 +525,7 @@ export class OrderService {
   async finOneById(id: string) {
     return await this.orderRepository.findOne({
       where: { id: id },
-      relations: ['orderDetails', 'orderDetails.product'],
+      relations: ['orderDetails', 'orderDetails.variant'],
     });
   }
 
@@ -537,7 +537,7 @@ export class OrderService {
           createdAt: LessThan(new Date(Date.now() - 10 * 60 * 1000)),
         },
       },
-      relations: ['orderDetails', 'orderDetails.product', 'orderTracks'],
+      relations: ['orderDetails', 'orderDetails.variant', 'orderTracks'],
     });
   }
 }

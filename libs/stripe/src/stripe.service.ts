@@ -27,10 +27,10 @@ export class StripeService {
     return products;
   }
 
-  async createProduct(name: string, description: string, active: boolean) {
+  async createProduct(name: string, images: string[], active: boolean) {
     return this.stripe.products.create({
       name,
-      description,
+      images,
       active,
     });
   }

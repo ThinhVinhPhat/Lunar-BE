@@ -1,7 +1,7 @@
-import { Product } from './product.entity';
 import { BaseEntity } from '../../shared/src/index';
 import { User } from './user.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { ProductVariant } from './product-variant.entity';
 
 @Entity()
 export class Comment extends BaseEntity {
@@ -25,11 +25,11 @@ export class Comment extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Product, (product) => product.comments, {
+  @ManyToOne(() => ProductVariant, (product) => product.comments, {
     eager: true,
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'product_id' })
-  product: Product;
+  @JoinColumn({ name: 'variant_id' })
+  variant: ProductVariant;
 }

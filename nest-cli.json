@@ -202,6 +202,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/swagger/tsconfig.lib.json"
       }
+    },
+    "search": {
+      "type": "application",
+      "root": "apps/search",
+      "entryFile": "main",
+      "sourceRoot": "apps/search/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/search/tsconfig.app.json"
+      }
+    },
+    "product-variant": {
+      "type": "application",
+      "root": "apps/product-variant",
+      "entryFile": "main",
+      "sourceRoot": "apps/product-variant/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/product-variant/tsconfig.app.json"
+      }
     }
   }
 }

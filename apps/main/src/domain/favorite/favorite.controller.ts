@@ -14,16 +14,30 @@ export class FavoriteController {
 
   @ApiBearerAuth()
   @ApiOperationDecorator({
-    summary: 'Add or Remove Favorite',
-    description: 'Add or Remove Favorite',
+    summary: 'Add or Remove Favorite Product',
+    description: 'Add or Remove Favorite Product',
   })
-  @Post('/:id')
-  customizeFavorite(
+  @Post('/product/:id')
+  customizeFavoriteProduct(
     @Param('id', UuidValidatePipe) productId: string,
     @UserReq() currentUser: User,
   ) {
     const userId = currentUser.id;
-    return this.favoriteService.handleFavorite(productId, userId);
+    return this.favoriteService.handleFavoriteProduct(productId, userId);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperationDecorator({
+    summary: 'Add or Remove Favorite Product',
+    description: 'Add or Remove Favorite Product',
+  })
+  @Post('/product-variant/:id')
+  customizeFavoriteVariant(
+    @Param('id', UuidValidatePipe) productId: string,
+    @UserReq() currentUser: User,
+  ) {
+    const userId = currentUser.id;
+    return this.favoriteService.handleFavoriteVariant(productId, userId);
   }
 
   @ApiBearerAuth()

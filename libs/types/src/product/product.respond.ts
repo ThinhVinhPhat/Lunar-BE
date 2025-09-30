@@ -1,13 +1,7 @@
 import { ProductRespondDto } from '@/domain/product/dto/product.respond.dto';
 import { Respond } from '..';
 import { CategoryDetails } from '../category/category.respond';
-
-export interface ColorVariant {
-  id: string;
-  slug: string;
-  color: string;
-  image: string;
-}
+import { ProductVariantResponse } from './product.variant.respond';
 
 export interface Product {
   id: string;
@@ -15,22 +9,16 @@ export interface Product {
   updatedAt: Date;
   name: string;
   slug: string;
-  price: number;
-  discount_percentage: number;
   description: string;
   status: boolean;
-  stock: number;
   video: string | null;
-  images: string[];
   isFreeShip: boolean;
   isNew: boolean;
+  images: string[];
   isFeatured: boolean;
-  views: number;
-  productCategories: ProductCategory[];
   categories?: string;
   isFavorite?: boolean;
-  color?: string;
-  allColors?: ColorVariant[];
+  variants?: ProductVariantResponse[];
 }
 
 export interface ProductCategory {
@@ -38,7 +26,7 @@ export interface ProductCategory {
   createdAt: Date;
   updatedAt: Date;
   quantity: number;
-  categoryDetails: CategoryDetails;
+  categoryDetail: CategoryDetails;
 }
 
 // Product

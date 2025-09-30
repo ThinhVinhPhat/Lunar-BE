@@ -22,7 +22,7 @@ export class CategoryDetail extends BaseEntity {
 
   @OneToMany(
     () => ProductCategory,
-    (productCategory) => productCategory.categoryDetails,
+    (productCategory) => productCategory.categoryDetail,
     { cascade: true, onDelete: 'CASCADE' },
   )
   productCategories: ProductCategory[];
