@@ -1,0 +1,205 @@
+openapi: 3.0.3
+info:
+  title: AI Service API
+  version: 1.0.0
+  description: API for face landmark detection and virtual try-on fitting
+
+paths:
+  /api/health:
+    get:
+      tags:
+        - System
+      operationId: healthCheck
+      summary: Health check
+      description: Check if the AI service is running
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+
+  /api/face/landmarks:
+    post:
+      tags:
+        - Face
+      operationId: detectLandmarks
+      summary: Detect facial landmarks from an image
+      description: Upload an image (base64 or file) and retrieve facial landmarks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LandmarkRequest'
+      responses:
+        '200':
+          description: Landmarks detected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LandmarkResponse'
+        '400':
+          description: Bad request - invalid input image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/face/fit-glasses:
+    post:
+      tags:
+        - Face
+      operationId: fitGlasses
+      summary: Fit glasses model on detected face
+      description: Provide landmarks or an image, get transform data for rendering 3D glasses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FitGlassesRequest'
+      responses:
+        '200':
+          description: Glasses fitting data generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FitGlassesResponse'
+        '400':
+          description: Bad request - invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    LandmarkRequest:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+          description: Base64 encoded image
+          example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD..."
+      required:
+        - imageBase64
+
+    LandmarkResponse:
+      type: object
+      properties:
+        faceId:
+          type: string
+          description: Unique ID for the detected face
+          example: "face_12345"
+        landmarks:
+          type: array
+          description: List of face landmark points
+          items:
+            type: object
+            properties:
+              x:
+                type: number
+                example: 0.45
+              y:
+                type: number
+                example: 0.32
+              z:
+                type: number
+                example: -0.01
+
+    FitGlassesRequest:
+      type: object
+      properties:
+        landmarks:
+          type: array
+          description: Landmarks of the face (from /face/landmarks API)
+          items:
+            type: object
+            properties:
+              x:
+                type: number
+              y:
+                type: number
+              z:
+                type: number
+        glassesModelId:
+          type: string
+          description: ID of the glasses model to fit
+          example: "glasses_001"
+      required:
+        - landmarks
+        - glassesModelId
+
+    FitGlassesResponse:
+      type: object
+      properties:
+        transform:
+          type: object
+          description: Transformation matrix for positioning 3D glasses
+          properties:
+            position:
+              type: object
+              properties:
+                x:
+                  type: number
+                  example: 0.12
+                y:
+                  type: number
+                  example: -0.08
+                z:
+                  type: number
+                  example: -0.5
+            rotation:
+              type: object
+              properties:
+                x:
+                  type: number
+                  example: 0.0
+                y:
+                  type: number
+                  example: 0.1
+                z:
+                  type: number
+                  example: 0.0
+            scale:
+              type: object
+              properties:
+                x:
+                  type: number
+                  example: 1.2
+                y:
+                  type: number
+                  example: 1.2
+                z:
+                  type: number
+                  example: 1.2
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: 'Internal server error'
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 500

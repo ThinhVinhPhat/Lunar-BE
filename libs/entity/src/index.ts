@@ -20,3 +20,6 @@ export * from './notification.entity';
 export * from './user-notification.entity';
 export * from './product-discount.entity';
 export * from './product-variant.entity';
+export * from './landmark.entity';
+export * from './glasses-model.entity';
+export * from './fit-glasses.entity';

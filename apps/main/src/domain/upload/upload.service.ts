@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
@@ -23,27 +23,36 @@ export class UploadService {
 
   async uploadS3(file: Express.Multer.File): Promise<string> {
     try {
-      if (file) {
-        const upload = new Upload({
-          client: this.s3Client,
-          params: {
-            Bucket: 'lunar-glassess',
-            Key: file?.originalname,
-            Body: file?.buffer,
-            ContentType: file?.mimetype,
-            ACL: 'public-read',
-          },
-        });
-
-        upload.on('httpUploadProgress', (progress) => {
-          console.log(`Progress: ${progress.loaded} / ${progress.total}`);
-        });
-        const result = await upload?.done();
-        return result.Location;
+      if (!file) {
+        throw new BadRequestException('No file provided');
       }
-      return null;
+
+      const contentType =
+        file.mimetype === 'application/octet-stream' &&
+        file.originalname.endsWith('.glb')
+          ? 'model/gltf-binary'
+          : file.mimetype;
+
+      const upload = new Upload({
+        client: this.s3Client,
+        params: {
+          Bucket: 'lunar-glassess',
+          Key: `models/${Date.now()}-${file.originalname.replace(/\+/g, '_')}`,
+          Body: file.buffer,
+          ContentType: contentType,
+          ACL: 'public-read',
+        },
+      });
+
+      upload.on('httpUploadProgress', (progress) => {
+        console.log(`Progress: ${progress.loaded} / ${progress.total}`);
+      });
+
+      const result = await upload.done();
+      return result.Location;
     } catch (error) {
-      console.error(error);
+      console.error('❌ Upload failed:', error);
+      throw new BadRequestException('Failed to upload file to S3');
     }
   }
 }

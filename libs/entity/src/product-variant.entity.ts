@@ -1,4 +1,11 @@
-import { Entity, ManyToOne, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  ManyToOne,
+  Column,
+  OneToMany,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Product } from './product.entity';
 import { BaseEntity } from '../../shared/src/base.entity';
 import { OrderDetail } from './order-detail.entity';
@@ -6,6 +13,7 @@ import { Favorite } from './favorite.entity';
 import { DiscountProduct } from './product-discount.entity';
 import { ProductCategory } from '.';
 import { Comment } from './comment.entity';
+import { GlassesModel } from './glasses-model.entity';
 
 export type GlassesSize = Record<
   'lens' | 'bridge' | 'overallWidth' | 'temple',
@@ -73,4 +81,8 @@ export class ProductVariant extends BaseEntity {
 
   @OneToMany(() => Comment, (comment) => comment.variant)
   comments: Comment[];
+
+  @OneToOne(() => GlassesModel, (glassesModel) => glassesModel.product)
+  @JoinColumn({ name: 'model_id' })
+  glassesModel: GlassesModel;
 }

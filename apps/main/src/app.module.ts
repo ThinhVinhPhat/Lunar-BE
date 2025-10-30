@@ -34,6 +34,7 @@ import { IpFilterMiddleware } from '@app/middleware/ip-filter.middleware';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { ApiKeyMiddleware } from '@app/middleware/api-key.middleware';
 import { ProductVariantModule } from './domain/product-variant/src/product-variant.module';
+import { FaceMeshModule } from './domain/face-mesh/face-mesh.module';
 @Module({
   imports: [
     StripeModule.forRoot({
@@ -72,6 +73,7 @@ import { ProductVariantModule } from './domain/product-variant/src/product-varia
     NotificationModule,
     GateWayModule,
     ProductVariantModule,
+    FaceMeshModule,
   ],
   controllers: [],
   providers: [

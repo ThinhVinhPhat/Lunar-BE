@@ -2,13 +2,7 @@ import { Module } from '@nestjs/common';
 import { StatisticService } from './statistic.service';
 import { StatisticController } from './statistic.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {
-  Order,
-  Product,
-  User,
-  MonthlyAnalytics,
-  ProductVariant,
-} from '@app/entity';
+import { Order, User, MonthlyAnalytics, ProductVariant } from '@app/entity';
 import { CommonModule } from '@app/common';
 
 @Module({

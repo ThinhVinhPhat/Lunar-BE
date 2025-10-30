@@ -89,6 +89,7 @@ export class FavoriteService {
       where: {
         id: productId,
       },
+      relations: ['product'],
     });
 
     if (!product) {
@@ -116,6 +117,7 @@ export class FavoriteService {
       const favorite = this.favoriteRepository.create({
         variant: product,
         user: user,
+        product: product.product,
       });
 
       await this.favoriteRepository.save(favorite);

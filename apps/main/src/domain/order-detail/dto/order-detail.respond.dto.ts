@@ -1,5 +1,4 @@
 import { ProductVariantRespondDto } from '@/domain/product-variant/src/dto/product-variant.respond.dto';
-import { ProductRespondDto } from '@/domain/product/dto/product.respond.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsDate, IsNumber, IsString } from 'class-validator';

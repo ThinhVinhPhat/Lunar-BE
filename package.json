@@ -42,7 +42,8 @@
     "migration:generate": "npm run typeorm -- -d ./libs/database/src/typeorm/typeorm.cli.ts migration:generate ./migrations/$npm_config_name",
     "migration:create": "npm run typeorm -- migration:create ./migrations/$npm_config_name",
     "migration:down": "npm run typeorm -- -d ./libs/database/src/typeorm/typeorm.ts migration:revert",
-    "migration:revert": "npm run typeorm -- -d ./libs/database/src/typeorm/typeorm.cli.ts migration:revert"
+    "migration:revert": "npm run typeorm -- -d ./libs/database/src/typeorm/typeorm.cli.ts migration:revert",
+    "codegen": "openapi-generator-cli generate"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.726.1",
@@ -102,6 +103,7 @@
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
+    "@openapitools/openapi-generator-cli": "^2.23.1",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
@@ -162,7 +164,8 @@
       "^@app/pipe(|/.*)$": "<rootDir>/libs/pipe/src/$1",
       "^@app/gateway(|/.*)$": "<rootDir>/libs/gateway/src/$1",
       "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
-      "^@app/swagger(|/.*)$": "<rootDir>/libs/swagger/src/$1"
+      "^@app/swagger(|/.*)$": "<rootDir>/libs/swagger/src/$1",
+      "^@app/face-mesh-client(|/.*)$": "<rootDir>/libs/face-mesh-client/src/$1"
     }
   }
 }

@@ -132,4 +132,11 @@ export const message = {
   DELETE_NOTIFICATION_SUCCESS: 'Delete Notification Successfully',
   DELETE_NOTIFICATION_FAIL: 'Delete Notification Fail',
   ALREADY_READ: 'Notification already read',
+
+  // ----------- Face Mesh -----------
+  FIND_LANDMARK_SUCCESS: 'Find Landmark successfully',
+  FIND_FIT_GLASSES_SUCCESS: 'Find Fit Glasses successfully',
+  FIND_GLASSES_MODEL_SUCCESS: 'Find Glasses Model successfully',
+  FIND_FIT_GLASSES_FAIL: 'Find Fit Glasses fail',
+  
 };

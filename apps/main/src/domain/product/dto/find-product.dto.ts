@@ -1,7 +1,6 @@
 import { FindDTO } from '@app/shared/find-dto';
 import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class FindProductDTO extends PartialType(FindDTO) {
   @ApiPropertyOptional({

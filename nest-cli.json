@@ -220,6 +220,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/product-variant/tsconfig.app.json"
       }
+    },
+    "face-mesh-client": {
+      "type": "library",
+      "root": "libs/face-mesh-client",
+      "entryFile": "index",
+      "sourceRoot": "libs/face-mesh-client/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/face-mesh-client/tsconfig.lib.json"
+      }
     }
   }
 }
